@@ -22,6 +22,17 @@ class VisualTextualVerifier:
         if context:
              # Optionally include some context for better disambiguation
              # But strictly we want to see if the *token* is visually grounded
+             
+             # STOPWORD CHECK:
+             # Common stopwords usually have low visual grounding but are not hallucinations.
+             stopwords = {"the", "is", "are", "on", "in", "at", "of", "a", "an", "and"}
+             if token.lower() in stopwords:
+                 return {
+                    "semantic_sim": 1.0, # Pass stopwords
+                    "var_score": 0.5,
+                    "spatial_score": 1.0
+                 }
+                 
              pass
              
         inputs = self.processor(

@@ -23,6 +23,17 @@ class UnifiedVerificationEngine:
         """
         Runs all verification layers and returns UVS and breakdown.
         """
+        # 0. Fast-track Stopwords
+        # Common words often lack knowledge grounding but are valid.
+        stopwords = {"the", "is", "are", "on", "in", "at", "of", "a", "an", "and", "to", "for", "with"}
+        if token.lower().strip() in stopwords:
+            return 1.0, {
+                "layer1": {"semantic_sim": 1.0, "var_score": 1.0, "spatial_score": 1.0},
+                "layer2": {"entity_check": 1.0, "attribute_check": 1.0, "relation_path": 1.0},
+                "layer3": {"temporal": 1.0, "logic": 1.0, "multi_hop": 1.0},
+                "totals": {"v1": 1.0, "v2": 1.0, "v3": 1.0}
+            }
+
         # Layer 1
         v1_scores = self.visual_verifier.verify(token, image, context)
         v1_total = (0.3 * v1_scores["var_score"] + 

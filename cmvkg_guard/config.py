@@ -8,7 +8,8 @@ class CMVKGConfig:
     
     # Model Configuration
     vlm_model_path: str = "llava-hf/llava-1.5-7b-hf"
-    device: str = "cuda" if os.environ.get("CUDA_VISIBLE_DEVICES") else "cpu"
+    import torch
+    device: str = "cuda" if torch.cuda.is_available() else "cpu"
     
     # DH-MMKG Configuration
     wikidata_endpoint: str = "https://query.wikidata.org/sparql"

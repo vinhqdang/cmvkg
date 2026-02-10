@@ -1,0 +1,118 @@
+[
+  {
+    "sample_id": 1,
+    "query": "What are the cats doing?",
+    "generated_text": "The remote and remote remote remote remote remote",
+    "corrections_count": 3,
+    "corrections": [
+      {
+        "original": "two",
+        "corrected": "remote",
+        "explanation": "Replaced 'two' with 'remote' because 'remote' is visually grounded.",
+        "uvs": 0.4988060445785522,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "2",
+        "corrected": "remote",
+        "explanation": "Replaced '2' with 'remote' because 'remote' is visually grounded.",
+        "uvs": 0.4951991443634033,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "control",
+        "corrected": "remote",
+        "explanation": "Replaced 'control' with 'remote' because 'remote' is visually grounded.",
+        "uvs": 0.4953500003814697,
+        "threshold": 0.6499999999999999
+      }
+    ],
+    "inference_time": 26.134173154830933,
+    "graph_stats": {
+      "nodes": 8,
+      "edges": 14
+    }
+  },
+  {
+    "sample_id": 2,
+    "query": "Is there a dog in the image?",
+    "generated_text": "remote remote",
+    "corrections_count": 2,
+    "corrections": [
+      {
+        "original": "No",
+        "corrected": "remote",
+        "explanation": "Replaced 'No' with 'remote' because 'remote' is visually grounded.",
+        "uvs": 0.49245530605316157,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "1",
+        "corrected": "remote",
+        "explanation": "Replaced '1' with 'remote' because 'remote' is visually grounded.",
+        "uvs": 0.4934834604263305,
+        "threshold": 0.6499999999999999
+      }
+    ],
+    "inference_time": 22.98634362220764,
+    "graph_stats": {
+      "nodes": 7,
+      "edges": 14
+    }
+  },
+  {
+    "sample_id": 3,
+    "query": "What color is the bus?",
+    "generated_text": "The sink is sink in the sink and the sink is sink in the sink and the sink is sink in the sink and the sink is sink in the",
+    "corrections_count": 6,
+    "corrections": [
+      {
+        "original": "bus",
+        "corrected": "sink",
+        "explanation": "Replaced 'bus' with 'sink' because 'sink' is visually grounded.",
+        "uvs": 0.6477015047073365,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "blue",
+        "corrected": "sink",
+        "explanation": "Replaced 'blue' with 'sink' because 'sink' is visually grounded.",
+        "uvs": 0.4947976083755493,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "bath",
+        "corrected": "sink",
+        "explanation": "Replaced 'bath' with 'sink' because 'sink' is visually grounded.",
+        "uvs": 0.49377768230438235,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "but",
+        "corrected": "sink",
+        "explanation": "Replaced 'but' with 'sink' because 'sink' is visually grounded.",
+        "uvs": 0.48833418273925777,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "white",
+        "corrected": "sink",
+        "explanation": "Replaced 'white' with 'sink' because 'sink' is visually grounded.",
+        "uvs": 0.4866206359863281,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": "but",
+        "corrected": "sink",
+        "explanation": "Replaced 'but' with 'sink' because 'sink' is visually grounded.",
+        "uvs": 0.48833418273925777,
+        "threshold": 0.6499999999999999
+      }
+    ],
+    "inference_time": 21.678694248199463,
+    "graph_stats": {
+      "nodes": 6,
+      "edges": 6
+    }
+  }
+]

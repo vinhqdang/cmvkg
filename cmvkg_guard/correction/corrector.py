@@ -33,7 +33,15 @@ class RealTimeCorrector:
             return hallucinated_token, "No correction found", []
             
         # Very simple correction: replace with most confident visual object
-        best_candidate = candidates[0] 
+        # IF the token is really distinct.
+        # For now, just pick the first one, but let's be slightly smarter:
+        # If we have a candidate that shares the same first letter? (Naive heuristic)
+        
+        best_candidate = candidates[0]
+        # Only replace if we have at least one candidate
+        if not candidates:
+             return hallucinated_token, "No correction found", []
+
         explanation = f"Replaced '{hallucinated_token}' with '{best_candidate}' because '{best_candidate}' is visually grounded."
         
         return best_candidate, explanation, candidates
