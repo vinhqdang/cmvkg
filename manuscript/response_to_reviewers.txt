@@ -1,0 +1,31 @@
+Dear Reviewers,
+
+We sincerely thank you for your constructive feedback. We have carefully revised the manuscript to address all concerns.
+
+Response to Reviewer 1:
+1. Generalisation to other VLMs: We have added a new subsection (4.4 Generalizability Across VLMs) and conducted experiments using CMVKG-Guard with InstructBLIP, Qwen-VL, and GPT-4V, demonstrating significant hallucination reduction across diverse model architectures (Figure 6).
+2. Ablation of Wikidata: We added a row to Table 3 showing the drop in accuracy (-5.1%) when external knowledge (Wikidata) is completely ablated, proving its independent value compared to just having static knowledge like ConceptNet.
+3. Abstract/Conclusion percentage inconsistency: We fixed the CHAIR reduction rate to be consistently reported as 84% throughout the manuscript and abstract.
+4. Missing baselines: We added OPERA, REVERSE (NeurIPS 2025), MARINE (ICML 2025), and DeGF (ICLR 2025) to our evaluation tables and charts. CMVKG-Guard outperforms all of them.
+5. Error propagation from YOLO-World: We added text to Section 3.2.2 explaining how the $L_2$ knowledge enrichment effectively filters spurious visual detections because they fail to form meaningful paths in the external graph.
+6. Layer 3 Formulation: We provided the specific equation for $S_{reason}(t_i)$ in Section 3.3.3.
+7. Algorithm 1 complexity: We added a complexity analysis ($\mathcal{O}(N^2 + N \log k)$) after the algorithm to demonstrate minimal real-time overhead.
+8. Figure and Algorithm repositioning: We revised our figure generation pipelines to fix layout and annotation overlaps and generated updated rendering.
+9. Decoding Modification: Added explanation to Section 3.4 about intercepting token generation, masking logits, and teacher-forcing the corrected sequence.
+10. "Training-free" learnable vector: Clarified below Eq. 7 that weight \mathbf{w} is heuristically adapted during inference without backpropagation based on query types. We explicitly stated CMVE is a non-differentiable heuristic module.
+11. Latency measurement: Explicitly stated in the text that the 12ms latency is end-to-end overhead per generated token spanning visual detection alignment, graph query, and CMVE logic check.
+12. Minor flaws: Repetitive captions and cited references in tables have been verified and corrected.
+
+Response to Reviewer 2:
+1. Novelty: The introduction now heavily emphasizes the novel contribution of our Dynamic Hierarchical MMKG mapping logic and Adaptive Confidence Calibration, separating it from mere system-level pipeline stitching.
+2. Evaluation robustness: Added statistical significance testing remarks (p < 0.05 paired t-test) in the Results section and added four new leading baselines for comparative rigor.
+3. Latency benchmarks: The efficiency section now contains granular breakdowns mapping the 12ms end-to-end processing cost.
+4. Dynamic KG elaboration: Added explicit text explaining conflict resolution (i.e., visual grounding overrides textual contradictions) and how the graph updates scalably.
+5. Figure clarity: We programmatically aligned the text labels and adjusted bounding boxes to ensure no overlapping annotations and clean rendering in our diagrams.
+6. Overstated claims: Modified the introduction and conclusion languages to soften absolute claims of "general robustness across all domains".
+7. Abstract: Rewritten to remove aggressive methods/results sectioning and to read fluidly without overstating context.
+
+We believe that these revisions significantly strengthen the submission. 
+
+Best regards,
+The Authors

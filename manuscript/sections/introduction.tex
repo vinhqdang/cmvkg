@@ -1,0 +1,29 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Vision-Language Models (VLMs) have demonstrated remarkable capabilities in understanding and generating content at the intersection of visual and textual modalities. However, their deployment in high-stakes domains is severely hindered by the phenomenon of \textit{hallucination}—where models generate plausible but visually ungrounded or factually incorrect information. Recent studies indicate that even state-of-the-art models suffer from hallucination rates as high as 30\% in complex reasoning tasks, manifesting as object fabrication, attribute misidentification, and reasoning failures.
+
+\subsection{Motivation and Problem Statement}
+The challenge of mitigating hallucinations in VLMs is compounded by the "black-box" nature of large pre-trained models. Existing approaches typically fall into two categories: training-based and training-free methods. Training-based methods, such as RLHF (Reinforcement Learning from Human Feedback) or DPO (Direct Preference Optimization), require expensive computational resources and extensive annotated datasets. While effective, they can sometimes degrade the model's general capabilities and may require additional adaptation to comfortably extend to entirely new domains without retraining.
+
+Conversely, training-free methods, such as decoding strategies or post-hoc correction, offer a more flexible alternative. However, current training-free solutions face notable limitations:
+\begin{enumerate}
+    \item \textbf{Separation of Detection and Mitigation:} Many frameworks treat detection and correction as separate phases, often detecting errors only after the full response is generated, which precludes real-time intervention.
+    \item \textbf{Static Knowledge Bases:} Approaches relying on Retrieval-Augmented Generation (RAG) typically use static knowledge graphs (KGs). These static structures cannot adapt to novel entities or the evolving context of a dynamic visual scene, leading to "knowledge obsolescence."
+    \item \textbf{Unidirectional Verification:} Most verification mechanisms focus solely on text-to-image consistency, neglecting the bidirectional nature of cross-modal understanding. This results in systems that may correctly identify objects but fail to verify their relationships or attributes against external factual knowledge.
+    \item \textbf{Perception-Reasoning Gap:} A significant portion of hallucinations stems not from perceptual errors but from flawed reasoning. Current methods often focus on object-level detection, missing subtle logical inconsistencies or temporal errors in complex scenes.
+\end{enumerate}
+
+\subsection{Proposed Solution: CMVKG-Guard}
+To address these gaps, we propose \textbf{CMVKG-Guard} (Cross-Modal Verified Knowledge Graph Guard), a novel training-free framework that integrates real-time hallucination detection and correction. unlike existing pipeline approaches, CMVKG-Guard operates as an intelligent middleware, dynamically constructing a Hierarchical Multimodal Knowledge Graph (DH-MMKG) during inference. This graph serves as a structured grounding source, evolving with the conversation and the visual context.
+
+Our system employs a Cross-Modal Verification Engine (CMVE) that validates generated tokens across three layers: (1) \textit{Visual-Textual Alignment} to ensure fidelity to the input image; (2) \textit{Knowledge Grounding} to verify facts against the constructed MMKG and external knowledge bases; and (3) \textit{Reasoning Chain Verification} to ensure logical consistency. Furthermore, we introduce an Adaptive Confidence Calibration (ACC) mechanism that dynamically adjusts detection thresholds based on query complexity, significantly reducing false positives.
+
+\subsection{Contributions}
+The key contributions of this work are as follows:
+\begin{itemize}
+    \item We introduce \textbf{CMVKG-Guard}, an effective training-free, end-to-end system capable of simultaneous real-time hallucination detection and correction without model retraining.
+    \item We propose the \textbf{Dynamic Hierarchical Multimodal Knowledge Graph (DH-MMKG)}, a novel data structure that self-constructs during inference to provide context-aware grounding.
+    \item We develop a \textbf{Multi-Layered Verification Strategy} that addresses perception, knowledge, and reasoning hallucinations in a unified framework.
+    \item We demonstrate through extensive experiments on standard benchmarks (POPE, CHAIR, MMHalBench) that CMVKG-Guard achieves highly competitive performance, reducing object hallucinations by 84\% and achieving >90\% accuracy on the POPE benchmark, with a minimal latency overhead suitable for real-time applications.
+\end{itemize}
