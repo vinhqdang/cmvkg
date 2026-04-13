@@ -86,23 +86,23 @@ def generate_dh_mmkg_process():
     # Layer 1
     draw.text((50, 600), "L1: Visual Scene Graph", fill="black", font=get_font(20))
     draw_box(draw, 300, 600, 100, 50, "Obj 1", color="#eeeeee")
-    draw_box(draw, 450, 600, 100, 50, "Obj 2", color="#eeeeee")
-    draw.line([(350, 625), (450, 625)], fill="black", width=2)
-    draw.text((390, 605), "rel", fill="black", font=get_font(14))
+    draw_box(draw, 500, 600, 100, 50, "Obj 2", color="#eeeeee")
+    draw.line([(400, 625), (500, 625)], fill="black", width=2)
+    draw.text((435, 605), "rel", fill="black", font=get_font(14))
 
     # Arrow Up
-    draw_arrow(draw, (425, 600), (425, 450))
+    draw_arrow(draw, (450, 600), (450, 450))
 
     # Layer 2
     draw.text((50, 400), "L2: Knowledge Enrichment", fill="black", font=get_font(20))
-    draw_box(draw, 300, 400, 250, 60, "Entity Linking (Wikidata)", color="#ccffcc")
+    draw_box(draw, 300, 400, 300, 60, "Entity Linking (Wikidata)", color="#ccffcc")
     
     # Arrow Up
-    draw_arrow(draw, (425, 400), (425, 250))
+    draw_arrow(draw, (450, 400), (450, 250))
 
     # Layer 3
     draw.text((50, 200), "L3: Hierarchical MMKG", fill="black", font=get_font(20))
-    draw_box(draw, 250, 150, 350, 120, "Final Graph:\n{Context + Facts + Relations}", color="#ccccff")
+    draw_box(draw, 250, 150, 400, 120, "Final Graph:\n{Context + Facts + Relations}", color="#ccccff")
 
     img.save("manuscript/figures/dh_mmkg_process.png")
     print("Generated dh_mmkg_process.png")
