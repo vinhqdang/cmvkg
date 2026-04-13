@@ -32,7 +32,7 @@ class ReasoningVerifier:
                 
                 # I(t_i |= p) - Entailment indicator function
                 # Naive text overlap as proxy for lightweight NLI entailment
-                if token.lower() in edge.relation.lower() or token.lower() in edge.target.lower():
+                if token.lower() in edge.relation.lower() or token.lower() in edge.target_id.lower():
                     indicator = 1.0
                 else:
                     indicator = 0.1 # Partial/No entailment

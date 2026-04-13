@@ -1,1 +1,84 @@
-[]
+[
+  {
+    "sample_id": 1,
+    "query": "What are the cats doing?",
+    "generated_text": "remote remote remote remote remote remote remote remote remote remote",
+    "corrections": [
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      },
+      {
+        "original": " qwen_mock_token",
+        "corrected": "remote",
+        "explanation": "BeamSearch: Replaced ' qwen_mock_token' with 'remote' maximizing joint P_VLM & P_KG.",
+        "uvs": 0.42732619118404225,
+        "threshold": 0.6499999999999999
+      }
+    ],
+    "inference_time": 7.3442223072052,
+    "graph_stats": {
+      "nodes": 8,
+      "edges": 14
+    }
+  }
+]
