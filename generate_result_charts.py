@@ -22,10 +22,23 @@ def draw_vertical_text(target_img, x, y, text, font):
     d = ImageDraw.Draw(txt_img)
     d.text((0, 0), text, font=font, fill="black")
     
-    # Rotate 45 degrees to prevent overlap
-    rotated = txt_img.rotate(45, expand=True, fillcolor=(255,255,255,0))
+    # Rotate 90 degrees for strictly vertical text (Y-axis)
+    rotated = txt_img.rotate(90, expand=True, fillcolor=(255,255,255,0))
     
     # Paste
+    target_img.paste(rotated, (int(x), int(y)), rotated)
+
+def draw_diagonal_text(target_img, x, y, text, font):
+    bbox = font.getbbox(text)
+    w = bbox[2] - bbox[0] + 10
+    h = bbox[3] - bbox[1] + 10
+    
+    txt_img = Image.new('RGBA', (w, h), (255, 255, 255, 0))
+    d = ImageDraw.Draw(txt_img)
+    d.text((0, 0), text, font=font, fill="black")
+    
+    # Rotate 45 degrees for X-axis labels
+    rotated = txt_img.rotate(45, expand=True, fillcolor=(255,255,255,0))
     target_img.paste(rotated, (int(x), int(y)), rotated)
 
 def draw_bar_chart(filename, title, data, ylabel, y_limit=None):
@@ -102,7 +115,7 @@ def draw_bar_chart(filename, title, data, ylabel, y_limit=None):
         
         # Draw Label (diagonal to avoid overlap)
         label_text = label
-        draw_vertical_text(img, center_x - 15, H - bottom_m + 5, label_text, font_val)
+        draw_diagonal_text(img, center_x - 15, H - bottom_m + 5, label_text, font_val)
         
     img.save(filename)
     print(f"Generated {filename}")
