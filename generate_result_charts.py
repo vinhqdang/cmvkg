@@ -22,8 +22,8 @@ def draw_vertical_text(target_img, x, y, text, font):
     d = ImageDraw.Draw(txt_img)
     d.text((0, 0), text, font=font, fill="black")
     
-    # Rotate
-    rotated = txt_img.rotate(90, expand=True)
+    # Rotate 45 degrees to prevent overlap
+    rotated = txt_img.rotate(45, expand=True, fillcolor=(255,255,255,0))
     
     # Paste
     target_img.paste(rotated, (int(x), int(y)), rotated)
@@ -33,8 +33,8 @@ def draw_bar_chart(filename, title, data, ylabel, y_limit=None):
     img = Image.new("RGB", (W, H), "white")
     draw = ImageDraw.Draw(img)
     
-    # Margins
-    left_m, right_m, top_m, bottom_m = 100, 50, 80, 50
+    # Margins - increase bottom to fit diagonal text
+    left_m, right_m, top_m, bottom_m = 100, 50, 80, 100
     
     # Title
     font_title = get_font(24)
@@ -100,12 +100,9 @@ def draw_bar_chart(filename, title, data, ylabel, y_limit=None):
         val_w = bbox[2] - bbox[0]
         draw.text((center_x - val_w/2, y - 20), val_text, fill="black", font=font_val)
         
-        # Draw Label
+        # Draw Label (diagonal to avoid overlap)
         label_text = label
-        bbox = font_val.getbbox(label_text)
-        label_w = bbox[2] - bbox[0]
-        # Check if label is too wide
-        draw.text((center_x - label_w/2, H - bottom_m + 10), label_text, fill="black", font=font_val)
+        draw_vertical_text(img, center_x - 15, H - bottom_m + 5, label_text, font_val)
         
     img.save(filename)
     print(f"Generated {filename}")

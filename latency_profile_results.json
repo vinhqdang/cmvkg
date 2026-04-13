@@ -1,0 +1,6 @@
+{
+  "Base Model": 45.0,
+  "VCD": 90.0,
+  "mKG-RAG": 95.0,
+  "CMVKG-Guard (Ours)": 57.0
+}
