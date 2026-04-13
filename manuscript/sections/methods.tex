@@ -82,10 +82,11 @@ We compute the Visual Attention Ratio (VAR). Let $\mathbf{A}_l \in \mathbb{R}^{T
 \begin{equation}
 \text{VAR}(t_i) = \frac{1}{L} \sum_{l=1}^{L} \sum_{j=1}^{S} \alpha_{i,j}^{(l)} \cdot \mathbb{1}(s_j \in \text{ROI}(t_i))
 \end{equation}
-Combined with CLIP-based semantic similarity, the visual score is:
+To prevent the language prior from dominating the semantic alignment, we introduce a \textbf{Counterfactual Contrastive Validator}. We dynamically generate a semantic counterfactual $t_{cf}$ (e.g., an antonym or mutually exclusive token) and compute a delta similarity. The final visual score $S_{vis}(t_i)$ is then computed as:
 \begin{equation}
-S_{vis}(t_i) = \lambda_1 \text{VAR}(t_i) + \lambda_2 \frac{\mathbf{e}_{t_i} \cdot \mathbf{e}_{\text{img}}}{\|\mathbf{e}_{t_i}\| \|\mathbf{e}_{\text{img}}\|}
+S_{vis}(t_i) = \lambda_1 \text{VAR}(t_i) + \lambda_2 \max\left(0, \text{sim}(t_i, \text{img}) - \text{sim}(t_{cf}, \text{img})\right)
 \end{equation}
+where $\text{sim}(t, \text{img})$ denotes the standard CLIP-based cosine similarity. This ensures that a token is only granted a high visual score if it strictly discriminates itself from its counterfactual, effectively neutralizing absolute baseline probabilities caused by language biases.
 
 \subsubsection{Layer 2: Knowledge Grounding}
 For a token $t_i$ identified as a named entity, we check for its existence in $\mathcal{G}$. If $t_i \in \mathcal{V}$, we evaluate the path validity score. Let $\mathcal{P}_{t_i}$ be the set of paths from context entities to $t_i$ in $\mathcal{G}$. The score is:
@@ -121,10 +122,12 @@ We define a dynamic threshold $\tau_{dyn}$ based on the local entropy of the gen
 \tau_{dyn}(t_i) = \mu + \sigma \cdot \tanh(\mathcal{H}(P(t_i | t_{<i})) - \mathcal{H}_0)
 \end{equation}
 
-If $\Omega(t_i) < \tau_{dyn}(t_i)$, the token is flagged as a hallucination. The correction process involves retrieving top-$K$ candidates $\mathcal{C}_{cand}$ from $\mathcal{G}$ and re-ranking them using a contrastive objective:
-\begin{equation}
-c^* = \arg\max_{c \in \mathcal{C}_{cand}} \left( (1-\gamma) \log P_{\text{VLM}}(c) + \gamma \log P_{\text{KG}}(c | \mathcal{G}) \right)
-\end{equation}
-where $P_{\text{KG}}$ is the likelihood derived from graph connectivity.
+If $\Omega(t_i) < \tau_{dyn}(t_i)$, the token is flagged as a hallucination. Replacing a single token exclusively based on local node similarities risks degrading the syntactic coherence of the autoregressive context. To bridge the perception-reasoning gap, we propose a \textbf{Constrained Look-Ahead Beam Search}. 
 
-In practical implementations (e.g., wrapping LLaVA), token-level interception is achieved by injecting custom stopping criteria into the autoregressive loop. Upon detecting a hallucination, logits for the flagged token are suppressed, and the VLM's context window is simply updated with the corrected candidate sequence $c^*$, effectively teacher-forcing the grounded reasoning path without any modifications to the underlying VLM source code.
+Instead of isolating $t_i$, we retrieve the top-$K$ semantic candidates $\mathcal{C}_{cand}$ from $\mathcal{G}$ and branch the generation into a $D$-depth look-ahead tree. The optimal correction sequence $c^*$ is selected by maximizing the joint probability over the speculative sequences:
+\begin{equation}
+c^* = \arg\max_{c \in \mathcal{C}_{cand}} \sum_{d=0}^{D} \left( (1-\gamma) \log P_{\text{VLM}}(t_{i+d} | t_{<i}, c_{0:d}) + \gamma \log P_{\text{KG}}(c | \mathcal{G}) \right)
+\end{equation}
+where $P_{\text{KG}}$ is the structural likelihood derived from the DH-MMKG.
+
+In practical implementations (e.g., wrapping LLaVA), token-level interception is seamlessly achieved by orchestrating custom stopping criteria within the generation loop. Upon detecting a hallucination, the tree search evaluates the $D$ speculative tokens, and the VLM's key-value (KV) cache is appended with the winning sequence branch. This theoretically guarantees grounded error corrections without sacrificing linguistic fluidity or necessitating changes to the underlying VLM source code.

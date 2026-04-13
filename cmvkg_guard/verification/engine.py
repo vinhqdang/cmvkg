@@ -52,12 +52,31 @@ class UnifiedVerificationEngine:
                     0.33 * v3_scores["logic"] + 
                     0.33 * v3_scores["multi_hop"])
         
-        # Compute UVS
-        # Adaptive weighting logic can go here (based on query type)
-        # Using config defaults for now
-        uvs = (self.config.weight_visual * v1_total + 
-               self.config.weight_kg * v2_total + 
-               self.config.weight_reasoning * v3_total)
+        # Compute UVS (Eq. 9 dynamically adaptive weights based on query heuristic)
+        # Weight vector w is heuristically adapted dynamically based on query type.
+        # e.g., shifting weight to S_vis for spatial/structural queries.
+        w_vis = self.config.weight_visual
+        w_kg = self.config.weight_kg
+        w_reason = self.config.weight_reasoning
+        
+        query_lower = context.split("ASSISTANT:")[0].lower() if "ASSISTANT:" in context else context.lower()
+        if any(word in query_lower for word in ["where", "left", "right", "top", "bottom"]):
+            # Spatial/structural -> Boost Visual
+            w_vis += 0.2
+            w_reason -= 0.1
+            w_kg -= 0.1
+        elif any(word in query_lower for word in ["who", "what", "when", "invented", "painter"]):
+            # Knowledge -> Boost KG
+            w_kg += 0.2
+            w_vis -= 0.1
+            w_reason -= 0.1
+        elif any(word in query_lower for word in ["why", "how", "because"]):
+            # Logical -> Boost Reasoning
+            w_reason += 0.2
+            w_vis -= 0.1
+            w_kg -= 0.1
+            
+        uvs = (w_vis * v1_total + w_kg * v2_total + w_reason * v3_total)
                
         breakdown = {
             "layer1": v1_scores,

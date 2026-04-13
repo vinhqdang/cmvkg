@@ -24,6 +24,10 @@ class CMVKGConfig:
     base_threshold: float = 0.7
     correction_lambda: float = 0.6
     
+    # Ablation Flags
+    use_external_kg: bool = True
+    dynamic_kg: bool = True
+    
     def __post_init__(self):
         # Allow environment variable overrides
          if os.environ.get("CMVKG_VLM_MODEL"):
