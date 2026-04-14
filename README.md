@@ -55,8 +55,42 @@ CMVKG-Guard is a research project focused on developing a novel framework for de
 
 ## Usage
 
-To run the demonstration script:
+### 1. Running the Demonstration
+
+To run a simple illustrative demonstration of the guarded generation process:
 
 ```bash
 python run_demo.py
 ```
+
+### 2. Running Experiments
+
+To run full validation experiments (e.g., across samples, ablation studies, or evaluating backward compatibility):
+
+```bash
+# Evaluate CMVKG-Guard using a specific core VLM model
+python do_experiment.py --model llava
+
+# Run an ablation study by disabling external knowledge graphs
+python do_experiment.py --model qwen --disable_external_kg
+
+# Evaluate a baseline model (without Guardian) instead
+python do_experiment.py --baseline OPERA
+```
+
+Supported VLM drivers include: `llava`, `qwen`, and `instructblip`.
+
+### 3. Latency Analysis
+
+To run latency profiling across the different generation and reasoning layers:
+
+```bash
+python run_latency_analysis.py
+```
+
+### 4. Manuscript Generation
+
+The repository also includes utility scripts for generating manuscript assets:
+- `python generate_method_diagrams.py` - Generates architectural diagrams for the paper.
+- `python generate_result_charts.py` - Synthesizes test outputs into quantitative performance charts.
+- `python generate_manuscript_examples.py` - Extracts qualitative examples for analysis.
