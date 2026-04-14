@@ -39,13 +39,13 @@ where $\psi_{\text{geo}}$ is a geometric heuristic function mapping to predicate
 \end{figure}
 
 \subsubsection{Knowledge Enrichment ($L_2$)}
-The second layer $L_2$ enriches $\mathcal{G}$ with external factual knowledge. We define a linking function $\Phi: \mathcal{V} \to \mathcal{K}_{ext}$ that maps visual entities to nodes in an external knowledge base (e.g., Wikidata).
+The second layer $L_2$ enriches $\mathcal{G}$ with external factual knowledge by actively querying APIs. We define a linking function $\Phi: \mathcal{V} \to \mathcal{K}_{ext}$ that maps visual entities to an aggregate external knowledge base comprising both Wikidata (fetching ontological properties via SPARQL, such as `instance of` or `subclass of`) and ConceptNet (fetching relational bindings).
 
 For each linked entity $e_j = \Phi(o_j)$, we retrieve a subgraph $\mathcal{G}_{sub}(e_j) \subset \mathcal{K}_{ext}$ subject to a relevance constraint based on the query embedding $\mathbf{q}$:
 \begin{equation}
 \mathcal{G}_{sub}(e_j) = \{ (e_j, r, e') \in \mathcal{K}_{ext} \mid \text{sim}(\mathbf{e}(r), \mathbf{q}) > \delta \}
 \end{equation}
-This ensures that only contextually relevant facts are added to the DH-MMKG. Importantly, this knowledge enrichment layer also mitigates potential error propagation from the open-vocabulary detector in $L_1$. If a visually detected object is spurious, its inability to form coherent factual links in the external knowledge base reduces its prominence in the resulting graph, effectively serving as early filtering of detection errors. To maintain scalability and handle inherent conflicts, visual evidence is configured to strictly override textual facts in cases of direct contradiction.
+This ensures that only contextually relevant facts are added to the DH-MMKG. A local disk-caching mechanism is implemented to maintain low-latency query resolution without exhausting external rate limits during large-scale evaluation benchmarking. Importantly, this knowledge enrichment layer also mitigates potential error propagation from the open-vocabulary detector in $L_1$. If a visually detected object is spurious, its inability to form coherent factual links in the external knowledge bases reduces its prominence in the resulting graph, effectively serving as early filtering of detection errors. To maintain scalability and handle inherent conflicts, visual evidence is configured to strictly override textual facts.
 
 \begin{algorithm}
 \caption{DH-MMKG Construction Algorithm}
@@ -96,11 +96,14 @@ S_{kg}(t_i) = \max_{p \in \mathcal{P}_{t_i}} \left( \prod_{(u,v) \in p} w(u,v) \
 where $w(u,v)$ is the confidence of the edge.
 
 \subsubsection{Layer 3: Reasoning Chain Verification}
-Beyond factual correctness, we verify logical consistency using a structural entailment approach. Given a candidate token $t_i$ representing an action or state, we evaluate its validity using the context representations in $\mathcal{G}$:
+Beyond factual correctness, we verify logical consistency using a structural entailment approach modeling multi-hop dependencies. Given a candidate token $t_i$ representing an action or state, we evaluate its validity using the context representations in $\mathcal{G}$:
 \begin{equation}
-S_{reason}(t_i) = \sigma \left( \sum_{p \in \mathcal{T}_{t_i}} \phi(p) \cdot \mathbb{I}(t_i \models p) \right)
+S_{logic}(t_i) = \sigma \left( \sum_{p \in \mathcal{T}_{t_i}} \phi(p) \cdot \mathbb{I}(t_i \models p) \right)
 \end{equation}
-where $\mathcal{T}_{t_i}$ is the set of logical predicates extracted from the local context, $\phi(p)$ is the heuristic path weight, and $\mathbb{I}$ is the entailment indicator function modeled via lightweight natural language inference checks.
+\begin{equation}
+S_{reason}(t_i) = \max \left( S_{logic}(t_i), \text{BFS}(t_i, \mathcal{G}, d_{max}) \right)
+\end{equation}
+where $\mathcal{T}_{t_i}$ is the set of logical predicates extracted from the local context, $\phi(p)$ is the heuristic path weight, and $\mathbb{I}$ is the entailment indicator function modeled via robust morphological string similarity techniques against graph edges. Additionally, a generic Breadth-First Search (BFS) graph traversal function executes up to $d_{max}=3$ hops from the candidate token to capture multi-hop cascading reasoning dependencies in structurally complex generated text.
 
 \subsubsection{Unified Verification Score (UVS)}
 The final verification score $\Omega(t_i)$ is a weighted combination of individual module scores:
@@ -117,10 +120,11 @@ To strictly preserve the training-free nature of the framework, the weight vecto
 \end{figure}
 
 \subsection{Adaptive Confidence Calibration and Real-Time Correction}
-We define a dynamic threshold $\tau_{dyn}$ based on the local entropy of the generation distribution $\mathcal{H}(P_i)$:
+We define a dynamic threshold $\tau_{dyn}$ based not only on static context heuristics but crucially on the real-time autoregressive progression of the answer to counter hallucination ``snowballing''. The threshold dynamically increases its penalty weight using the current generation step $s$:
 \begin{equation}
-\tau_{dyn}(t_i) = \mu + \sigma \cdot \tanh(\mathcal{H}(P(t_i | t_{<i})) - \mathcal{H}_0)
+\tau_{dyn}(t_i) = \theta_{base} + \omega_{risk} + \omega_{complexity} + \min(\lambda, \eta \cdot s_i)
 \end{equation}
+where $\theta_{base}$ is a base configured strictness, $\omega_{risk}$ acts as an upward adjustment for high-risk domains, $\omega_{complexity}$ penalizes queries requiring high-density logical verification, and the sequential step modifier ensures later tokens are scrutinized heavily.
 
 If $\Omega(t_i) < \tau_{dyn}(t_i)$, the token is flagged as a hallucination. Replacing a single token exclusively based on local node similarities risks degrading the syntactic coherence of the autoregressive context. To bridge the perception-reasoning gap, we propose a \textbf{Constrained Look-Ahead Beam Search}. 
 
