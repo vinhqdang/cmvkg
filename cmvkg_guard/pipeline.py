@@ -39,7 +39,7 @@ class CMVKGGuard:
         
         print(f"Starting generation with {self.config.vlm_model_path}...")
         
-        for _ in range(max_tokens):
+        for step in range(max_tokens):
             # Generate next speculative token
             out = self.vlm_driver.generate_token(image, full_text)
             token_text = out["token"]
@@ -53,7 +53,7 @@ class CMVKGGuard:
             uvs, breakdown = self.verification_engine.verify_token(token_text, image, graph, current_context)
             
             # 3. Calibrate Dynamic Threshold
-            threshold = self.calibrator.compute_threshold()
+            threshold = self.calibrator.compute_threshold(generation_step=step + 1)
             
             # 4. Decide & Correct
             final_token_text = token_text
