@@ -1,3 +1,7 @@
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
 # CMVKG-Guard local settings (contains real API keys - never commit)
 settings.local.json
 
