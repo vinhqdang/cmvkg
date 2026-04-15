@@ -74,6 +74,13 @@ This ensures that only contextually relevant facts are added to the DH-MMKG. A l
 
 The time complexity of the DH-MMKG construction is primarily bounded by the number of detected objects $N$ and the retrieval fan-out $k$. Assuming constant time for embedding comparisons, the overall time complexity is $\mathcal{O}(N^2 + N \log k)$. This bounded complexity ensures the extraction pipeline induces minimal latency overhead during real-time inference.
 
+\noindent\textbf{KG update mechanism.} The DH-MMKG is constructed once per query before generation begins. During the token-by-token generation loop, the graph is treated as a read-only grounding source. If the model generates a new named entity that was not in the initial visual scene (e.g., an inferred off-screen object), a lightweight incremental update appends that entity node and fetches its immediate one-hop facts from the cache. This avoids re-running the full $\mathcal{O}(N^2)$ construction and adds only $\mathcal{O}(\log k)$ per newly encountered entity.
+
+\noindent\textbf{Conflict resolution.} When the external knowledge facts $\mathcal{F}$ conflict with visually detected attributes (e.g., Wikidata says ``fire trucks are red'' but the detected object is blue), we apply a strict visual-priority rule: the edge contributed by $L_1$ detection is assigned confidence weight $w_{vis} = 1.0$ and overrides the external edge, which is downweighted to $w_{ext} = 0.2$. This prevents hallucination by external knowledge sources while still retaining them as weak soft constraints.
+
+\noindent\textbf{Scalability.} For open-domain queries with many detected entities ($N > 20$), we cap external knowledge retrieval to the top-5 most query-relevant entities (ranked by cosine similarity between entity embedding and query embedding), ensuring the graph remains compact and query-time graph search stays bounded. Caching of API responses (Wikidata SPARQL, ConceptNet) means repeated entity lookups across a session incur zero network latency.
+
+
 \subsection{Cross-Modal Verification Engine (CMVE)}
 The CMVE verifies each generated token $t_i$ against $\mathcal{G}$ and $I$.
 
