@@ -95,25 +95,32 @@ The superior performance of CMVKG-Guard over mKG-RAG highlights the advantage of
 
 Table~\ref{tab:all_benchmarks} presents a unified summary of CMVKG-Guard performance across all six evaluation benchmarks, comparing against the base model and the strongest knowledge-enhanced baseline (mKG-RAG). For CHAIR, lower hallucination rates are better; for all other benchmarks, higher scores are better.
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
-\caption{Cross-benchmark performance summary. CMVKG-Guard consistently outperforms both the base model and the best knowledge-enhanced baseline across all six benchmarks. $\downarrow$ = lower is better; $\uparrow$ = higher is better. All improvements are statistically significant ($p < 0.05$).}
+\caption{Cross-benchmark performance summary across all six evaluation datasets.
+  $\downarrow$ = lower is better; $\uparrow$ = higher is better.
+  All improvements over baselines are statistically significant ($p < 0.05$, paired $t$-test).}
 \label{tab:all_benchmarks}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{l|c|c|c|c|c|c}
+\begin{tabular}{l c c c c c c}
 \hline
-\textbf{Method} & \textbf{POPE F1$\uparrow$} & \textbf{CHAIR$_S \downarrow$} & \textbf{MMHal$\downarrow$} & \textbf{MedHall$\uparrow$} & \textbf{InfoSeek$\uparrow$} & \textbf{KVQA$\uparrow$} \\
+\textbf{Method}
+  & \textbf{POPE F1\,$\uparrow$}
+  & \textbf{CHAIR$_S$\,$\downarrow$}
+  & \textbf{MMHal\,$\downarrow$}
+  & \textbf{MedHall\,$\uparrow$}
+  & \textbf{InfoSeek\,$\uparrow$}
+  & \textbf{KVQA\,$\uparrow$} \\
 \hline
-LLaVA-1.5 (Base) & 82.1 & 22.0 & 3.8 & 71.2 & 65.3 & 58.4 \\
-VCD \cite{leng2023vcd}    & 84.1 & 17.4 & 3.3 & 73.8 & 67.1 & 61.2 \\
-OPERA \cite{opera2024}    & 85.4 & 15.8 & 3.1 & 74.9 & 68.3 & 62.5 \\
-mKG-RAG \cite{wang2024mkgrag} & 88.2 & 12.0 & 2.8 & 79.4 & 68.7 & 65.1 \\
+LLaVA-1.5 (Base)              & 82.1 & 22.0 & 3.8 & 71.2 & 65.3 & 58.4 \\
+VCD \cite{leng2023vcd}         & 84.1 & 17.4 & 3.3 & 73.8 & 67.1 & 61.2 \\
+OPERA \cite{opera2024}         & 85.4 & 15.8 & 3.1 & 74.9 & 68.3 & 62.5 \\
+mKG-RAG \cite{wang2024mkgrag}  & 88.2 & 12.0 & 2.8 & 79.4 & 68.7 & 65.1 \\
 \hline
-\textbf{CMVKG-Guard} & \textbf{91.2} & \textbf{3.5} & \textbf{2.1} & \textbf{84.8} & \textbf{81.2} & \textbf{74.3} \\
+\textbf{CMVKG-Guard (Ours)}    & \textbf{91.2} & \textbf{3.5} & \textbf{2.1} & \textbf{84.8} & \textbf{81.2} & \textbf{74.3} \\
 \hline
-\end{tabular}%
-}
-\end{table}
+\end{tabular}
+\end{table*}
+
 
 \noindent\textbf{MMHalBench.} The MMHalBench hallucination score (lower is better, range 0--8) drops from 3.8 (base) to 2.1 with CMVKG-Guard, a 44.7\% relative reduction. MMHalBench includes diverse hallucination types (object, attribute, relation, counting), demonstrating that CMVKG-Guard generalises beyond simple object existence evaluation.
 
