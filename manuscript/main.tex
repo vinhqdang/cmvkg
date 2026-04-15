@@ -1,0 +1,53 @@
+\documentclass[conference]{IEEEtran}
+
+% ── Core packages ──────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{xcolor}
+
+% ── Table packages ─────────────────────────────────────────────────────────────
+\usepackage{booktabs}          % \toprule, \midrule, \bottomrule
+\usepackage{threeparttable}    % table notes with \begin{tablenotes}
+\usepackage{multirow}          % \multirow
+\usepackage{makecell}          % line breaks inside cells
+\usepackage{array}             % extended column specs
+
+% ── Algorithm packages ─────────────────────────────────────────────────────────
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% ── Figure/layout packages ─────────────────────────────────────────────────────
+\usepackage{subcaption}
+\usepackage[export]{adjustbox} % \resizebox alternative
+\usepackage{balance}           % balance columns on last page
+
+% ── Math utilities ─────────────────────────────────────────────────────────────
+\usepackage{mathtools}
+\usepackage{bbm}               % \mathbbm{1} indicator function
+
+% ──────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+\title{CMVKG-Guard: Real-Time Hallucination Detection and Correction in Vision-Language Models via Dynamic Hierarchical Knowledge Graphs}
+
+\author{
+  \IEEEauthorblockN{Authors Anonymized for Review}
+  \IEEEauthorblockA{Institution Anonymized for Review}
+}
+
+\maketitle
+
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
