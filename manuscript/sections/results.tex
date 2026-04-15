@@ -99,17 +99,18 @@ Table~\ref{tab:all_benchmarks} presents a unified summary of CMVKG-Guard perform
 \centering
 \caption{Cross-benchmark performance summary across all six evaluation datasets.
   $\downarrow$ = lower is better; $\uparrow$ = higher is better.
-  All improvements over baselines are statistically significant ($p < 0.05$, paired $t$-test).}
+  All improvements are statistically significant ($p < 0.05$, paired $t$-test).}
 \label{tab:all_benchmarks}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c c c}
 \hline
 \textbf{Method}
   & \textbf{POPE F1\,$\uparrow$}
   & \textbf{CHAIR$_S$\,$\downarrow$}
   & \textbf{MMHal\,$\downarrow$}
-  & \textbf{MedHall\,$\uparrow$}
-  & \textbf{InfoSeek\,$\uparrow$}
-  & \textbf{KVQA\,$\uparrow$} \\
+  & \textbf{MedHall (\%)\,$\uparrow$}
+  & \textbf{InfoSeek (\%)\,$\uparrow$}
+  & \textbf{KVQA (\%)\,$\uparrow$} \\
 \hline
 LLaVA-1.5 (Base)              & 82.1 & 22.0 & 3.8 & 71.2 & 65.3 & 58.4 \\
 VCD \cite{leng2023vcd}         & 84.1 & 17.4 & 3.3 & 73.8 & 67.1 & 61.2 \\
@@ -118,7 +119,8 @@ mKG-RAG \cite{wang2024mkgrag}  & 88.2 & 12.0 & 2.8 & 79.4 & 68.7 & 65.1 \\
 \hline
 \textbf{CMVKG-Guard (Ours)}    & \textbf{91.2} & \textbf{3.5} & \textbf{2.1} & \textbf{84.8} & \textbf{81.2} & \textbf{74.3} \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
 \end{table*}
 
 
