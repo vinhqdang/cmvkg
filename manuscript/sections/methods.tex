@@ -110,12 +110,14 @@ The final verification score $\Omega(t_i)$ is a weighted combination of individu
 \begin{equation}
 \Omega(t_i) = \mathbf{w}^T \cdot [S_{vis}(t_i), S_{kg}(t_i), S_{reason}(t_i)]
 \end{equation}
-To strictly preserve the training-free nature of the framework, the weight vector $\mathbf{w}$ is not learned via backpropagation. Instead, it is heuristically adapted dynamically based on the softmax distribution of the query-type embeddings (e.g., shifting weight to $S_{vis}$ for structural queries). Therefore, the entire CMVE is a non-differentiable, heuristic verification layer structurally perfect for plug-and-play middleware integration.
+where $\mathbf{w} = [w_1, w_2, w_3]$ with default values $[0.30, 0.40, 0.30]$ (empirically set to reflect the relative discriminative power of each layer). Crucially, $\mathbf{w}$ is \textbf{not} learned via any gradient-based update. Instead, it is \textit{heuristically re-weighted at inference time} by classifying the incoming query into one of three types—structural (high $w_1$), factual (high $w_2$), or logical (high $w_3$)—using lightweight keyword-matching against the query string. This re-weighting is a deterministic, rule-based function with no trainable parameters, fully preserving the training-free property of the framework.
+
+\noindent\textbf{Is CMVE differentiable?} No. The entire CMVE is a non-differentiable, heuristic verification layer. $S_{vis}$ relies on attention thresholding and CLIP cosine similarity; $S_{kg}$ uses graph path products; $S_{reason}$ uses BFS traversal and string-matching similarity. None of these operations involve learned parameters or gradient flow. CMVE is therefore structurally suitable for plug-and-play middleware integration with any frozen VLM.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{figures/cmve_verification_flow.png}
-    \caption{Workflow of the Cross-Modal Verification Engine (CMVE).}
+    \caption{Workflow of the Cross-Modal Verification Engine (CMVE). For each speculative token $t_i$, the three verification layers compute $S_{vis}$, $S_{kg}$, and $S_{reason}$ independently and in parallel. These are combined via the heuristic weight vector $\mathbf{w}$ into the Unified Verification Score $\Omega(t_i)$, which is compared against the adaptive threshold $\tau_{dyn}$ to trigger correction if needed.}
     \label{fig:cmve_flow}
 \end{figure}
 
@@ -134,4 +136,27 @@ c^* = \arg\max_{c \in \mathcal{C}_{cand}} \sum_{d=0}^{D} \left( (1-\gamma) \log 
 \end{equation}
 where $P_{\text{KG}}$ is the structural likelihood derived from the DH-MMKG.
 
-In practical implementations (e.g., wrapping LLaVA), token-level interception is seamlessly achieved by orchestrating custom stopping criteria within the generation loop. Upon detecting a hallucination, the tree search evaluates the $D$ speculative tokens, and the VLM's key-value (KV) cache is appended with the winning sequence branch. This theoretically guarantees grounded error corrections without sacrificing linguistic fluidity or necessitating changes to the underlying VLM source code.
+In practical implementations, token-level interception is achieved without modifying the VLM source code. Concretely, for LLaVA-1.5, we wrap the standard \texttt{generate()} call with a custom autoregressive decoding loop (illustrated in Algorithm~\ref{alg:decoding}): at each step $i$, we (1) perform a single forward pass to obtain the logit distribution over $\mathcal{V}_{vocab}$; (2) apply argmax to identify the candidate token $\hat{t}_i$; (3) pass $\hat{t}_i$ through the CMVE; and (4) if $\Omega(\hat{t}_i) < \tau_{dyn}$, we invoke the Constrained Look-Ahead Beam Search, which evaluates $K$ graph-grounded candidates each extended $D$ steps into the future, selects $c^*$, and teacher-forces $c^*$ into the sequence by directly appending it to the KV-cache. The VLM then continues autoregressively from the corrected state. This approach requires no access to model weights, activations, or training infrastructure.
+
+\begin{algorithm}[t]
+\caption{Autoregressive Decoding with CMVKG-Guard Interception}
+\label{alg:decoding}
+\begin{algorithmic}[1]
+\Require Image $I$, Query $Q$, Graph $\mathcal{G}$, Max tokens $T$
+\Ensure Corrected response $R^*$
+\State $R^* \gets []$, $\text{KV} \gets \emptyset$
+\For{$i = 1, \ldots, T$}
+    \State $\mathbf{l}_i \gets \text{VLM.forward}(I, Q, R^*_{<i}; \text{KV})$
+    \State $\hat{t}_i \gets \arg\max(\mathbf{l}_i)$
+    \If{$\hat{t}_i = $ EOS} \textbf{break} \EndIf
+    \State $\Omega(\hat{t}_i), \tau_{dyn} \gets \text{CMVE}(\hat{t}_i, I, \mathcal{G}), \text{Calibrator}(i)$
+    \If{$\Omega(\hat{t}_i) < \tau_{dyn}$}
+        \State $c^* \gets \text{LookAheadBeamSearch}(\hat{t}_i, \mathcal{G}, K, D)$
+        \State $R^* \gets R^* \cup \{ c^* \}$, append $c^*$ to KV-cache
+    \Else
+        \State $R^* \gets R^* \cup \{ \hat{t}_i \}$, append $\hat{t}_i$ to KV-cache
+    \EndIf
+\EndFor
+\State \Return $R^*$
+\end{algorithmic}
+\end{algorithm}

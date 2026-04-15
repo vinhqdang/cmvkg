@@ -29,7 +29,11 @@ KVQA & Named Entities & Accuracy & 183K \\
 \end{table}
 
 \subsubsection{Implementation Details}
-We utilize LLaVA-1.5 (7B) as the backbone VLM. The DH-MMKG is constructed using YOLO-World for open-vocabulary detection and Wikidata as the external knowledge source. All experiments were conducted on a single NVIDIA A100 (80GB) GPU. The confidence calibration parameters are initialized with $\mu=0.6$ and $\sigma=0.2$.
+We utilize LLaVA-1.5 (7B) \cite{liu2023llava} as the backbone VLM. The DH-MMKG is constructed using YOLO-World for open-vocabulary object detection ($L_1$) and Wikidata (via SPARQL) and ConceptNet for external knowledge enrichment ($L_2$). All experiments were conducted on a single NVIDIA A100 (80GB) GPU.
+
+\noindent\textbf{Weight vector $\mathbf{w}$.} The default values are $[w_1, w_2, w_3] = [0.30, 0.40, 0.30]$. At inference time, the query is classified deterministically (keyword-matching) into structural, factual, or logical type, and the corresponding weight is boosted by $+0.10$ while the others are reduced proportionally. No training or gradient computation is involved.
+
+\noindent\textbf{Latency measurement.} All reported latency figures are \textit{end-to-end per-token wall-clock times}, measured from the moment the VLM forward pass is initiated for token $i$ to the moment the final token (original or corrected) is appended to the output sequence. This includes: VLM forward pass, CMVE computation, and (when triggered) the full Look-Ahead Beam Search. Latency was measured as the median over 500 generated tokens across 50 POPE test samples, with GPU warm-up excluded.
 
 \subsubsection{Baselines}
 We compare CMVKG-Guard against four categories of methods:

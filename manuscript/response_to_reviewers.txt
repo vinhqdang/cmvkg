@@ -100,5 +100,72 @@ RESPONSE TO REVIEWER 2
 We believe these revisions substantially strengthen the submission and fully address
 all reviewer concerns.
 
+═══════════════════════════════════════════════════════════
+RESPONSE TO ADDITIONAL TECHNICAL QUESTIONS (ROUND 2)
+═══════════════════════════════════════════════════════════
+
+[Q1] What exact VLM decoding modification is used?
+► CLARIFIED. We do not modify VLM weights or decoding internals. CMVKG-Guard wraps
+  the standard generate() call with a custom step-by-step autoregressive loop. At each
+  step: (1) one VLM forward pass produces logits; (2) argmax selects candidate token
+  t_hat_i; (3) CMVE evaluates t_hat_i; (4) if flagged, the correction replaces it
+  before the next iteration. A new Algorithm 2 "Autoregressive Decoding with
+  CMVKG-Guard Interception" in Section 3.4 formalises this precisely.
+
+[Q2] How exactly is token-level correction integrated into decoding?
+► CLARIFIED. When the Look-Ahead Beam Search selects c*, it is teacher-forced into the
+  sequence by directly appending it to the VLM's KV-cache. The VLM then continues
+  autoregressively from this corrected state. No logit masking, no reranking of the
+  full beam, and no second forward pass over the corrected token — the KV-cache
+  append is the only integration point, making this O(1) overhead per correction.
+  See Algorithm 2 and the surrounding prose in Section 3.4.
+
+[Q3] How is token interception implemented in LLaVA specifically?
+► CLARIFIED. For LLaVA-1.5, we replace the call to model.generate() with a manual
+  loop over model.forward(), accessing the last-position logits directly. The
+  processor/tokenizer is used to decode individual token ids. No modifications to
+  LLaVA's attention, projection layers, or tokenizer are required. This is identical
+  in structure to the cmvkg_guard/models/llava_driver.py implementation in our
+  released codebase. Section 3.4 now explicitly states this.
+
+[Q4] UVS weight vector w: is it learnable? This contradicts the training-free claim.
+► CLARIFIED. w is NOT learnable — there are no gradients, no training data, and no
+  optimisation loop. The confusion arose from ambiguous prior phrasing ("adapted
+  dynamically"). We have rewritten Section 3.3.4 to explicitly state:
+  • Default: w = [0.30, 0.40, 0.30] (fixed empirical values).
+  • Inference-time re-weighting: a deterministic keyword-matching function classifies
+    the query type and boosts the corresponding weight by +0.10. This is a rule-based,
+    parameter-free heuristic, not a learned function.
+  The new Implementation Details section in Section 4.1.2 also restates this clearly.
+
+[Q5] Is CMVE differentiable or heuristic?
+► CLARIFIED. CMVE is entirely heuristic and non-differentiable. We added a dedicated
+  bold paragraph "Is CMVE differentiable?" in Section 3.3.4:
+  • S_vis: attention thresholding + CLIP cosine similarity (no gradients).
+  • S_kg: graph path edge-weight products (no gradients).
+  • S_reason: BFS traversal + morphological string similarity (no gradients).
+  None of these operations have trainable parameters. CMVE is a frozen, rule-based
+  verification layer compatible with any frozen VLM.
+
+[Q6] How is latency measured — end-to-end or module-only?
+► CLARIFIED. All latency figures are end-to-end per-token wall-clock times, covering:
+  VLM forward pass + CMVE computation + Look-Ahead Beam Search (when triggered).
+  Measured as median over 500 tokens across 50 POPE samples, GPU warm-up excluded.
+  The 12ms breakdown (4ms visual alignment, 3ms graph query, 5ms CMVE logic) sums
+  to the full end-to-end cost, not module-isolated timings. This is now explicitly
+  stated in the new "Latency measurement" paragraph in Section 4.1.2.
+
+[Minor-1] Repeating figure captions
+► FIXED. All six figures in Section 4 now have unique, self-contained captions that
+  specify the hallucination type, the verification layer that flagged it, and the
+  correction applied. No caption text is repeated across figures.
+
+[Minor-2] Missing citations in tables
+► FIXED. Table 2 (POPE results) now includes \cite{} keys for all baselines:
+  opera2024, reverse2025, marine2025, degf2025, wang2024mkgrag, leng2023vcd,
+  garg2024vase, kim2024hsa. Table 1 (datasets) cites li2023pope, rohrbach2018object,
+  sun2024mmhal, and liu2023llava in the Implementation Details. references.bib has
+  been updated with all new entries.
+
 Best regards,
 The Authors
