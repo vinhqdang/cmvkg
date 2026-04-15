@@ -1,3 +1,9 @@
+# CMVKG-Guard local settings (contains real API keys - never commit)
+settings.local.json
+
+# CMVKG knowledge graph API cache
+.cmvkg_cache/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

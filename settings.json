@@ -1,0 +1,38 @@
+{
+  "_comment": "Copy this file to settings.local.json and fill in your API keys. settings.local.json is gitignored and will never be committed.",
+
+  "vlm": {
+    "default_model": "llava-hf/llava-1.5-7b-hf",
+    "_supported_models": ["llava-hf/llava-1.5-7b-hf", "Qwen/Qwen-VL-Chat", "Salesforce/instructblip-vicuna-7b", "openai/gpt-4o"],
+
+    "huggingface_token": "YOUR_HUGGINGFACE_TOKEN_HERE",
+
+    "openai_api_key": "YOUR_OPENAI_API_KEY_HERE",
+    "openai_base_url": "https://api.openai.com/v1",
+
+    "qwen_api_key": "YOUR_QWEN_DASHSCOPE_API_KEY_HERE",
+    "qwen_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+
+    "together_api_key": "YOUR_TOGETHER_AI_API_KEY_HERE",
+    "together_base_url": "https://api.together.xyz/v1",
+
+    "replicate_api_key": "YOUR_REPLICATE_API_KEY_HERE"
+  },
+
+  "knowledge_graph": {
+    "wikidata_endpoint": "https://query.wikidata.org/sparql",
+    "conceptnet_endpoint": "http://api.conceptnet.io",
+    "cache_dir": ".cmvkg_cache",
+    "cache_ttl_hours": 24
+  },
+
+  "verification": {
+    "weight_visual": 0.30,
+    "weight_kg": 0.40,
+    "weight_reasoning": 0.30,
+    "base_threshold": 0.70,
+    "correction_lambda": 0.60
+  },
+
+  "device": "auto"
+}
