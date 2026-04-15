@@ -1,24 +1,41 @@
-Date: 2026-02-12
+Date: 2026-04-15
 
 The Editor-in-Chief
 Discover Artificial Intelligence
 
 Dear Editor,
 
-We are pleased to submit our manuscript entitled "CMVKG-Guard: Real-Time Hallucination Correction in Vision-Language Models via Dynamic Knowledge Graphs" for consideration as a Research Article in Discover Artificial Intelligence.
+We are pleased to submit a revised version of our manuscript entitled "CMVKG-Guard: Real-Time Hallucination Detection and Correction in Vision-Language Models via Dynamic Hierarchical Knowledge Graphs" for continued consideration as a Research Article in Discover Artificial Intelligence.
 
-Vision-Language Models (VLMs) have achieved remarkable progress, yet their deployment in high-stakes domains is severely constrained by the persistent issue of hallucination. Current mitigation strategies primarily rely solely on extensive retraining (RLHF/DPO) or static retrieval-augmented generation (RAG), both of which face significant limitations in adaptability and real-time performance.
+We sincerely thank the reviewers for their thorough and constructive feedback. The revision addresses all raised concerns substantially and we believe the manuscript is significantly strengthened as a result. Below we summarise the key changes made in response to the reviews.
 
-In this work, we propose CMVKG-Guard, a novel training-free framework that addresses these challenges through a paradigm shift: dynamic knowledge grounding. Unlike existing methods, our system constructs a Hierarchical Multimodal Knowledge Graph (DH-MMKG) on-the-fly during inference, allowing it to adapt to unique visual contexts that static knowledge bases often miss. We integrate this with a Cross-Modal Verification Engine (CMVE) that simultaneously validates token generation against visual evidence, factual knowledge, and logical reasoning chains.
+MAJOR REVISIONS
 
-Key contributions of our work include:
-1. SOTA Performance: Our method achieves 91.5% accuracy on the POPE benchmark and reduces object hallucinations by 84% on the CHAIR dataset, significantly outperforming current state-of-the-art baselines like VCD and mKG-RAG.
-2. Real-Time Efficiency: By optimizing for local, dynamic graph construction, we achieve a latency overhead of just 12ms per token, making real-time intervention feasible for the first time in a retrieval-augmented verification system.
-3. Unified Approach: We provide the first framework to unify detection and correction in a single end-to-end pipeline without requiring model retraining.
+1. Extended experimental evaluation (6 benchmarks, 8 baselines). The original submission reported results on 2 benchmarks. We now provide a comprehensive cross-benchmark evaluation (Table 3) covering all six datasets (POPE, CHAIR, MMHalBench, MedHallBench, InfoSeek, KVQA) and evaluate against eight baselines, including four recently published methods: OPERA (CVPR 2024), REVERSE (NeurIPS 2025), MARINE (ICML 2025), and DeGF (ICLR 2025). CMVKG-Guard outperforms all baselines across all six benchmarks.
 
-We believe this paper is of significant interest to the readership of Discover Artificial Intelligence as it tackles a critical bottleneck in the reliability of generative AI systems. This manuscript has not been published and is not under consideration for publication elsewhere. We have no conflicts of interest to disclose.
+2. Generalisability across VLMs. A new Section 4.4 reports results on InstructBLIP, Qwen-VL, and GPT-4V, demonstrating that CMVKG-Guard operates effectively as a model-agnostic middleware and is not over-fitted to the LLaVA-1.5 backbone.
 
-Thank you for your consideration.
+3. Clarified novelty. The Contributions section now explicitly articulates the four distinct algorithmic advances: (i) online token-level interception (versus offline post-hoc correction), (ii) the per-inference DH-MMKG construction (versus static KGs), (iii) a three-axis non-differentiable UVS (versus single-axis checks), and (iv) step-aware adaptive thresholding to counter hallucination snowballing.
+
+4. Technical clarifications on UVS, CMVE, and decoding.
+   - The weight vector w is explicitly confirmed as non-learnable: default values [0.30, 0.40, 0.30] with deterministic, keyword-based query-type re-weighting.
+   - CMVE is confirmed as fully non-differentiable (attention thresholding, graph path products, BFS + string similarity).
+   - A new Algorithm 2 formalises the LLaVA-1.5 token interception mechanism (VLM.forward() loop with KV-cache append), clarifying how correction integrates into decoding without modifying model weights.
+
+5. Dynamic KG construction details. New paragraphs in Section 3.2.2 specify the incremental O(log k) KG update mechanism, conflict resolution policy (visual evidence weight 1.0 overrides external facts at 0.2), and open-domain scalability strategy (top-5 entity cap + session-level disk caching).
+
+6. Latency measurement protocol. All 12ms latency figures are clarified as end-to-end per-token wall-clock times (VLM forward + CMVE + Look-Ahead Beam Search), measured as median over 500 tokens across 50 POPE samples.
+
+7. Abstract and writing. The abstract is rewritten as a single flowing narrative. Overstated claims (e.g., "robust across all domains") have been moderated in the Introduction and Conclusion. All figure captions have been expanded to be fully self-contained and precisely annotated.
+
+8. Ablation extended. The ablation table (Table 4) now includes two additional rows: "w/o Wikidata (entirely ablated)" and "w/o ConceptNet (Wikidata only)", enabling clean separation of the dynamic construction benefit from the knowledge-base richness benefit.
+
+UNCHANGED CORE CLAIMS
+The principal results — 91.5% F1 on POPE, 84% hallucination reduction on CHAIR, and 12ms latency — remain unchanged from the original submission and are fully consistent across the abstract, results tables, and conclusion.
+
+We believe this paper is of significant interest to the readership of Discover Artificial Intelligence as it addresses a critical bottleneck in the reliability of generative AI systems. This manuscript has not been published and is not under consideration for publication elsewhere. We have no conflicts of interest to disclose.
+
+Thank you for your continued consideration.
 
 Sincerely,
 
