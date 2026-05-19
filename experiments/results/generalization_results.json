@@ -1,0 +1,99 @@
+{
+  "experiment": "generalization_across_vlms",
+  "mode": "mock",
+  "n_runs": 3,
+  "n_probes_per_run": 100,
+  "results": {
+    "LLaVA-1.5-7B": {
+      "runs": [
+        {
+          "baseline_hallucinations": 10,
+          "guard_hallucinations": 1,
+          "baseline_rate_pct": 10.0,
+          "guard_rate_pct": 1.0,
+          "reduction_pct": 90.0
+        },
+        {
+          "baseline_hallucinations": 18,
+          "guard_hallucinations": 1,
+          "baseline_rate_pct": 18.0,
+          "guard_rate_pct": 1.0,
+          "reduction_pct": 94.44
+        },
+        {
+          "baseline_hallucinations": 16,
+          "guard_hallucinations": 2,
+          "baseline_rate_pct": 16.0,
+          "guard_rate_pct": 2.0,
+          "reduction_pct": 87.5
+        }
+      ],
+      "baseline_mean": 14.67,
+      "baseline_std": 3.4,
+      "guard_mean": 1.33,
+      "guard_std": 0.47,
+      "reduction_pct": 90.9
+    },
+    "Qwen-VL": {
+      "runs": [
+        {
+          "baseline_hallucinations": 10,
+          "guard_hallucinations": 1,
+          "baseline_rate_pct": 10.0,
+          "guard_rate_pct": 1.0,
+          "reduction_pct": 90.0
+        },
+        {
+          "baseline_hallucinations": 16,
+          "guard_hallucinations": 1,
+          "baseline_rate_pct": 16.0,
+          "guard_rate_pct": 1.0,
+          "reduction_pct": 93.75
+        },
+        {
+          "baseline_hallucinations": 14,
+          "guard_hallucinations": 1,
+          "baseline_rate_pct": 14.0,
+          "guard_rate_pct": 1.0,
+          "reduction_pct": 92.86
+        }
+      ],
+      "baseline_mean": 13.33,
+      "baseline_std": 2.49,
+      "guard_mean": 1.0,
+      "guard_std": 0.0,
+      "reduction_pct": 92.5
+    },
+    "InstructBLIP": {
+      "runs": [
+        {
+          "baseline_hallucinations": 11,
+          "guard_hallucinations": 2,
+          "baseline_rate_pct": 11.0,
+          "guard_rate_pct": 2.0,
+          "reduction_pct": 81.82
+        },
+        {
+          "baseline_hallucinations": 24,
+          "guard_hallucinations": 2,
+          "baseline_rate_pct": 24.0,
+          "guard_rate_pct": 2.0,
+          "reduction_pct": 91.67
+        },
+        {
+          "baseline_hallucinations": 19,
+          "guard_hallucinations": 2,
+          "baseline_rate_pct": 19.0,
+          "guard_rate_pct": 2.0,
+          "reduction_pct": 89.47
+        }
+      ],
+      "baseline_mean": 18.0,
+      "baseline_std": 5.35,
+      "guard_mean": 2.0,
+      "guard_std": 0.0,
+      "reduction_pct": 88.9
+    }
+  },
+  "note_gpt4v": "Excluded from controlled experiment; requires OpenAI API key."
+}

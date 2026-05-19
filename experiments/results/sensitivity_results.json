@@ -1,0 +1,64 @@
+{
+  "threshold_sensitivity": {
+    "0.5": 100.0,
+    "0.55": 100.0,
+    "0.6": 100.0,
+    "0.65": 98.2,
+    "0.7": 88.8,
+    "0.75": 66.0,
+    "0.8": 44.0,
+    "0.85": 35.8,
+    "0.9": 33.6
+  },
+  "weight_sensitivity": [
+    {
+      "w_vis": 0.5,
+      "w_kg": 0.3,
+      "w_reason": 0.2,
+      "accuracy": 89.8
+    },
+    {
+      "w_vis": 0.4,
+      "w_kg": 0.4,
+      "w_reason": 0.2,
+      "accuracy": 87.4
+    },
+    {
+      "w_vis": 0.3,
+      "w_kg": 0.4,
+      "w_reason": 0.3,
+      "accuracy": 88.8
+    },
+    {
+      "w_vis": 0.2,
+      "w_kg": 0.5,
+      "w_reason": 0.3,
+      "accuracy": 87.0
+    },
+    {
+      "w_vis": 0.2,
+      "w_kg": 0.3,
+      "w_reason": 0.5,
+      "accuracy": 86.4
+    },
+    {
+      "w_vis": 0.33,
+      "w_kg": 0.33,
+      "w_reason": 0.34,
+      "accuracy": 89.0
+    }
+  ],
+  "kg_noise_robustness": {
+    "0.0": 88.8,
+    "0.1": 85.6,
+    "0.2": 81.6,
+    "0.3": 80.8,
+    "0.4": 74.6,
+    "0.5": 74.4
+  },
+  "summary": {
+    "threshold_accuracy_range_pp": 66.4,
+    "max_accuracy": 100.0,
+    "min_accuracy": 33.6
+  }
+}

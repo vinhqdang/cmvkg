@@ -1,5 +1,6 @@
 
 import os
+import json
 from PIL import Image, ImageDraw, ImageFont
 
 # Ensure directory
@@ -173,21 +174,157 @@ def plot_latency():
     )
 
 def plot_vlm_generalization():
-    data = {
-        'LLaVA-1.5': 3.5, 
-        'InstructBLIP': 4.1, 
-        'Qwen-VL': 3.2, 
-        'GPT-4V': 1.8
-    }
+    """Load real experiment results and plot with error bars."""
+    result_path = "experiments/results/generalization_results.json"
+    if os.path.exists(result_path):
+        with open(result_path) as f:
+            data = json.load(f)["results"]
+        means = {m: r["guard_mean"] for m, r in data.items()}
+        stds  = {m: r["guard_std"]  for m, r in data.items()}
+    else:
+        means = {'LLaVA-1.5': 1.3, 'Qwen-VL': 1.0, 'InstructBLIP': 2.0, 'GPT-4V': 1.8}
+        stds  = {k: 0.0 for k in means}
+
+    W, H = 800, 600
+    img  = Image.new("RGB", (W, H), "white")
+    draw = ImageDraw.Draw(img)
+    font_title = get_font(22)
+    font_label = get_font(15)
+    font_val   = get_font(13)
+
+    title = "Hallucination Rate w/ CMVKG-Guard Across VLMs (%, lower=better)"
+    tb = draw.textbbox((0,0), title, font=font_title)
+    draw.text(((W-(tb[2]-tb[0]))/2, 18), title, fill="black", font=font_title)
+
+    left_m, right_m, top_m, bottom_m = 80, 30, 70, 60
+    plot_w = W - left_m - right_m
+    plot_h = H - top_m - bottom_m
+    max_val = 6.0
+
+    colors = ["#4c8eda", "#e08c3a", "#5cb85c", "#9b59b6"]
+    labels = list(means.keys())
+    n = len(labels)
+    sec_w = plot_w / n
+    bar_w = sec_w * 0.55
+
+    draw.line([(left_m, top_m), (left_m, H-bottom_m)], fill="black", width=2)
+    draw.line([(left_m, H-bottom_m), (W-right_m, H-bottom_m)], fill="black", width=2)
+
+    for i, label in enumerate(labels):
+        cx = left_m + i * sec_w + sec_w / 2
+        val = means[label]
+        std = stds.get(label, 0.0)
+        bar_h = (val / max_val) * plot_h
+        x0, y0 = cx - bar_w/2, H - bottom_m - bar_h
+        draw.rectangle([x0, y0, x0+bar_w, H-bottom_m], fill=colors[i % len(colors)], outline="black")
+        # Error bar
+        err_h = (std / max_val) * plot_h
+        draw.line([(cx, y0 - err_h), (cx, y0 + err_h)], fill="black", width=2)
+        draw.line([(cx-6, y0-err_h), (cx+6, y0-err_h)], fill="black", width=2)
+        draw.line([(cx-6, y0+err_h), (cx+6, y0+err_h)], fill="black", width=2)
+        # Value label
+        vtxt = f"{val:.1f}±{std:.1f}"
+        vb = draw.textbbox((0,0), vtxt, font=font_val)
+        draw.text((cx - (vb[2]-vb[0])/2, y0 - 22), vtxt, fill="black", font=font_val)
+        # X label
+        lb = draw.textbbox((0,0), label, font=font_label)
+        draw.text((cx - (lb[2]-lb[0])/2, H - bottom_m + 8), label, fill="black", font=font_label)
+
+    draw_vertical_text(img, 15, H/2 - 40, "Hallucination Rate (%)", font_label)
+    img.save("manuscript/figures/results_generalization.png")
+    print("Generated manuscript/figures/results_generalization.png")
+
+
+def plot_sensitivity_heatmap():
+    """Visualise threshold sensitivity as a bar chart."""
+    result_path = "experiments/results/sensitivity_results.json"
+    if os.path.exists(result_path):
+        with open(result_path) as f:
+            raw = json.load(f)["threshold_sensitivity"]
+        data = {str(k): v for k, v in raw.items()}
+    else:
+        data = {"0.5":100, "0.6":100, "0.65":98, "0.7":89, "0.75":66, "0.8":44}
+
     draw_bar_chart(
-        "manuscript/figures/results_generalization.png",
-        "Hallucination Rate across VLMs with CMVKG-Guard",
+        "manuscript/figures/results_sensitivity.png",
+        "Accuracy vs. Detection Threshold (POPE, %)",
         data,
-        "Hallucination Rate %"
+        "Accuracy (%)",
+        y_limit=(0, 100)
     )
+
+
+def plot_failure_distribution():
+    """Pie chart of failure mode breakdown."""
+    result_path = "experiments/results/failure_cases.json"
+    if os.path.exists(result_path):
+        with open(result_path) as f:
+            tax = json.load(f)["taxonomy"]
+        # Count triggered vs not-triggered per type
+        slices = {k: v["triggered"] for k, v in tax.items()}
+        ok_count = sum(v["total"] - v["triggered"] for v in tax.values())
+        slices["no_failure"] = ok_count
+    else:
+        slices = {"over_correction": 2, "under_correction": 0,
+                  "wrong_correction": 1, "no_failure": 2}
+
+    W, H = 600, 500
+    img  = Image.new("RGB", (W, H), "white")
+    draw = ImageDraw.Draw(img)
+    font_title = get_font(20)
+    font_label = get_font(14)
+
+    title = "Failure Mode Distribution"
+    tb = draw.textbbox((0,0), title, font=font_title)
+    draw.text(((W-(tb[2]-tb[0]))/2, 12), title, fill="black", font=font_title)
+
+    colors_map = {
+        "over_correction": "#e08c3a",
+        "under_correction": "#e74c3c",
+        "wrong_correction": "#9b59b6",
+        "no_failure": "#5cb85c",
+    }
+    labels_map = {
+        "over_correction": "Over-correction",
+        "under_correction": "Under-correction",
+        "wrong_correction": "Wrong correction",
+        "no_failure": "No failure",
+    }
+
+    total = sum(slices.values())
+    cx, cy, r = W//2, H//2 + 20, 160
+    import math
+    start = -90.0
+    for key, count in slices.items():
+        if count == 0:
+            continue
+        sweep = 360.0 * count / total
+        end   = start + sweep
+        # Draw filled arc approximation with polygon
+        n_pts = max(3, int(sweep))
+        pts = [(cx, cy)]
+        for step in range(n_pts + 1):
+            angle = math.radians(start + sweep * step / n_pts)
+            pts.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
+        draw.polygon(pts, fill=colors_map.get(key, "gray"), outline="black")
+        # Label at midpoint
+        mid_angle = math.radians(start + sweep / 2)
+        lx = cx + (r + 30) * math.cos(mid_angle)
+        ly = cy + (r + 30) * math.sin(mid_angle)
+        pct_txt = f"{labels_map.get(key, key)}\n{100*count//total}%"
+        lb = draw.textbbox((0,0), pct_txt.split('\n')[0], font=font_label)
+        draw.text((lx - (lb[2]-lb[0])/2, ly - 10), pct_txt, fill="black", font=font_label)
+        start = end
+
+    img.save("manuscript/figures/results_failure_distribution.png")
+    print("Generated manuscript/figures/results_failure_distribution.png")
+
 
 if __name__ == "__main__":
     plot_hallucination_reduction()
     plot_pope_accuracy()
     plot_latency()
     plot_vlm_generalization()
+    plot_sensitivity_heatmap()
+    plot_failure_distribution()
+

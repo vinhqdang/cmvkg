@@ -1,0 +1,106 @@
+{
+  "threshold": 0.55,
+  "probes": [
+    {
+      "token": "europe",
+      "context": "Paris is in France, so it is in Europe.",
+      "is_inconsistent": false,
+      "l3_score": 0.8005,
+      "flagged": false,
+      "correct": true,
+      "scores": {
+        "temporal": 1.0,
+        "logic": 0.7398,
+        "multi_hop": 0.6658
+      }
+    },
+    {
+      "token": "france",
+      "context": "Paris is the capital of France.",
+      "is_inconsistent": false,
+      "l3_score": 0.8005,
+      "flagged": false,
+      "correct": true,
+      "scores": {
+        "temporal": 1.0,
+        "logic": 0.7398,
+        "multi_hop": 0.6658
+      }
+    },
+    {
+      "token": "located",
+      "context": "Paris is located in France.",
+      "is_inconsistent": false,
+      "l3_score": 0.8005,
+      "flagged": false,
+      "correct": true,
+      "scores": {
+        "temporal": 1.0,
+        "logic": 0.7398,
+        "multi_hop": 0.6658
+      }
+    },
+    {
+      "token": "before",
+      "context": "Event A happened before Event B then after it.",
+      "is_inconsistent": true,
+      "l3_score": 0.6942,
+      "flagged": false,
+      "correct": false,
+      "scores": {
+        "temporal": 0.5,
+        "logic": 0.832,
+        "multi_hop": 0.7488
+      }
+    },
+    {
+      "token": "after",
+      "context": "Event B occurred after A but also before A.",
+      "is_inconsistent": true,
+      "l3_score": 0.5084,
+      "flagged": true,
+      "correct": true,
+      "scores": {
+        "temporal": 0.5,
+        "logic": 0.5399,
+        "multi_hop": 0.4859
+      }
+    },
+    {
+      "token": "dog",
+      "context": "There is no dog in the image.",
+      "is_inconsistent": false,
+      "l3_score": 0.6781,
+      "flagged": false,
+      "correct": true,
+      "scores": {
+        "temporal": 1.0,
+        "logic": 0.5474,
+        "multi_hop": 0.4926
+      }
+    },
+    {
+      "token": "cat",
+      "context": "There is no cat here, only a bird.",
+      "is_inconsistent": false,
+      "l3_score": 0.8005,
+      "flagged": false,
+      "correct": true,
+      "scores": {
+        "temporal": 1.0,
+        "logic": 0.7398,
+        "multi_hop": 0.6658
+      }
+    }
+  ],
+  "metrics": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "f1": 0.667,
+    "accuracy": 0.857,
+    "tp": 1,
+    "tn": 5,
+    "fp": 0,
+    "fn": 1
+  }
+}

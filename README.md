@@ -28,15 +28,22 @@ CMVKG-Guard is a research project focused on developing a novel framework for de
 
 ## Implementation Status
 
-### ✅ Well Implemented (100% complete)
+### ✅ Well Implemented (85-90% complete)
 - Core pipeline architecture in `cmvkg_guard/pipeline.py`
 - Knowledge graph builder in `cmvkg_guard/graph/builder.py`
 - Three-layer verification engine in `cmvkg_guard/verification/engine.py`
 - Real-time correction mechanism in `cmvkg_guard/correction/corrector.py`
 - Configuration management system
-- Advanced external knowledge source integration (Wikidata & ConceptNet)
-- Sophisticated reasoning chain validation (BFS multi-hop tracking & Structural Entailment)
-- Adaptive threshold computation
+
+### 🔶 Partially Implemented
+- Basic knowledge enrichment (needs deeper external KB integration)
+- Reasoning verification (has placeholder mechanisms)
+- Adaptive threshold computation (basic implementation)
+
+### ❌ Missing/Needs Enhancement
+- Advanced external knowledge source integration
+- Sophisticated reasoning chain validation
+- Complex multi-hop reasoning verification
 - Comprehensive evaluation benchmarks
 
 ## Key Findings
@@ -44,46 +51,12 @@ CMVKG-Guard is a research project focused on developing a novel framework for de
 1.  **High Fidelity to Research Proposal**: The code structure closely follows the architectural design outlined in the research documents, with proper modular separation and clear implementation of the three core components.
 2.  **Solid Foundation**: The current implementation provides a robust prototype that demonstrates the core concepts, with type hints, documentation, and extensible design patterns.
 3.  **Research-Grade Quality**: This project demonstrates a systematic approach to addressing VLM hallucinations with comprehensive documentation.
-4.  **Complete Functional Flow**: All core components, including multi-hop reasoning verifications, adaptive thresholding, and fully operational Wikidata/ConceptNet enrichments have been built and properly integrated into the evaluation benchmark.
+4.  **Implementation Gap**: While the core architecture is implemented, advanced algorithms (like complex reasoning verification) require further development.
 
 ## Usage
 
-### 1. Running the Demonstration
-
-To run a simple illustrative demonstration of the guarded generation process:
+To run the demonstration script:
 
 ```bash
 python run_demo.py
 ```
-
-### 2. Running Experiments
-
-To run full validation experiments (e.g., across samples, ablation studies, or evaluating backward compatibility):
-
-```bash
-# Evaluate CMVKG-Guard using a specific core VLM model
-python do_experiment.py --model llava
-
-# Run an ablation study by disabling external knowledge graphs
-python do_experiment.py --model qwen --disable_external_kg
-
-# Evaluate a baseline model (without Guardian) instead
-python do_experiment.py --baseline OPERA
-```
-
-Supported VLM drivers include: `llava`, `qwen`, and `instructblip`.
-
-### 3. Latency Analysis
-
-To run latency profiling across the different generation and reasoning layers:
-
-```bash
-python run_latency_analysis.py
-```
-
-### 4. Manuscript Generation
-
-The repository also includes utility scripts for generating manuscript assets:
-- `python generate_method_diagrams.py` - Generates architectural diagrams for the paper.
-- `python generate_result_charts.py` - Synthesizes test outputs into quantitative performance charts.
-- `python generate_manuscript_examples.py` - Extracts qualitative examples for analysis.

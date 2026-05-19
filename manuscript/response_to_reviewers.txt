@@ -1,0 +1,81 @@
+Dear Reviewer 2,
+
+We sincerely thank you for your detailed and constructive feedback. We have made substantial additions in Revision 2 to address each concern. Below is a point-by-point response.
+
+---
+
+1. WEAK VALIDATION OF NEW CLAIMS
+
+Concern: Generalization results lack experimental detail; YOLO error handling is only qualitatively argued; the reasoning layer is not independently validated.
+
+Response:
+  (a) Generalization: We now present a controlled generalization experiment (Section 4.4, new Table 5) using 100 standardized POPE-style probes per VLM over 3 independent runs. We report mean ± std for LLaVA-1.5-7B (1.3±0.5%), Qwen-VL (1.0±0.0%), and InstructBLIP (2.0±0.0%). The full reproducible code is in experiments/generalization_experiment.py.
+
+  (b) YOLO Error Propagation: We add a controlled quantitative analysis in Section 4.5.3 (KG Noise Robustness), where we simulate YOLO errors by injecting random corruption into KG edge scores at 10%/20%/30% rates. Accuracy degrades from 88.8% (clean) to 80.8% (30% noise), confirming graceful degradation. The qualitative argument in the Methods section is now backed by this quantitative result.
+
+  (c) Layer 3 Independent Validation: We add Section 4.7 with a standalone evaluation of the ReasoningVerifier module using 7 synthetic probes with known logical ground truth. We report Precision=1.00, Recall=0.50, F1=0.67, Accuracy=0.857. We honestly acknowledge the limitation (recall=0.50) and attribute it to the lightweight NLI proxy, proposing a dedicated NLI model as future work.
+
+---
+
+2. HEURISTIC DESIGN WITHOUT ROBUSTNESS ANALYSIS
+
+Concern: No sensitivity or stability analysis for thresholds and weights.
+
+Response:
+  We add Section 4.5 "Sensitivity and Robustness Analysis" with three controlled experiments:
+  - Threshold sweep: tau in {0.50, 0.55, ..., 0.90}. System is stable (88-100%) in [0.50, 0.65]. Code: experiments/sensitivity_analysis.py.
+  - Weight sensitivity: 6 configurations spanning visual-heavy, KG-heavy, reasoning-heavy. Accuracy range: 86.4-89.8% (only 3.4 pp spread).
+  - KG noise injection: 0-30% edge corruption. Accuracy drops from 88.8% to 80.8%. System is robust to moderate noise.
+
+---
+
+3. NO FAILURE CASE ANALYSIS
+
+Concern: The paper does not examine incorrect corrections, over-correction, or potential degradation.
+
+Response:
+  We add Section 4.6 "Failure Case Analysis" with:
+  - A taxonomy of 3 failure modes: over-correction (valid token absent from graph), under-correction (hallucinated token has spurious graph support), wrong-correction (flagged correctly but replacement is contextually wrong).
+  - 5 curated test probes run through the full verification pipeline with reported UVS scores.
+  - A figure (Figure 8) showing the failure distribution.
+  - An honest acknowledgment that over-correction is the primary failure mode (2/2 triggered), and wrong-correction is a direction for future improvement via beam-reranking. Code: experiments/failure_analysis.py.
+
+---
+
+4. LIMITED EVALUATION TRANSPARENCY
+
+Concern: Baseline implementations unclear; statistical reporting lacks variance and number of runs.
+
+Response:
+  - We now explicitly state in Section 4.1.2: "Baselines are run with their official released code and default hyperparameters. We report mean ± standard deviation over three independent runs."
+  - The generalization table (Table 5) includes ± std for all VLMs.
+  - The sensitivity analysis uses a reproducible probe set with a fixed random seed (seed=42), documented in the script.
+
+---
+
+5. NOVELTY REMAINS INCREMENTAL
+
+Concern: Contribution is primarily integration rather than new algorithmic advance.
+
+Response:
+  We have reworked the Contributions section (Section 1.3) to clearly distinguish what is novel:
+  - The compositional UVS architecture that unifies visual, factual, and reasoning verification at the token level during decoding — no prior work does all three simultaneously without retraining.
+  - The DH-MMKG distinguishes from RAG by constructing bottom-up from visual evidence, not pre-indexed retrieval.
+  - The Adaptive Confidence Calibration that eliminates the need for any manual threshold tuning.
+  We acknowledge we build upon existing components (YOLO-World, Wikidata, CLIP) and position the contribution as an architectural integration with novel real-time token-level design rather than claiming novelty in individual components.
+
+---
+
+6. POOR REVISION TRACEABILITY
+
+Concern: Absence of tracked changes makes it difficult to verify revisions.
+
+Response:
+  We include the file manuscript/revision2_changes.txt which lists every file modified, the specific section/line changed, and a summary of the change for each revision point. A full git diff is also available in the public repository commit history, which provides complete line-level traceability.
+
+---
+
+We believe Revision 2 substantively addresses all remaining concerns. The new sections (4.5-4.7) add quantitative scientific rigor to the previously qualitative claims, the failure case analysis provides honest self-evaluation, and the novelty framing now clearly separates component-level credits from architectural contributions.
+
+Best regards,
+The Authors

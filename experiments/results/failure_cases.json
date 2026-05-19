@@ -1,0 +1,179 @@
+{
+  "cases": [
+    {
+      "type": "over_correction",
+      "token": "umbrella",
+      "uvs": 0.3931,
+      "threshold": 0.7,
+      "flagged": true,
+      "failure_triggered": true,
+      "description": "Correct token 'umbrella' absent from graph \u2192 may be falsely flagged.",
+      "breakdown": {
+        "layer1": {
+          "semantic_sim": 0.209,
+          "var_score": 0.5,
+          "spatial_score": 1.0
+        },
+        "layer2": {
+          "entity_check": 0.0,
+          "attribute_check": 0.0,
+          "relation_path": 0.5
+        },
+        "layer3": {
+          "temporal": 1.0,
+          "logic": 0.52,
+          "multi_hop": 0.468
+        },
+        "totals": {
+          "v1": 0.454,
+          "v2": 0.15,
+          "v3": 0.656
+        }
+      }
+    },
+    {
+      "type": "over_correction",
+      "token": "sitting",
+      "uvs": 0.3944,
+      "threshold": 0.7,
+      "flagged": true,
+      "failure_triggered": true,
+      "description": "Action verb 'sitting' has no direct KG entity \u2192 kg score may penalise unfairly.",
+      "breakdown": {
+        "layer1": {
+          "semantic_sim": 0.217,
+          "var_score": 0.5,
+          "spatial_score": 1.0
+        },
+        "layer2": {
+          "entity_check": 0.0,
+          "attribute_check": 0.0,
+          "relation_path": 0.5
+        },
+        "layer3": {
+          "temporal": 1.0,
+          "logic": 0.52,
+          "multi_hop": 0.468
+        },
+        "totals": {
+          "v1": 0.458,
+          "v2": 0.15,
+          "v3": 0.656
+        }
+      }
+    },
+    {
+      "type": "under_correction",
+      "token": "dog",
+      "uvs": 0.5553,
+      "threshold": 0.7,
+      "flagged": true,
+      "failure_triggered": false,
+      "description": "Hallucinated 'dog' is grounded in graph (bad detection) \u2192 slips through.",
+      "breakdown": {
+        "layer1": {
+          "semantic_sim": 0.223,
+          "var_score": 0.5,
+          "spatial_score": 1.0
+        },
+        "layer2": {
+          "entity_check": 1.0,
+          "attribute_check": 0.0,
+          "relation_path": 0.5
+        },
+        "layer3": {
+          "temporal": 1.0,
+          "logic": 0.52,
+          "multi_hop": 0.468
+        },
+        "totals": {
+          "v1": 0.462,
+          "v2": 0.55,
+          "v3": 0.656
+        }
+      }
+    },
+    {
+      "type": "under_correction",
+      "token": "bicycle",
+      "uvs": 0.5558,
+      "threshold": 0.7,
+      "flagged": true,
+      "failure_triggered": false,
+      "description": "Hallucinated 'bicycle' spuriously detected and added to graph.",
+      "breakdown": {
+        "layer1": {
+          "semantic_sim": 0.226,
+          "var_score": 0.5,
+          "spatial_score": 1.0
+        },
+        "layer2": {
+          "entity_check": 1.0,
+          "attribute_check": 0.0,
+          "relation_path": 0.5
+        },
+        "layer3": {
+          "temporal": 1.0,
+          "logic": 0.52,
+          "multi_hop": 0.468
+        },
+        "totals": {
+          "v1": 0.463,
+          "v2": 0.55,
+          "v3": 0.656
+        }
+      }
+    },
+    {
+      "type": "wrong_correction",
+      "token": "airplane",
+      "uvs": 0.3956,
+      "threshold": 0.7,
+      "flagged": true,
+      "failure_triggered": true,
+      "description": "Hallucinated 'airplane' caught, but corrector picks 'bicycle' which is wrong in context.",
+      "breakdown": {
+        "layer1": {
+          "semantic_sim": 0.225,
+          "var_score": 0.5,
+          "spatial_score": 1.0
+        },
+        "layer2": {
+          "entity_check": 0.0,
+          "attribute_check": 0.0,
+          "relation_path": 0.5
+        },
+        "layer3": {
+          "temporal": 1.0,
+          "logic": 0.52,
+          "multi_hop": 0.468
+        },
+        "totals": {
+          "v1": 0.463,
+          "v2": 0.15,
+          "v3": 0.656
+        }
+      }
+    }
+  ],
+  "taxonomy": {
+    "over_correction": {
+      "triggered": 2,
+      "total": 2,
+      "rate_pct": 100.0
+    },
+    "under_correction": {
+      "triggered": 0,
+      "total": 2,
+      "rate_pct": 0.0
+    },
+    "wrong_correction": {
+      "triggered": 1,
+      "total": 1,
+      "rate_pct": 100.0
+    }
+  },
+  "total_cases": 5,
+  "total_failures": 3,
+  "failure_rate_pct": 60.0
+}
