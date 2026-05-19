@@ -1,3 +1,4 @@
+\providecommand{\revised}[1]{{\color{blue}#1}}
 \section{Our Method}
 \label{sec:method}
 
@@ -45,7 +46,7 @@ For each linked entity $e_j = \Phi(o_j)$, we retrieve a subgraph $\mathcal{G}_{s
 \begin{equation}
 \mathcal{G}_{sub}(e_j) = \{ (e_j, r, e') \in \mathcal{K}_{ext} \mid \text{sim}(\mathbf{e}(r), \mathbf{q}) > \delta \}
 \end{equation}
-This ensures that only contextually relevant facts are added to the DH-MMKG. Importantly, this knowledge enrichment layer also mitigates potential error propagation from the open-vocabulary detector in $L_1$. If a visually detected object is spurious, its inability to form coherent factual links in the external knowledge base reduces its prominence in the resulting graph, effectively serving as early filtering of detection errors. To maintain scalability and handle inherent conflicts, visual evidence is configured to strictly override textual facts in cases of direct contradiction.
+This ensures that only contextually relevant facts are added to the DH-MMKG. \revised{Importantly, this knowledge enrichment layer also mitigates potential error propagation from the open-vocabulary detector in $L_1$. If a visually detected object is spurious, its inability to form coherent factual links in the external knowledge base reduces its prominence in the resulting graph, effectively serving as early filtering of detection errors. To maintain scalability and handle inherent conflicts, visual evidence is configured to strictly override textual facts in cases of direct contradiction.}
 
 \begin{algorithm}
 \caption{DH-MMKG Construction Algorithm}
@@ -72,7 +73,7 @@ This ensures that only contextually relevant facts are added to the DH-MMKG. Imp
 \end{algorithmic}
 \end{algorithm}
 
-The time complexity of the DH-MMKG construction is primarily bounded by the number of detected objects $N$ and the retrieval fan-out $k$. Assuming constant time for embedding comparisons, the overall time complexity is $\mathcal{O}(N^2 + N \log k)$. This bounded complexity ensures the extraction pipeline induces minimal latency overhead during real-time inference.
+\revised{The time complexity of the DH-MMKG construction is primarily bounded by the number of detected objects $N$ and the retrieval fan-out $k$. Assuming constant time for embedding comparisons, the overall time complexity is $\mathcal{O}(N^2 + N \log k)$. This bounded complexity ensures the extraction pipeline induces minimal latency overhead during real-time inference.}
 
 \subsection{Cross-Modal Verification Engine (CMVE)}
 The CMVE verifies each generated token $t_i$ against $\mathcal{G}$ and $I$.
@@ -96,18 +97,18 @@ S_{kg}(t_i) = \max_{p \in \mathcal{P}_{t_i}} \left( \prod_{(u,v) \in p} w(u,v) \
 where $w(u,v)$ is the confidence of the edge.
 
 \subsubsection{Layer 3: Reasoning Chain Verification}
-Beyond factual correctness, we verify logical consistency using a structural entailment approach. Given a candidate token $t_i$ representing an action or state, we evaluate its validity using the context representations in $\mathcal{G}$:
+\revised{Beyond factual correctness, we verify logical consistency using a structural entailment approach. Given a candidate token $t_i$ representing an action or state, we evaluate its validity using the context representations in $\mathcal{G}$:
 \begin{equation}
 S_{reason}(t_i) = \sigma \left( \sum_{p \in \mathcal{T}_{t_i}} \phi(p) \cdot \mathbb{I}(t_i \models p) \right)
 \end{equation}
-where $\mathcal{T}_{t_i}$ is the set of logical predicates extracted from the local context, $\phi(p)$ is the heuristic path weight, and $\mathbb{I}$ is the entailment indicator function modeled via lightweight natural language inference checks.
+where $\mathcal{T}_{t_i}$ is the set of logical predicates extracted from the local context, $\phi(p)$ is the heuristic path weight, and $\mathbb{I}$ is the entailment indicator function modeled via lightweight natural language inference checks.}
 
 \subsubsection{Unified Verification Score (UVS)}
 The final verification score $\Omega(t_i)$ is a weighted combination of individual module scores:
 \begin{equation}
 \Omega(t_i) = \mathbf{w}^T \cdot [S_{vis}(t_i), S_{kg}(t_i), S_{reason}(t_i)]
 \end{equation}
-To strictly preserve the training-free nature of the framework, the weight vector $\mathbf{w}$ is not learned via backpropagation. Instead, it is heuristically adapted dynamically based on the softmax distribution of the query-type embeddings (e.g., shifting weight to $S_{vis}$ for structural queries). Therefore, the entire CMVE is a non-differentiable, heuristic verification layer structurally perfect for plug-and-play middleware integration.
+\revised{To strictly preserve the training-free nature of the framework, the weight vector $\mathbf{w}$ is not learned via backpropagation. Instead, it is heuristically adapted dynamically based on the softmax distribution of the query-type embeddings (e.g., shifting weight to $S_{vis}$ for structural queries). Therefore, the entire CMVE is a non-differentiable, heuristic verification layer structurally perfect for plug-and-play middleware integration.}
 
 \begin{figure}[t]
     \centering
@@ -117,10 +118,10 @@ To strictly preserve the training-free nature of the framework, the weight vecto
 \end{figure}
 
 \subsection{Adaptive Confidence Calibration and Real-Time Correction}
-We define a dynamic threshold $\tau_{dyn}$ based on the local entropy of the generation distribution $\mathcal{H}(P_i)$:
+\revised{We define a dynamic threshold $\tau_{dyn}$ based on the local entropy of the generation distribution $\mathcal{H}(P_i)$:
 \begin{equation}
 \tau_{dyn}(t_i) = \mu + \sigma \cdot \tanh(\mathcal{H}(P(t_i | t_{<i})) - \mathcal{H}_0)
-\end{equation}
+\end{equation}}
 
 If $\Omega(t_i) < \tau_{dyn}(t_i)$, the token is flagged as a hallucination. Replacing a single token exclusively based on local node similarities risks degrading the syntactic coherence of the autoregressive context. To bridge the perception-reasoning gap, we propose a \textbf{Constrained Look-Ahead Beam Search}. 
 
@@ -130,4 +131,4 @@ c^* = \arg\max_{c \in \mathcal{C}_{cand}} \sum_{d=0}^{D} \left( (1-\gamma) \log 
 \end{equation}
 where $P_{\text{KG}}$ is the structural likelihood derived from the DH-MMKG.
 
-In practical implementations (e.g., wrapping LLaVA), token-level interception is seamlessly achieved by orchestrating custom stopping criteria within the generation loop. Upon detecting a hallucination, the tree search evaluates the $D$ speculative tokens, and the VLM's key-value (KV) cache is appended with the winning sequence branch. This theoretically guarantees grounded error corrections without sacrificing linguistic fluidity or necessitating changes to the underlying VLM source code.
+\revised{In practical implementations (e.g., wrapping LLaVA), token-level interception is seamlessly achieved by orchestrating custom stopping criteria within the generation loop. Upon detecting a hallucination, the tree search evaluates the $D$ speculative tokens, and the VLM's key-value (KV) cache is appended with the winning sequence branch. This theoretically guarantees grounded error corrections without sacrificing linguistic fluidity or necessitating changes to the underlying VLM source code.}
