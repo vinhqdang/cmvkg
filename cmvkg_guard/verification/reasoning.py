@@ -6,7 +6,7 @@ class ReasoningVerifier:
     """Layer 3: Verifies logical, temporal, and multi-hop reasoning (Eq. 7)."""
 
     def verify(self, token: str, context: str, graph: DHMMKG) -> Dict[str, float]:
-        """
+        r"""
         Verify reasoning consistency using structural entailment Eq. 7:
         S_{reason}(t_i) = \sigma( \sum_{p \in T} \phi(p) * I(t_i |= p) )
         """
