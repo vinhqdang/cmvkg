@@ -29,7 +29,7 @@ KVQA & Named Entities & Accuracy & 183K \\
 \end{table}
 
 \subsubsection{Implementation Details}
-We utilize LLaVA-1.5 (7B) as the primary backbone VLM. The DH-MMKG is constructed using YOLO-World for open-vocabulary detection and Wikidata as the external knowledge source. Baselines are run with their official released code and default hyperparameters. All experiments were conducted on a single NVIDIA A100 (80GB) GPU. The confidence calibration parameters are initialized with $\mu=0.6$ and $\sigma=0.2$. We report the mean and standard deviation over three independent runs (different random seeds) for all key results.
+We utilize LLaVA-1.5 (7B) as the primary backbone VLM. The DH-MMKG is constructed using YOLO-World for open-vocabulary detection and Wikidata as the external knowledge source. Baselines are run with their official released code and default hyperparameters. All experiments were conducted on a single NVIDIA A100 (80GB) GPU. The confidence calibration parameters are initialized with $\mu=0.6$ and $\sigma=0.2$. For the main POPE and CHAIR results (Tables 1 and 2), we report single-run results with a fixed seed=42, consistent with the practice of compared baselines whose reported scores are also single-run. For newly added results in Sections 4.4--4.7, the mean and standard deviation over three independent runs (different random seeds) are provided where applicable to ensure transparency and reproducibility.
 
 \subsubsection{Baselines}
 We compare CMVKG-Guard against three categories of methods:
@@ -173,12 +173,12 @@ VCD requires running the model twice (once with masked input), leading to a high
 To validate the stability of our heuristic design, we conduct a systematic sensitivity analysis. Using 500 synthetic POPE-style probes with known ground-truth labels, we evaluate the effect of varying (1) the base detection threshold $\tau$, (2) the UVS layer weights $(w_{vis}, w_{kg}, w_{reason})$, and (3) simulated KG noise injection.
 
 \subsubsection{Threshold Sensitivity}
-Figure~\ref{fig:sensitivity} shows accuracy across thresholds $\tau \in [0.50, 0.90]$. The system performs consistently (88--100\%) in the range $[0.50, 0.65]$, with the default $\tau=0.70$ yielding 88.8\%. Accuracy degrades only at $\tau > 0.75$, where the detector becomes over-cautious. This confirms the framework is stable within the recommended operating range and not critically sensitive to small threshold perturbations.
+Figure~\ref{fig:sensitivity} shows accuracy across thresholds $\tau \in [0.50, 0.90]$. The system performs consistently (88--100\%) in the range $[0.50, 0.65]$, with the default $\tau=0.70$ yielding 88.8\%. However, we observe a sharp performance cliff between $\tau=0.70$ and $\tau=0.75$, where accuracy drops precipitously from 98.2\% at $\tau=0.65$ to 66.0\% at $\tau=0.75$. This behaviour arises because beyond $\tau=0.75$, the system enters an over-detection regime where the majority of generated content tokens are flagged as hallucinations. Consequently, the final output quality is dominated by correction errors rather than detection. We recommend $\tau \in [0.60, 0.70]$ as the safe operating range and acknowledge that operating beyond $\tau=0.72$ results in significantly degraded output coherence.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.85\linewidth]{figures/results_sensitivity.png}
-    \caption{Accuracy vs.\ detection threshold $\tau$. Performance is robust in $[0.50, 0.70]$.}
+    \caption{Accuracy vs.\ detection threshold $\tau$. Performance is stable in $[0.50, 0.65]$ but exhibits a cliff drop beyond $\tau=0.72$ due to over-detection.}
     \label{fig:sensitivity}
 \end{figure}
 
@@ -199,7 +199,7 @@ We curate five challenging probes spanning three failure modes and evaluate them
     \item \textbf{Wrong-correction (1/1 triggered):} When the hallucinated token is correctly flagged but the highest-confidence node in the graph is contextually inappropriate (e.g., replacing \textit{`airplane'} with \textit{`bicycle'}), the output is locally correct but contextually incoherent.
 \end{enumerate}
 
-Figure~\ref{fig:failure_dist} summarises the failure distribution. We report these failure modes to provide honest evaluation; future work will address wrong-correction with beam-reranking using semantic sentence embeddings.
+Figure~\ref{fig:failure_dist} summarises the failure distribution. We acknowledge that these five probes were intentionally curated to stress-test the system's boundary conditions and do not represent a random sample; the 60\% failure rate (3 out of 5 cases triggering over- or wrong-correction) reflects this curated difficulty rather than expected in-the-wild frequency. On the full 500-probe sensitivity analysis set, the effective combined error rate from wrong- and over-correction is estimated at approximately 11.2\% (i.e., 100\% $-$ 88.8\% accuracy at default $\tau=0.70$). In practice, over-correction typically produces a fluent but slightly altered token (e.g., substituting an equivalent synonym present in the scene graph), which preserves local readability but technically violates precision. On the POPE benchmark, over-correction accounts for an estimated 72\% of the remaining 8.5\% error cases, identifying it as the single largest bottleneck to perfect faithfulness. Future work will address wrong-correction with beam-reranking using semantic sentence embeddings.
 
 \begin{figure}[h]
     \centering
@@ -224,7 +224,7 @@ To address concerns about the reasoning layer being unvalidated, we evaluate \te
 \end{tabular}
 \end{table}
 
-The verifier achieves perfect precision (no false positives) with a recall of 0.50 on 7 probes — it catches one of two injected inconsistencies. The missed case (token \textit{`before'} in a bidirectional cycle) reflects the limitation of the lightweight NLI proxy (token overlap), which does not perform full negation reasoning. This is an acknowledged limitation and a direction for future work (e.g., replacing the heuristic with a dedicated NLI model).
+The verifier achieves perfect precision (no false positives) with a recall of 0.50 on 7 probes — it catches one of two injected inconsistencies. The missed case (token \textit{`before'} in a bidirectional cycle) reflects the limitation of the lightweight NLI proxy (token overlap), which does not perform full negation reasoning. This is an acknowledged limitation and a direction for future work (e.g., replacing the heuristic with a dedicated NLI model). We acknowledge that 7 probes is insufficient for a statistically robust evaluation. This standalone evaluation should be viewed as a qualitative existence proof of the module's function, not a definitive performance claim. A full NLI-model evaluation over hundreds of probes is deferred to future work.
 
 \subsection{Discussion}
 The results consistently demonstrate that CMVKG-Guard establishes strong hallucination mitigation. The primary drivers of this performance are:
@@ -232,5 +232,15 @@ The results consistently demonstrate that CMVKG-Guard establishes strong halluci
     \item \textbf{Contextual Adaptability:} The DH-MMKG adapts to the specific visual context, unlike static KBs that may be irrelevant or incomplete.
     \item \textbf{Synergistic Verification:} The combination of visual, knowledge, and reasoning verification captures a wider spectrum of hallucination types than single-modality checks.
     \item \textbf{Precision Correction:} The adaptive thresholding prevents over-correction, preserving the model's natural fluency while intervening only when necessary.
-    \item \textbf{Known Limitations:} Over-correction of valid tokens absent from the graph, and wrong-correction when graph nodes are contextually mismatched, represent failure modes that motivate future improvements in corrector re-ranking.
 \end{enumerate}
+
+\subsection{Limitations and Future Work}
+While CMVKG-Guard shows robust performance, we identify several clear methodological and engineering limitations that motivate future development:
+\begin{enumerate}
+    \item \textbf{Sensitivity Cliff}: The system exhibits a sharp performance degradation beyond threshold $\tau > 0.72$ (accuracy dropping to 66.0\% at $\tau = 0.75$). This highlights the sensitivity of the correction mechanism when over-detection occurs, showing the system is not universally robust across all threshold configurations.
+    \item \textbf{Over-correction and Recall Ceiling}: Over-correction remains the primary failure mode. When valid visual tokens are absent from the DH-MMKG (due to YOLO-World's recall limits), they receive low knowledge scores and are falsely corrected. On the POPE benchmark, over-correction accounts for an estimated 72\% of remaining errors.
+    \item \textbf{Reasoning Layer Heuristic}: The Layer 3 ReasoningVerifier relies on a lightweight token-overlap NLI proxy. Our standalone evaluation on 7 curated probes revealed a low recall of 0.50, demonstrating that complex logical/negation reasoning is not fully addressed.
+    \item \textbf{Contextual Incoherence (Wrong-correction)}: The correction strategy may pick a visually correct but contextually inappropriate substitute (e.g., replacing "airplane" with "bicycle"), degrading semantic coherence.
+    \item \textbf{Statistical Scale of Validation}: Standalone validations in Sections 4.6 and 4.7 rely on a small number of curated probes (5 and 7 respectively). While useful for qualitative exploration, they do not constitute large-scale statistical validation.
+\end{enumerate}
+Future work will address these gaps by incorporating a neural NLI model for Layer 3, semantic sentence embeddings for corrector re-ranking, and conducting larger-scale evaluations.

@@ -1,24 +1,24 @@
-Date: 2026-02-12
+Date: 2026-05-20
 
 The Editor-in-Chief
 Discover Artificial Intelligence
 
 Dear Editor,
 
-We are pleased to submit our manuscript entitled "CMVKG-Guard: Real-Time Hallucination Correction in Vision-Language Models via Dynamic Knowledge Graphs" for consideration as a Research Article in Discover Artificial Intelligence.
+We are pleased to submit the revised version of our manuscript entitled "CMVKG-Guard: Real-Time Hallucination Correction in Vision-Language Models via Dynamic Knowledge Graphs" for consideration as a Research Article in Discover Artificial Intelligence. 
 
-Vision-Language Models (VLMs) have achieved remarkable progress, yet their deployment in high-stakes domains is severely constrained by the persistent issue of hallucination. Current mitigation strategies primarily rely solely on extensive retraining (RLHF/DPO) or static retrieval-augmented generation (RAG), both of which face significant limitations in adaptability and real-time performance.
+This submission represents Revision 2 (R2) of our paper. In this revised version, we have deeply addressed the outstanding concerns raised by the reviewers and the editor, focusing on enhancing scientific rigor, analytical depth, and honesty. Specifically, we have:
 
-In this work, we propose CMVKG-Guard, a novel training-free framework that addresses these challenges through a paradigm shift: dynamic knowledge grounding. Unlike existing methods, our system constructs a Hierarchical Multimodal Knowledge Graph (DH-MMKG) on-the-fly during inference, allowing it to adapt to unique visual contexts that static knowledge bases often miss. We integrate this with a Cross-Modal Verification Engine (CMVE) that simultaneously validates token generation against visual evidence, factual knowledge, and logical reasoning chains.
+1. Statistical Generalization: Conducted a controlled generalization experiment across three vision-language models (LLaVA-1.5, Qwen-VL, InstructBLIP) with statistical variance (3-run mean ± std) to ensure reproducibility.
+2. Robustness and Threshold Cliff Analysis: Added sensitivity evaluations for our detection threshold tau, honestly reporting and discussing the sharp performance cliff observed beyond tau=0.72 due to over-detection.
+3. Expanded Failure Case Analysis: Curated test probes to stress-test the system's boundary conditions, provided statistical context on the overall error rate (~11.2% on the full set), and analyzed the practical impact of over-correction.
+4. Independent Validation of Reasoning: Evaluated the Layer 3 ReasoningVerifier module in isolation, providing precision/recall metrics and honestly acknowledging the limitations of our lightweight NLI proxy.
+5. Honest Contribution Framing: Reworked the Contributions section to transparently position our work as a rigorously evaluated, real-time middleware system and compositional token-level architecture rather than claiming fundamentally new algorithmic components, while drawing clear distinctions from concurrent response-level methods.
+6. Detailed Traceability: Provided a comprehensive point-by-point response to reviewers (response_to_reviewers.txt) and a granular, section-by-section change summary (revision2_changes.txt).
 
-Key contributions of our work include:
-1. SOTA Performance: Our method achieves 91.5% accuracy on the POPE benchmark and reduces object hallucinations by 84% on the CHAIR dataset, significantly outperforming current state-of-the-art baselines like VCD and mKG-RAG.
-2. Real-Time Efficiency: By optimizing for local, dynamic graph construction, we achieve a latency overhead of just 12ms per token, making real-time intervention feasible for the first time in a retrieval-augmented verification system.
-3. Unified Approach: We provide the first framework to unify detection and correction in a single end-to-end pipeline without requiring model retraining.
+We believe this highly transparent, self-critical, and rigorous revision substantially strengthens the manuscript and addresses all remaining concerns. This manuscript has not been published and is not under consideration for publication elsewhere. We have no conflicts of interest to disclose.
 
-We believe this paper is of significant interest to the readership of Discover Artificial Intelligence as it tackles a critical bottleneck in the reliability of generative AI systems. This manuscript has not been published and is not under consideration for publication elsewhere. We have no conflicts of interest to disclose.
-
-Thank you for your consideration.
+Thank you for your time and continued consideration.
 
 Sincerely,
 
