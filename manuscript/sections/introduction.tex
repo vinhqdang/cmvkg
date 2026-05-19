@@ -1,3 +1,4 @@
+\providecommand{\revised}[1]{{\color{blue}#1}}
 \section{Introduction}
 \label{sec:introduction}
 
@@ -22,8 +23,8 @@ Our system employs a Cross-Modal Verification Engine (CMVE) that validates gener
 \subsection{Contributions}
 The key contributions of this work are as follows:
 \begin{itemize}
-    \item We introduce \textbf{CMVKG-Guard}, an effective training-free, end-to-end middleware that intercepts VLM token generation in real-time. Concurrent works such as MARINE and DeGF address knowledge grounding at the response or sentence level; CMVKG-Guard is distinguished by token-level intervention during decoding, enabling correction before error propagation. We position this work as a rigorously evaluated system contribution: the primary novelty is the compositional architecture and real-time token-level design, rather than a claim of fundamentally new algorithmic components.
+    \item We introduce \textbf{CMVKG-Guard}, an effective training-free, end-to-end middleware that intercepts VLM token generation in real-time. \revised{Concurrent works such as MARINE and DeGF address knowledge grounding at the response or sentence level; CMVKG-Guard is distinguished by token-level intervention during decoding, enabling correction before error propagation. We position this work as a rigorously evaluated system contribution: the primary novelty is the compositional architecture and real-time token-level design, rather than a claim of fundamentally new algorithmic components.}
     \item We propose the \textbf{Dynamic Hierarchical Multimodal Knowledge Graph (DH-MMKG)}, which distinguishes itself from standard RAG by constructing a query-conditioned scene graph \textit{bottom-up from visual evidence} during inference, rather than retrieving from a pre-indexed static store.
     \item We develop the \textbf{Adaptive Confidence Calibration (ACC)} mechanism, which eliminates the need for any threshold tuning by dynamically adjusting the detection boundary based on local generation entropy and query type.
-    \item We demonstrate through extensive experiments on standard benchmarks (POPE, CHAIR, MMHalBench) that CMVKG-Guard achieves highly competitive performance, reducing object hallucinations by 84\% and achieving >90\% accuracy on the POPE benchmark. We additionally provide detailed sensitivity, robustness, failure case, and Layer 3 independent validation analyses to support scientific rigour.
+    \item We demonstrate through extensive experiments on standard benchmarks (POPE, CHAIR, MMHalBench) that CMVKG-Guard achieves highly competitive performance, reducing object hallucinations by 84\% and achieving >90\% accuracy on the POPE benchmark. \revised{We additionally provide detailed sensitivity, robustness, failure case, and Layer 3 independent validation analyses to support scientific rigour.}
 \end{itemize}
