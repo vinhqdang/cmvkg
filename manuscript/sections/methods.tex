@@ -1,13 +1,12 @@
-\providecommand{\revised}[1]{{\color{blue}#1}}
 \section{Our Method}
 \label{sec:method}
 
-In this section, we present \textbf{CMVKG-Guard}, a novel framework designed to detect and mitigate hallucinations in Vision-Language Models (VLMs) in real-time. Unlike prior approaches that rely on static knowledge bases or post-hoc corrections, our method dynamically constructs a Hierarchical Multimodal Knowledge Graph (DH-MMKG) during inference and employs a multi-layered verification engine.
+In this section, we present \textbf{CMVKG-Guard}, a training-free middleware for detecting and mitigating hallucinations in Vision-Language Models (VLMs) at decoding time. \revisiontwo{We are explicit about the scope of our contribution: the constituent modules ---  open-vocabulary detection, knowledge-graph retrieval, attention-based visual scoring, and beam-search correction --- are individually drawn from existing literature. The novel piece is their composition into a \emph{per-token, in-the-loop} verify-and-correct architecture that intercepts the VLM's autoregressive decoder, together with the documented operating envelope (sensitivity cliff, failure-mode taxonomy, and Layer-3 reasoning limits) characterised in Sec.~\ref{sec:results}.} Unlike prior approaches that rely on static knowledge bases or post-hoc corrections, our method constructs a Dynamic Hierarchical Multimodal Knowledge Graph (DH-MMKG) on the fly during inference and employs a multi-layered verification engine.
 
 \begin{figure*}[t]
     \centering
     \includegraphics[width=\linewidth]{figures/system_architecture.png}
-    \caption{Overview of the CMVKG-Guard architecture. The framework acts as a middleware, intercepting VLM output and verifying it against a dynamically constructed Hierarchical Multimodal Knowledge Graph (DH-MMKG) using a Cross-Modal Verification Engine (CMVE).}
+    \caption{Overview of the CMVKG-Guard architecture. The framework acts as a middleware, intercepting VLM output and verifying it against a Dynamic Hierarchical Multimodal Knowledge Graph (DH-MMKG) built on the fly using a Cross-Modal Verification Engine (CMVE).}
     \label{fig:system_arch}
 \end{figure*}
 
@@ -18,13 +17,13 @@ P(R | I, Q) = \prod_{i=1}^{T} P(t_i | I, Q, t_{<i}; \theta)
 \end{equation}
 where $t_{<i}$ denotes the sequence of tokens generated prior to step $i$.
 
-We define the \textit{hallucination detection} task as learning a binary decision function $f_{\text{ver}}: \mathcal{V}_{vocab} \times \mathcal{I} \times \mathcal{K} \to \{0, 1\}$, where $1$ indicates a hallucination. The function relies on a dynamic knowledge source $\mathcal{K}$ constructed on-the-fly. If $f_{\text{ver}}(t_i) = 1$, a correction function $f_{\text{corr}}$ maps $t_i$ to a grounded token $t^*_i$.
+We cast the \textit{hallucination detection} task as designing a binary decision function $f_{\text{ver}}: \mathcal{V}_{vocab} \times \mathcal{I} \times \mathcal{K} \to \{0, 1\}$, where $1$ indicates a hallucination. Consistent with the training-free nature of our framework, $f_{\text{ver}}$ is constructed analytically rather than learned from labeled hallucination data. It relies on a dynamic knowledge source $\mathcal{K}$ constructed on the fly. If $f_{\text{ver}}(t_i) = 1$, a correction function $f_{\text{corr}}$ maps $t_i$ to a grounded token $t^*_i$.
 
 \subsection{Dynamic Hierarchical Multimodal Knowledge Graph (DH-MMKG)}
 To address the limitations of static knowledge bases, we introduce the DH-MMKG, formally denoted as $\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{S})$, where $\mathcal{V}$ is the set of entity nodes, $\mathcal{E}$ is the set of relational edges, and $\mathcal{S}$ represents the global scene context.
 
 \subsubsection{Visual Scene Graph Construction ($L_1$)}
-The base layer $L_1$ captures visual primitives. We employ an open-vocabulary object detector $D$ to extract a set of objects $O = \{o_1, ..., o_N\}$. For each object $o_j$, we extract a feature vector $\mathbf{v}_j$ and a set of attributes $\mathcal{A}_j = \{(a_k, s_k)\}_{k=1}^{K}$, where $a_k$ is an attribute label (e.g., "red") and $s_k$ is the confidence score.
+The base layer $L_1$ captures visual primitives. We employ an open-vocabulary object detector $D$ to extract a set of objects $O = \{o_1, ..., o_N\}$. For each object $o_j$, we extract a feature vector $\mathbf{v}_j$ and a set of attributes $\mathcal{A}_j = \{(a_k, s_k)\}_{k=1}^{K}$, where $a_k$ is an attribute label (e.g., ``red'') and $s_k$ is the confidence score.
 
 The set of edges $\mathcal{E}_{vis}$ represents spatial relationships derived from bounding box geometry. Let $B(o_i)$ be the bounding box of object $o_i$. The spatial relation $r_{sp}(o_i, o_j)$ is determined by:
 \begin{equation}
@@ -40,13 +39,13 @@ where $\psi_{\text{geo}}$ is a geometric heuristic function mapping to predicate
 \end{figure}
 
 \subsubsection{Knowledge Enrichment ($L_2$)}
-The second layer $L_2$ enriches $\mathcal{G}$ with external factual knowledge. We define a linking function $\Phi: \mathcal{V} \to \mathcal{K}_{ext}$ that maps visual entities to nodes in an external knowledge base (e.g., Wikidata).
+The second layer $L_2$ enriches $\mathcal{G}$ with external factual knowledge by actively querying APIs. We define a linking function $\Phi: \mathcal{V} \to \mathcal{K}_{ext}$ that maps visual entities to an aggregate external knowledge base comprising both Wikidata (fetching ontological properties via SPARQL, such as \texttt{instance of} or \texttt{subclass of}) and ConceptNet (fetching relational bindings).
 
 For each linked entity $e_j = \Phi(o_j)$, we retrieve a subgraph $\mathcal{G}_{sub}(e_j) \subset \mathcal{K}_{ext}$ subject to a relevance constraint based on the query embedding $\mathbf{q}$:
 \begin{equation}
 \mathcal{G}_{sub}(e_j) = \{ (e_j, r, e') \in \mathcal{K}_{ext} \mid \text{sim}(\mathbf{e}(r), \mathbf{q}) > \delta \}
 \end{equation}
-This ensures that only contextually relevant facts are added to the DH-MMKG. \revised{Importantly, this knowledge enrichment layer also mitigates potential error propagation from the open-vocabulary detector in $L_1$. If a visually detected object is spurious, its inability to form coherent factual links in the external knowledge base reduces its prominence in the resulting graph, effectively serving as early filtering of detection errors. To maintain scalability and handle inherent conflicts, visual evidence is configured to strictly override textual facts in cases of direct contradiction.}
+This ensures that only contextually relevant facts are added to the DH-MMKG. A local disk-caching mechanism is implemented to maintain low-latency query resolution without exhausting external rate limits during large-scale evaluation benchmarking. Importantly, this knowledge-enrichment layer also mitigates error propagation from the open-vocabulary detector in $L_1$: a spurious visual entity typically fails to attract coherent factual links in $\mathcal{K}_{ext}$, so its connectivity --- and hence its downstream influence on verification --- decays, providing implicit early filtering of detection errors. The complementary case, in which $L_1$ and $L_2$ disagree on a visually observable attribute, is handled by the explicit conflict-resolution rule described below.
 
 \begin{algorithm}
 \caption{DH-MMKG Construction Algorithm}
@@ -73,7 +72,21 @@ This ensures that only contextually relevant facts are added to the DH-MMKG. \re
 \end{algorithmic}
 \end{algorithm}
 
-\revised{The time complexity of the DH-MMKG construction is primarily bounded by the number of detected objects $N$ and the retrieval fan-out $k$. Assuming constant time for embedding comparisons, the overall time complexity is $\mathcal{O}(N^2 + N \log k)$. This bounded complexity ensures the extraction pipeline induces minimal latency overhead during real-time inference.}
+The time complexity of the DH-MMKG construction is primarily bounded by the number of detected objects $N$ and the retrieval fan-out $k$ per node. Assuming constant time for embedding comparisons, the overall time complexity is $\mathcal{O}(N^2 + N k)$: the $N^2$ term arises from pairwise spatial-edge construction in $L_1$, and the $N k$ term from per-node fact retrieval in $L_2$. In practice both $N$ and $k$ are small ($N \lesssim 20$ detected objects, $k \lesssim 10$ retrieved facts), so the extraction pipeline stays within the latency budget of real-time inference (see Sec.~\ref{sec:results} for measurements).
+
+\noindent\textbf{KG update mechanism.} The DH-MMKG is constructed once per query before generation begins. During the token-by-token generation loop, the graph is treated as a read-only grounding source. If the model generates a new named entity that was not in the initial visual scene (e.g., an inferred off-screen object), a lightweight incremental update appends that entity node and fetches its immediate one-hop facts from the cache. This avoids re-running the full $\mathcal{O}(N^2)$ construction and adds only $\mathcal{O}(k)$ per newly encountered entity (one-hop fetch with fan-out $k$).
+
+\noindent\textbf{Conflict resolution.} When the external knowledge facts $\mathcal{F}$ conflict with visually detected attributes (e.g., Wikidata says ``fire trucks are red'' but the detected object is blue), we apply a strict visual-priority rule: the edge contributed by $L_1$ detection is assigned confidence weight $w_{vis} = 1.0$ and overrides the external edge, which is downweighted to $w_{ext} = 0.2$. This prevents hallucination by external knowledge sources while still retaining them as weak soft constraints.
+
+\noindent\textbf{Scalability.} For open-domain queries with many detected entities ($N > 20$), we cap external knowledge retrieval to the top-5 most query-relevant entities (ranked by cosine similarity between entity embedding and query embedding), ensuring the graph remains compact and query-time graph search stays bounded. Caching of API responses (Wikidata SPARQL, ConceptNet) means repeated entity lookups across a session incur zero network latency.
+
+\subsubsection{Reasoning Chain Layer ($L_3$)}
+\label{sec:l3}
+The third level of the hierarchy, $L_3$, captures multi-hop reasoning chains over the entities and relations materialized in $L_1 \cup L_2$. Unlike the lower two levels, $L_3$ is not pre-populated during graph construction; instead, chains are induced \emph{lazily} at inference time, on demand by the CMVE. Concretely, when a candidate token $t_i$ requires multi-hop justification, a chain
+\begin{equation}
+c_{t_i} = (v_0 \xrightarrow{r_1} v_1 \xrightarrow{r_2} \cdots \xrightarrow{r_m} v_m)
+\end{equation}
+is assembled by traversing $\mathcal{V}$ along $\mathcal{E}$ via the BFS routine of Sec.~\ref{sec:layer3}, and is attached to $\mathcal{G}$ for the duration of the verification step before being discarded. This lazy materialization (i) preserves the three-level hierarchical structure of DH-MMKG without inflating its static memory footprint, and (ii) keeps the chain set query-specific.
 
 \subsection{Cross-Modal Verification Engine (CMVE)}
 The CMVE verifies each generated token $t_i$ against $\mathcal{G}$ and $I$.
@@ -90,40 +103,48 @@ S_{vis}(t_i) = \lambda_1 \text{VAR}(t_i) + \lambda_2 \max\left(0, \text{sim}(t_i
 where $\text{sim}(t, \text{img})$ denotes the standard CLIP-based cosine similarity. This ensures that a token is only granted a high visual score if it strictly discriminates itself from its counterfactual, effectively neutralizing absolute baseline probabilities caused by language biases.
 
 \subsubsection{Layer 2: Knowledge Grounding}
-For a token $t_i$ identified as a named entity, we check for its existence in $\mathcal{G}$. If $t_i \in \mathcal{V}$, we evaluate the path validity score. Let $\mathcal{P}_{t_i}$ be the set of paths from context entities to $t_i$ in $\mathcal{G}$. The score is:
+For a token $t_i$ identified as a named entity, we check whether it grounds in $\mathcal{G}$. Concretely, we apply a surface-form linking function $\Phi_{tok}: \mathcal{V}_{vocab} \to \mathcal{V} \cup \{\bot\}$ that maps $t_i$ to its corresponding entity node $v_{t_i} \in \mathcal{V}$ via lemma-normalized string or alias matching, returning $\bot$ if no match exists. If $\Phi_{tok}(t_i) = \bot$, we set $S_{kg}(t_i) = 0$. Otherwise, letting $\mathcal{P}_{t_i}$ denote the set of paths from context entities to $v_{t_i}$ in $\mathcal{G}$, the score is:
 \begin{equation}
-S_{kg}(t_i) = \max_{p \in \mathcal{P}_{t_i}} \left( \prod_{(u,v) \in p} w(u,v) \right)
+S_{kg}(t_i) = \max_{p \in \mathcal{P}_{t_i}} \prod_{(u,v) \in p} w(u,v),
 \end{equation}
-where $w(u,v)$ is the confidence of the edge.
+where $w(u,v) \in [0,1]$ is the confidence of edge $(u,v)$.
 
 \subsubsection{Layer 3: Reasoning Chain Verification}
-\revised{Beyond factual correctness, we verify logical consistency using a structural entailment approach. Given a candidate token $t_i$ representing an action or state, we evaluate its validity using the context representations in $\mathcal{G}$:
+\label{sec:layer3}
+Beyond factual correctness, we verify logical consistency using a structural entailment approach modeling multi-hop dependencies. Given a candidate token $t_i$ representing an action or state, we evaluate its validity using the context representations in $\mathcal{G}$:
 \begin{equation}
-S_{reason}(t_i) = \sigma \left( \sum_{p \in \mathcal{T}_{t_i}} \phi(p) \cdot \mathbb{I}(t_i \models p) \right)
+S_{logic}(t_i) = \mathrm{sigmoid}\!\left( \sum_{p \in \mathcal{T}_{t_i}} \phi(p) \cdot \mathbb{1}(t_i \models p) \right)
 \end{equation}
-where $\mathcal{T}_{t_i}$ is the set of logical predicates extracted from the local context, $\phi(p)$ is the heuristic path weight, and $\mathbb{I}$ is the entailment indicator function modeled via lightweight natural language inference checks.}
+\begin{equation}
+S_{reason}(t_i) = \max \!\left( S_{logic}(t_i),\; \mathrm{BFS}(t_i, \mathcal{G}, d_{max}) \right)
+\end{equation}
+where $\mathcal{T}_{t_i}$ is the set of logical predicates extracted from the local context, $\phi(p)$ is the heuristic path weight, and $\mathbb{1}(\cdot)$ is the entailment indicator (in practice approximated by morphological string-similarity matching against graph edges). Additionally, $\mathrm{BFS}(t_i, \mathcal{G}, d_{max}) \in [0,1]$ denotes a breadth-first graph-traversal score, defined as the maximum edge-weight product along any path of length $\leq d_{max}$ connecting $t_i$ to a context-anchored entity; we use $d_{max}=3$ to capture multi-hop cascading reasoning dependencies in structurally complex generated text. We write the activation as $\mathrm{sigmoid}(\cdot)$ to disambiguate from other uses of $\sigma$ in the paper.
 
 \subsubsection{Unified Verification Score (UVS)}
 The final verification score $\Omega(t_i)$ is a weighted combination of individual module scores:
 \begin{equation}
-\Omega(t_i) = \mathbf{w}^T \cdot [S_{vis}(t_i), S_{kg}(t_i), S_{reason}(t_i)]
+\Omega(t_i) = \mathbf{w}^{\top} [S_{vis}(t_i),\, S_{kg}(t_i),\, S_{reason}(t_i)]^{\top}
 \end{equation}
-\revised{To strictly preserve the training-free nature of the framework, the weight vector $\mathbf{w}$ is not learned via backpropagation. Instead, it is heuristically adapted dynamically based on the softmax distribution of the query-type embeddings (e.g., shifting weight to $S_{vis}$ for structural queries). Therefore, the entire CMVE is a non-differentiable, heuristic verification layer structurally perfect for plug-and-play middleware integration.}
+where $\mathbf{w} = [w_1, w_2, w_3]$ with default values $[0.30, 0.40, 0.30]$ (empirically set to reflect the relative discriminative power of each layer). Crucially, $\mathbf{w}$ is \textbf{not} learned via any gradient-based update. Instead, it is \textit{heuristically re-weighted at inference time} by classifying the incoming query into one of three types—structural (high $w_1$), factual (high $w_2$), or logical (high $w_3$)—using lightweight keyword-matching against the query string. This re-weighting is a deterministic, rule-based function with no trainable parameters, fully preserving the training-free property of the framework.
+
+\noindent\textbf{Is CMVE differentiable?} No. The entire CMVE is a non-differentiable, heuristic verification layer. $S_{vis}$ relies on attention thresholding and CLIP cosine similarity; $S_{kg}$ uses graph path products; $S_{reason}$ uses BFS traversal and string-matching similarity. None of these operations involve learned parameters or gradient flow. CMVE is therefore structurally suitable for plug-and-play middleware integration with any frozen VLM.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{figures/cmve_verification_flow.png}
-    \caption{Workflow of the Cross-Modal Verification Engine (CMVE).}
+    \caption{Workflow of the Cross-Modal Verification Engine (CMVE). For each speculative token $t_i$, the three verification layers compute $S_{vis}$, $S_{kg}$, and $S_{reason}$ independently and in parallel. These are combined via the heuristic weight vector $\mathbf{w}$ into the Unified Verification Score $\Omega(t_i)$, which is compared against the adaptive threshold $\tau_{dyn}$ to trigger correction if needed.}
     \label{fig:cmve_flow}
 \end{figure}
 
 \subsection{Adaptive Confidence Calibration and Real-Time Correction}
-\revised{We define a dynamic threshold $\tau_{dyn}$ based on the local entropy of the generation distribution $\mathcal{H}(P_i)$:
+\label{sec:calibration}
+We define a dynamic threshold $\tau_{dyn}$ that depends not only on static context heuristics but, crucially, on the real-time autoregressive progression of the answer to counter hallucination ``snowballing''. Concretely:
 \begin{equation}
-\tau_{dyn}(t_i) = \mu + \sigma \cdot \tanh(\mathcal{H}(P(t_i | t_{<i})) - \mathcal{H}_0)
-\end{equation}}
+\tau_{dyn}(t_i) = \theta_{base} + \omega_{risk} + \omega_{complexity} + \min\!\left(\lambda_{cap},\; \eta \cdot s_i\right),
+\end{equation}
+where (i) $\theta_{base} \in (0,1)$ is the base configured strictness; (ii) $\omega_{risk} \geq 0$ is an upward adjustment for high-risk domains (e.g., medical or legal queries); (iii) $\omega_{complexity} \geq 0$ penalizes queries requiring high-density logical verification; (iv) $s_i \in \mathbb{N}$ is the index of the current generation step; (v) $\eta > 0$ is the per-step growth rate of the snowballing penalty; and (vi) $\lambda_{cap} > 0$ upper-bounds the cumulative step penalty so that the threshold remains finite for long generations. (We subscript $\lambda_{cap}$ to distinguish it from the coefficients $\lambda_1, \lambda_2$ used in $S_{vis}$.) Default values used in our experiments are reported in Sec.~\ref{subsec:sensitivity}; see also the sensitivity analysis therein for the impact of $\eta$ and $\lambda_{cap}$.
 
-If $\Omega(t_i) < \tau_{dyn}(t_i)$, the token is flagged as a hallucination. Replacing a single token exclusively based on local node similarities risks degrading the syntactic coherence of the autoregressive context. To bridge the perception-reasoning gap, we propose a \textbf{Constrained Look-Ahead Beam Search}. 
+If $\Omega(t_i) < \tau_{dyn}(t_i)$, the token is flagged as a hallucination. Replacing a single token exclusively based on local node similarities risks degrading the syntactic coherence of the autoregressive context. To bridge the perception-reasoning gap, we propose a \textbf{Constrained Look-Ahead Beam Search}.
 
 Instead of isolating $t_i$, we retrieve the top-$K$ semantic candidates $\mathcal{C}_{cand}$ from $\mathcal{G}$ and branch the generation into a $D$-depth look-ahead tree. The optimal correction sequence $c^*$ is selected by maximizing the joint probability over the speculative sequences:
 \begin{equation}
@@ -131,4 +152,30 @@ c^* = \arg\max_{c \in \mathcal{C}_{cand}} \sum_{d=0}^{D} \left( (1-\gamma) \log 
 \end{equation}
 where $P_{\text{KG}}$ is the structural likelihood derived from the DH-MMKG.
 
-\revised{In practical implementations (e.g., wrapping LLaVA), token-level interception is seamlessly achieved by orchestrating custom stopping criteria within the generation loop. Upon detecting a hallucination, the tree search evaluates the $D$ speculative tokens, and the VLM's key-value (KV) cache is appended with the winning sequence branch. This theoretically guarantees grounded error corrections without sacrificing linguistic fluidity or necessitating changes to the underlying VLM source code.}
+In practical implementations, token-level interception is achieved without modifying the VLM source code. Concretely, for LLaVA-1.5, we wrap the standard \texttt{generate()} call with a custom autoregressive decoding loop (illustrated in Algorithm~\ref{alg:decoding}): at each step $i$, we (1) perform a single forward pass to obtain the logit distribution over $\mathcal{V}_{vocab}$; (2) apply argmax to identify the candidate token $\hat{t}_i$; (3) pass $\hat{t}_i$ through the CMVE; and (4) if $\Omega(\hat{t}_i) < \tau_{dyn}$, we invoke the Constrained Look-Ahead Beam Search, which evaluates $K$ graph-grounded candidates each extended $D$ steps into the future, selects $c^*$, and teacher-forces $c^*$ into the sequence by directly appending it to the KV-cache. The VLM then continues autoregressively from the corrected state. This approach requires no access to model weights, activations, or training infrastructure.
+
+\begin{algorithm}[t]
+\caption{Autoregressive Decoding with CMVKG-Guard Interception}
+\label{alg:decoding}
+\begin{algorithmic}[1]
+\Require Image $I$, Query $Q$, Graph $\mathcal{G}$, Max tokens $T$
+\Ensure Corrected response $R^*$
+\State $R^* \gets []$, $\text{KV} \gets \emptyset$
+\For{$i = 1, \ldots, T$}
+    \State $\mathbf{l}_i \gets \text{VLM.forward}(I, Q, R^*_{<i}; \text{KV})$
+    \State $\hat{t}_i \gets \arg\max(\mathbf{l}_i)$
+    \If{$\hat{t}_i = \texttt{EOS}$}
+        \State \textbf{break}
+    \EndIf
+    \State $\Omega(\hat{t}_i) \gets \text{CMVE}(\hat{t}_i, I, \mathcal{G})$
+    \State $\tau_{dyn} \gets \text{Calibrator}(i)$
+    \If{$\Omega(\hat{t}_i) < \tau_{dyn}$}
+        \State $c^* \gets \text{LookAheadBeamSearch}(\hat{t}_i, \mathcal{G}, K, D)$
+        \State $R^* \gets R^* \cup \{ c^* \}$; append $c^*$ to KV-cache
+    \Else
+        \State $R^* \gets R^* \cup \{ \hat{t}_i \}$; append $\hat{t}_i$ to KV-cache
+    \EndIf
+\EndFor
+\State \Return $R^*$
+\end{algorithmic}
+\end{algorithm}

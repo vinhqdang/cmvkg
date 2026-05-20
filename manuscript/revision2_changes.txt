@@ -1,31 +1,288 @@
 REVISION 2 CHANGE SUMMARY
 =========================
-This document lists all modifications made in Revision 2 to address Reviewer 2's concerns with rigorous, transparent, and scientifically honest additions.
+This document lists every change made in Revision 2 in response to the
+reviewer report. Each manuscript edit is mapped to the reviewer bullet it
+addresses, and the underlying experimental artifact (script + JSON) is
+named for every quantitative claim so the reviewer can reproduce or audit
+each number.
+
+Files touched in this revision:
+  manuscript/main.tex
+  manuscript/sections/abstract.tex
+  manuscript/sections/introduction.tex
+  manuscript/sections/methods.tex
+  manuscript/sections/results.tex
+  manuscript/sections/conclusion.tex
+  manuscript/response_to_reviewers_R2.txt   (this document's companion)
+  manuscript/revision2_changes.txt          (this document)
+
+Highlight macro:
+  All Revision 2 additions are wrapped in \revisiontwo{...} (blue text)
+  for visual diffing. Toggle in main.tex preamble. The macro is body-text
+  only --- it is intentionally NOT used inside \caption{} or \subsection{}
+  to avoid LaTeX fragile-argument errors. Caption- and heading-level
+  rewrites are listed in this changelog instead.
+
+
+REVIEWER BULLET -> MANUSCRIPT SECTION MAP
+-----------------------------------------
+Reviewer 1 - Weak validation of new claims
+  generalization detail   -> Sec. 4.5 + Table 3
+  YOLO error handling     -> Sec. 4.3 paragraph; Sec. 4.9.3 quantitative
+  reasoning layer         -> Sec. 4.11 + Table 5
+Reviewer 2 - Heuristic design without robustness
+  threshold sensitivity   -> Sec. 4.9.1 + Fig. 6
+  weight sensitivity      -> Sec. 4.9.2
+  KG noise robustness     -> Sec. 4.9.3
+Reviewer 3 - No failure case analysis
+  taxonomy + curated test -> Sec. 4.10
+  failure distribution    -> Fig. 7
+Reviewer 4 - Limited evaluation transparency
+  result-class taxonomy   -> Sec. 4.1.2 "Reporting transparency" block
+  variance / run counts   -> Sec. 4.5 (3 runs) + Sec. 4.9-4.11 scope notes
+Reviewer 5 - Novelty framing
+  contribution re-framing -> Sec. 1.3 + Sec. 3 opening + Sec. 4.12
+Reviewer 6 - Revision traceability
+  changelog               -> this file
+  highlight macro         -> \revisiontwo (blue) in main.tex
+
+
+FILE-BY-FILE CHANGES
+====================
+
+FILE: manuscript/main.tex
+-------------------------
+1. Added the \revisiontwo highlight macro:
+       \newcommand{\revisiontwo}[1]{{\color{blue}#1}}
+   (Replaces the old \newcommand{\revised} block. Renamed to a unique
+   command name because the old \revised symbol was \providecommand-ed
+   in multiple section files and caused both "already defined" and
+   "Incomplete \iffalse inside \caption{}" errors. The new name is
+   uniquely owned by Revision 2 content.)
+
+
+FILE: manuscript/sections/abstract.tex
+--------------------------------------
+2. No content change; usages of \revised{...} renamed to \revisiontwo{...}.
+
 
 FILE: manuscript/sections/introduction.tex
-  - Section 1.3 (Contributions): Rewritten to re-frame novelty honestly. Positioned the work as a "rigorously evaluated system contribution" and real-time middleware architecture rather than claiming fundamentally new algorithmic components. Distinguished our token-level decoding intervention from concurrent response-level methods like MARINE and DeGF.
+------------------------------------------
+3. Sec. 1.3 (Contributions), first bullet: novelty re-framing.
+   - Before: claimed CMVKG-Guard as a novel framework with new
+     algorithmic components.
+   - After: positions the work as a rigorously evaluated SYSTEM
+     contribution; explicitly distinguishes token-level intervention
+     from response- or sentence-level work (MARINE, DeGF); states that
+     the constituent modules are drawn from existing literature and the
+     novel piece is their composition.
+4. Sec. 1.3, last bullet: added a one-sentence pointer to the new
+   sensitivity / robustness / failure-case / Layer-3 analyses.
+
+
+FILE: manuscript/sections/methods.tex
+-------------------------------------
+5. Sec. 3 opening paragraph: added a scope-of-contribution sentence
+   that mirrors the introduction's novelty re-framing. The reviewer
+   encounters the same framing in both Sec. 1 and Sec. 3 so it cannot
+   be missed.
+6. Sec. 3.1 problem formulation: removed the contradiction between
+   "training-free" and "learning a binary decision function". The
+   decision function is now described as designed analytically.
+7. Sec. 3.2.2 (L_2 / Knowledge Enrichment): rewritten so the
+   conflict-resolution rule is explicit (visual evidence overrides
+   external facts only for visually observable attributes; non-visual
+   conflicts defer to K_ext), eliminating the prior juxtaposition that
+   read as contradictory.
+8. Sec. 3.2 - NEW SUBSUBSECTION 3.2.5 "Reasoning Chain Layer (L_3)".
+   The "Hierarchical" name in DH-MMKG was previously not honestly
+   grounded (only L_1 and L_2 were described). The new subsubsection
+   formalises L_3 as a query-specific, lazily-induced layer of
+   reasoning chains over L_1 union L_2 and cross-links to Sec. 3.3.3
+   for the verification mechanics.
+9. Sec. 3.4 (Adaptive Confidence Calibration): every parameter in the
+   tau_dyn equation is now defined inline (theta_base, omega_risk,
+   omega_complexity, eta, lambda_cap, s_i). The previously-undefined
+   lambda was renamed lambda_cap to remove collision with lambda_1,
+   lambda_2 used in S_vis.
+10. Sec. 3.5 Algorithm 2 (decoding loop): inline "\textbf{break}"
+    promoted to its own \State; parallel assignment split into two
+    lines so it compiles cleanly under algpseudocode.
+11. Notation hygiene (mathematical-rigor fixes, no claim changes):
+    - DH-MMKG now correctly expanded as DYNAMIC Hierarchical Multimodal
+      Knowledge Graph in two sites that previously dropped "Dynamic".
+    - \mathbf{w}^T --> \mathbf{w}^\top  (avoids collision with the
+      sequence-length symbol T used in Sec. 3.1).
+    - Layer-3 sigmoid written as \mathrm{sigmoid}(...) rather than
+      \sigma(...), so the sigma in tau_dyn is not overloaded.
+    - Indicator function unified to \mathbb{1} (was inconsistent
+      between \mathbb{I} and \mathbb{1}).
+    - Layer-2 set membership t_i \in V replaced by an explicit surface-
+      form linking function Phi_{tok}: V_{vocab} -> V \cup \{\bot\}.
+    - Complexity claim O(N^2 + N log k) corrected to O(N^2 + Nk), with
+      the dominant Nk term derived from per-node fact retrieval.
+    - LaTeX quote style ("red" --> ``red'').
+
 
 FILE: manuscript/sections/results.tex
-  - Section 4.1.2 (Implementation Details): Clarified that main POPE and CHAIR results (Tables 1 and 2) are reported as single-run evaluations with a fixed seed=42 (consistent with baseline practices), while new analysis sections (Sections 4.4–4.7) report the mean and standard deviation over three independent runs for statistical variance and transparency.
-  - Section 4.4 (Generalizability): Replaced the unsupported table with controlled experiment results (Table 3) reporting 3-run mean±std. Added GPT-4V exclusion note.
-  - Section 4.5.1 (Threshold Sensitivity): Strengthened to honestly report and discuss the sharp performance cliff between tau=0.70 and tau=0.75 (from 98.2% to 66.0% accuracy) due to over-detection. Updated Figure 6's caption to note this cliff and explicitly recommended tau in [0.60, 0.70] as the safe operating range.
-  - Section 4.5.3 (KG Noise Robustness): Added quantitative graph corruption analysis (10%/20%/30% noise) with a graceful degradation description.
-  - Section 4.6 (Failure Case Analysis): Expanded to clarify that the 5 curated test probes were intentionally selected to stress-test the system's boundaries (yielding a 60% failure rate) and do not represent expected in-the-wild frequency. Provided overall error rate context (~11.2% on the full 500-probe set) and analyzed the practical impact of over-correction (accounting for 72% of remaining errors on POPE), explaining that it preserves fluency but degrades precision by substituting synonyms.
-  - Section 4.7 (Layer 3 Independent Validation): Added standalone validation results of ReasoningVerifier (Table 5). Added a prominent limitation note acknowledging that 7 synthetic probes constitute a very small-scale qualitative validation (proof-of-concept) rather than a statistically conclusive evaluation.
-  - Section 4.8 (Limitations and Future Work): Replaced the brief limitations bullet point with a comprehensive, dedicated subsection detailing 5 major methodological and engineering limitations:
-    1. Sensitivity Cliff (performance drop beyond tau=0.72)
-    2. Over-correction and Recall Ceiling (YOLO recall constraints propagating as false positives)
-    3. Reasoning Layer Heuristic (lightweight token-overlap NLI proxy recall of 0.50)
-    4. Contextual Incoherence (wrong-correction node mismatches)
-    5. Statistical Scale of Validation (small-scale curated probe sets)
+-------------------------------------
+12. Sec. 4.1.2 (Implementation Details) - NEW "Reporting transparency"
+    block. Classifies every empirical result in the paper into one of
+    three buckets and states which bucket each subsection belongs to:
+       (a) Benchmark evaluations (Sec. 4.2 - 4.4, 4.7 ablation):
+           single-run with seed=42 on the public datasets in Table 1.
+       (b) Controlled generalization (Sec. 4.5): 3 independent seeds *
+           100 standardised POPE-style probes per VLM via the modular
+           VLM driver in cmvkg_guard/models/.
+       (c) Stress-test and sensitivity probes (Sec. 4.9, 4.10, 4.11):
+           controlled synthetic probe sets (500 / 5 / 7), designed to
+           isolate one design variable at a time with known labels.
+           Explicitly NOT benchmark numbers.
+    Reviewer can read the scope of every table without leaving Sec. 4.
 
-FILE: experiments/ (Reproducible Artifacts Added)
-  - experiments/sensitivity_analysis.py: Sweeps thresholds tau in {0.50..0.90}, weight configurations, and KG noise injection.
-  - experiments/failure_analysis.py: Curates the 5 stress-test failure probes.
-  - experiments/layer3_validation.py: Implements standalone ReasoningVerifier evaluation on synthetic probes.
-  - experiments/generalization_experiment.py: Runs 3-run generalization testing for LLaVA, Qwen-VL, and InstructBLIP.
+13. Sec. 4.3 "On the role of YOLO-World detection errors": reworked
+    from a purely qualitative argument into a mechanism + measurement
+    answer. The KG-noise robustness numbers (Sec. 4.9.3) are now cited
+    inline as the quantitative complement, with explicit failure-mode
+    accounting via Sec. 4.10.
 
-VERIFIED NEW FIGURES GENERATED:
-  - manuscript/figures/results_sensitivity.png
-  - manuscript/figures/results_failure_distribution.png
-  - manuscript/figures/results_generalization.png
+14. Sec. 4.5 Generalizability - Table 3 RESTORED with the controlled
+    experiment numbers from
+    experiments/results/generalization_results.json (3-run mean +- std
+    over 100 POPE-style probes per VLM):
+        LLaVA-1.5-7B : 14.7 +- 3.4  -->  1.3 +- 0.5  (90.9% reduction)
+        Qwen-VL      : 13.3 +- 2.5  -->  1.0 +- 0.0  (92.5%)
+        InstructBLIP : 18.0 +- 5.4  -->  2.0 +- 0.0  (88.9%)
+    GPT-4V is explicitly excluded from the controlled experiment
+    (proprietary API, not seed-controllable). The 1.8% figure for
+    GPT-4V cited in the introduction is sourced from the published
+    GPT-4V baseline paper and is now framed as a complementary
+    indication, not part of the controlled experiment. Caption now
+    states "mean +- std, 3 runs" so the unit is unambiguous.
+    Reproducible code: experiments/generalization_experiment.py.
+
+15. Sec. 4.7 Ablation Study: added "w/o External Knowledge (Wikidata
+    ablated)" and "w/o ConceptNet (Wikidata only)" rows. The
+    accompanying paragraph now explicitly decomposes the -5.1% drop
+    into a 1.4 pp Wikidata-vs-ConceptNet breadth effect and a 3.7 pp
+    dynamic-graph-construction effect, eliminating the earlier
+    conflation between "richer KB" and "dynamic graph". The two new
+    rows are flagged with $^\star$ in the table caption.
+
+16. Sec. 4.9 Sensitivity and Robustness Analysis - NEW SUBSECTION.
+    Scope: 500-probe synthetic POPE-style probe set generated by
+    experiments/sensitivity_analysis.py, not the POPE benchmark itself.
+    Justified as a single-variable-isolation tool, with full real-
+    benchmark sweeps deferred to future work (item 5 in Limitations).
+    Three sub-sweeps:
+      4.9.1 Threshold sensitivity (theta_base in [0.50, 0.90]):
+            stable in [0.50, 0.65]; sharp cliff at theta_base > 0.72
+            (98.2% --> 66.0%). Recommended safe range is documented
+            rather than papered over.
+      4.9.2 Weight sensitivity: six configurations span 86.4 - 89.8%
+            (3.4 pp spread). Flat surface implies learned weight
+            adaptation would yield limited headroom over the keyword
+            heuristic.
+      4.9.3 KG noise robustness: random edge-confidence corruption
+            (0% - 30% rho); accuracy drops 88.8% --> 80.8%. Framed
+            as proxy for detector-side errors and tied back to the
+            Sec. 4.3 YOLO discussion.
+
+17. Sec. 4.10 Failure Case Analysis - NEW SUBSECTION.
+    Five adversarially-curated probes covering three failure modes:
+      - over-correction (2/2 triggered) - dominant residual error;
+        root cause is YOLO-World recall miss producing missing graph
+        nodes that propagate as L_2 false positives.
+      - under-correction (0/2 triggered) - multi-layer UVS acts as
+        partial backstop against detection-side contamination;
+        cautioned as 2-probe evidence, not conclusive.
+      - wrong-correction (1/1 triggered) - corrector lacks longer-
+        range semantic context; flagged as architectural limitation.
+    Probe set's adversarial curation is stated in the first sentence
+    of the subsection so the 60% case-rate is not mistaken for an
+    operating-point error rate. Estimated combined error rate on the
+    500-probe sensitivity set is 11.2% (= 100% - 88.8%), with ~72% of
+    it attributable to over-correction. Reproducible code:
+    experiments/failure_analysis.py.
+
+18. Sec. 4.11 Layer 3 Independent Validation - NEW SUBSECTION.
+    Seven synthetic probes covering multi-hop entailment, temporal
+    contradiction, and negation; threshold theta_{L_3} = 0.55.
+    Table 5: Precision 1.000, Recall 0.500, F1 0.667, Accuracy 0.857.
+    Subsection states up front that 7 probes is too few for a
+    statistical claim and that the result is reported as a unit-test-
+    style existence proof. The missed case (bidirectional temporal
+    cycle) is attributed explicitly to the token-overlap NLI proxy;
+    replacing it with a dedicated NLI model is named as the highest-
+    leverage method-side next step (Limitations item 3). Reproducible
+    code: experiments/layer3_validation.py.
+
+19. Sec. 4.12 Discussion: each of the three "drivers" of performance
+    now points to the subsection that quantifies it (ablation, weight
+    sensitivity, sensitivity envelope + failure tail). A new paragraph
+    re-positions the contribution as a per-token in-the-loop
+    middleware architecture plus its documented operating envelope,
+    NOT a claim of new algorithms for the constituent layers. This
+    paragraph repeats the novelty framing first introduced in
+    Sec. 1.3 and Sec. 3 opening.
+
+20. Sec. 4.13 Limitations and Future Work - NEW SUBSECTION.
+    Six items, ordered by impact on headline performance:
+       1. Sensitivity cliff at theta_base > 0.72.
+       2. Over-correction is the dominant residual error.
+       3. Reasoning-layer NLI is a token-overlap proxy (recall 0.500).
+       4. Wrong-correction lacks longer-range semantic context.
+       5. Statistical scale of new analyses (500 / 5 / 7 / 3*100).
+       6. Single-seed reporting for the main POPE / CHAIR tables.
+    Items 1-4 are flagged as method limitations and 5-6 as evaluation-
+    protocol limitations so the reviewer can distinguish roadmap items
+    from paper-level scope items.
+
+21. Manuscript-vs-response-letter language hygiene: removed five
+    phrases that referred to "the reviewer" inside the manuscript body
+    (e.g., "The reviewer asks for...", "To directly address the
+    reviewer's concern that..."). All such language is now confined to
+    response_to_reviewers_R2.txt; the manuscript reads as a
+    self-contained paper.
+
+
+FILE: manuscript/sections/conclusion.tex
+----------------------------------------
+22. No content change; usages of \revised{...} renamed to
+    \revisiontwo{...}.
+
+
+EXPERIMENTAL ARTIFACTS REFERENCED
+==================================
+The quantitative claims added in this revision are backed by the
+following reproducible scripts and their JSON outputs:
+
+  experiments/sensitivity_analysis.py
+      -> experiments/results/sensitivity_results.json
+      drives Sec. 4.9.1, 4.9.2, 4.9.3 and Fig. 6
+  experiments/failure_analysis.py
+      -> experiments/results/failure_cases.json
+      drives Sec. 4.10 and Fig. 7
+  experiments/layer3_validation.py
+      -> experiments/results/layer3_standalone_results.json
+      drives Sec. 4.11 and Table 5
+  experiments/generalization_experiment.py
+      -> experiments/results/generalization_results.json
+      drives Sec. 4.5 and Table 3
+
+Each script is self-contained and produces its corresponding JSON file
+in experiments/results/ when re-run. The JSON files are committed
+alongside the manuscript.
+
+
+EXPLICITLY DEFERRED ITEMS (TRANSPARENT FUTURE WORK)
+====================================================
+Items listed explicitly in Sec. 4.13 Limitations as future work, so
+the reviewer is not surprised by their absence:
+  - Multi-seed re-run of the main POPE / CHAIR tables.
+  - Full real-benchmark sweeps of theta_base, the weight vector, and
+    KG noise (the current sweeps use synthetic probes).
+  - Dedicated NLI model for Layer 3 in place of the current token-
+    overlap proxy.
+  - Beam-rerank with sentence-embedding context for the corrector to
+    reduce wrong-correction.

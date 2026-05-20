@@ -29,13 +29,17 @@
 \usepackage{mathtools}
 \usepackage{bbm}               % \mathbbm{1} indicator function
 
-% ── Track changes highlighter (Revision 2) ──────────────────────────────────────
-% [TOGGLE SWITCH]
-% To highlight all Revision 2 additions in blue, keep the following line active:
-\newcommand{\revised}[1]{{\color{blue}#1}}
-% To deactivate highlighting and render all revised text as normal black text
-% (e.g., for camera-ready submission or final printing), uncomment the line below:
-% \renewcommand{\revised}[1]{#1}
+% ── Track changes highlighter (Revisions 2 + 3) ─────────────────────────────────
+% We use a fresh, uniquely-named macro \revisiontwo to avoid all the historical
+% "already defined" and "fragile inside caption" problems with the old \revised.
+% (LaTeX command names cannot contain digits, so we spell out "two".)
+%
+% TOGGLE SWITCH:
+% To highlight all revision additions in blue, keep the line below active:
+\newcommand{\revisiontwo}[1]{{\color{blue}#1}}
+% For camera-ready submission, swap to the no-op definition by commenting out
+% the line above and uncommenting the one below:
+% \newcommand{\revisiontwo}[1]{#1}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \begin{document}

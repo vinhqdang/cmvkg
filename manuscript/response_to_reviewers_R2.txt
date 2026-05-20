@@ -1,80 +1,315 @@
-Dear Reviewer 2,
+Dear Reviewer,
 
-We sincerely thank you for your detailed and constructive feedback. We have made substantial, deep revisions to address each of your core concerns with scientific honesty, analytical rigor, and transparency. Below is our point-by-point response detailing the manuscript changes made in Revision 2.
+We thank you for the careful and constructive critique, and for
+acknowledging the additions in the previous revision while pointing
+out that several of them remained surface-level. We have used your
+six-point summary as a direct checklist for this revision, with two
+guiding principles:
 
----
+  (i) every quantitative claim added or restated is now backed by a
+      named, reproducible script and a JSON artefact committed to the
+      repository, and the scope of each artefact (real benchmark vs.
+      controlled probe set) is stated up-front in the manuscript;
 
+  (ii) where a limitation exists, we name it inside the manuscript
+       rather than only in this letter, so that a reader of the paper
+       alone receives the same honest framing as a reader of this
+       response.
+
+A point-by-point reply follows. Section, table, and figure references
+are to the revised manuscript. A complete file-by-file change list,
+together with the experimental-artefact map, is provided in
+manuscript/revision2_changes.txt; we recommend keeping that file open
+alongside this letter.
+
+
+-----------------------------------------------------------------------
 1. WEAK VALIDATION OF NEW CLAIMS
+-----------------------------------------------------------------------
 
-Concern: Generalization results lack experimental detail; YOLO error handling is only qualitatively argued; the reasoning layer is not independently validated.
+   1.1 GENERALIZATION RESULTS LACK EXPERIMENTAL DETAIL
+   ---------------------------------------------------
+   We agree the earlier prose-only generalization paragraph was
+   inadequate.
 
-Response:
-  (a) Generalization: We have completed a controlled generalization experiment (Section 4.4, new Table 3) using 100 standardized POPE-style probes per VLM over 3 independent runs. We report mean ± std for LLaVA-1.5-7B (1.3±0.5%), Qwen-VL (1.0±0.0%), and InstructBLIP (2.0±0.0%). The full reproducible code has been added to experiments/generalization_experiment.py.
-  
-  (b) YOLO Error Propagation: We have added a controlled quantitative analysis in Section 4.5.3 (KG Noise Robustness), where we simulate YOLO errors by injecting random corruption into KG edge scores at 10%/20%/30% rates. Accuracy degrades from 88.8% (clean) to 80.8% (30% noise), confirming graceful degradation under moderate noise.
-  
-  (c) Layer 3 Independent Validation: We have added Section 4.7 with a standalone evaluation of the ReasoningVerifier module using 7 synthetic probes with known logical ground truth. We report Precision=1.000, Recall=0.500, F1=0.667, and Accuracy=0.857 (Table 5). We honestly acknowledge the limitation (recall=0.500) and attribute it to the lightweight NLI proxy, proposing a dedicated NLI model as future work. We also explicitly note in Section 4.7 and our Limitations section that 7 synthetic probes serve as a qualitative proof-of-concept rather than a statistically conclusive evaluation.
+   What is new:
+     - Sec. 4.5 now reports a controlled generalization experiment
+       over three independent seeds * 100 standardised POPE-style
+       probes per VLM, evaluated through the modular VLM driver in
+       cmvkg_guard/models/.
+     - Table 3 shows the per-VLM hallucination rate as mean +- std:
+           LLaVA-1.5-7B : 14.7 +- 3.4  -->  1.3 +- 0.5  (90.9% red.)
+           Qwen-VL      : 13.3 +- 2.5  -->  1.0 +- 0.0  (92.5% red.)
+           InstructBLIP : 18.0 +- 5.4  -->  2.0 +- 0.0  (88.9% red.)
+     - GPT-4V is explicitly excluded from the controlled experiment
+       because it requires a proprietary API and cannot be seed-
+       controlled in our pipeline. The 1.8% figure for GPT-4V cited in
+       the introduction is sourced from the published GPT-4V baseline
+       paper and is now framed in Sec. 4.5 as a complementary
+       indication rather than part of the controlled experiment, so it
+       is not double-counted.
+     - The script that produces these numbers is
+       experiments/generalization_experiment.py; the JSON output is at
+       experiments/results/generalization_results.json. Re-running the
+       script regenerates the table.
 
----
+   What we did NOT do (transparently noted in Sec. 4.13, item 5):
+     - We did not extend the controlled experiment to the public
+       MMHal / MedHall / InfoSeek / KVQA benchmarks at three seeds.
+       That extension is named explicitly as future work in the
+       Limitations section.
 
+   1.2 YOLO ERROR HANDLING IS ONLY QUALITATIVELY ARGUED
+   -----------------------------------------------------
+   We have moved the YOLO discussion from a single qualitative
+   paragraph to a two-axis (mechanism + measurement) treatment.
+
+     - Sec. 4.3 retains the mechanism argument: a spurious visual
+       entity acquires near-zero coherent links in K_ext, so its edge
+       weights stay small and its contribution to S_kg / S_reason is
+       attenuated by construction.
+     - Sec. 4.9.3 (KG Noise Robustness) adds the quantitative
+       measurement: random edge-confidence corruption at rho in
+       {0%, 10%, 20%, 30%} drives accuracy from 88.8% to 85.6% / 81.6%
+       / 80.8% on a 500-probe controlled set. The injection is framed
+       as a proxy for detector-side errors propagated into L_2.
+     - Sec. 4.10 (Failure Case Analysis) adds the direct failure-mode
+       accounting: missed YOLO recall is named as the proximate cause
+       of the dominant residual error (over-correction), with two
+       concrete probe examples (`umbrella', `sitting').
+     - The Sec. 4.3 paragraph now cites both Sec. 4.9.3 and Sec. 4.10
+       inline, so a reader does not have to hunt across the paper.
+
+   1.3 THE REASONING LAYER IS NOT INDEPENDENTLY VALIDATED
+   -------------------------------------------------------
+   Sec. 4.11 is a new standalone-validation subsection for the
+   ReasoningVerifier (S_reason). Seven synthetic probes covering
+   multi-hop entailment, temporal contradiction, and negation are run
+   in isolation at threshold theta_{L_3} = 0.55. Reported in Table 5:
+       Precision = 1.000, Recall = 0.500, F1 = 0.667, Acc = 0.857.
+
+   We do NOT claim this is a benchmark result. The opening sentence of
+   the subsection states explicitly that 7 probes is intended as a
+   unit-test-style existence proof of the module. The recall = 0.500
+   reflects the limitation of the current token-overlap NLI proxy:
+   bidirectional temporal cycles like "A before B then after it"
+   cannot be detected without explicit negation modelling. Replacing
+   the proxy with a dedicated NLI model and re-evaluating on hundreds
+   of probes is named as the highest-leverage method-side next step
+   in Sec. 4.13 (Limitations, item 3). Reproducible code:
+   experiments/layer3_validation.py; JSON at
+   experiments/results/layer3_standalone_results.json.
+
+
+-----------------------------------------------------------------------
 2. HEURISTIC DESIGN WITHOUT ROBUSTNESS ANALYSIS
+-----------------------------------------------------------------------
 
-Concern: No sensitivity or stability analysis for thresholds and weights.
+Sec. 4.9 is a new subsection devoted to sensitivity and robustness
+of the heuristic design. The probe set is 500 controlled POPE-style
+probes with known ground-truth labels; the synthetic-probe scope is
+stated in the first sentence of the subsection so that no
+quantitative claim is mistaken for a public-benchmark result.
 
-Response:
-  We have added Section 4.5 "Sensitivity and Robustness Analysis" with three controlled experiments:
-  - Threshold Sweep: tau in {0.50, 0.55, ..., 0.90}. We honestly report a sharp performance cliff between tau=0.70 and tau=0.75 (from 98.2% accuracy down to 66.0% accuracy) due to over-detection. We explicitly recommend tau in [0.60, 0.70] as the safe operating range and have documented this sensitivity in Section 4.5.1 and Figure 6.
-  - Weight Sensitivity: 6 configurations spanning visual-heavy, KG-heavy, reasoning-heavy. Accuracy range: 86.4-89.8% (only 3.4 pp spread).
-  - KG Noise Injection: 0-30% edge corruption. Accuracy drops from 88.8% to 80.8%. System is robust to moderate noise.
+   2.1 Threshold sensitivity (Sec. 4.9.1, Fig. 6)
+       theta_base sweep in [0.50, 0.90]. The system is stable
+       (88-100% accuracy) in [0.50, 0.65] and exhibits a SHARP CLIFF
+       between theta_base = 0.70 (88.8%) and theta_base = 0.75
+       (66.0%). We document this rather than smooth it over, recommend
+       theta_base in [0.60, 0.70] as the safe operating range, and
+       list the cliff explicitly as item 1 in Sec. 4.13 Limitations.
 
----
+   2.2 Weight sensitivity (Sec. 4.9.2)
+       Six (w_vis, w_kg, w_reason) configurations span 86.4 - 89.8%,
+       a 3.4 pp spread. We additionally observe that this flat surface
+       implies learned weight adaptation would offer limited headroom
+       over the keyword-heuristic re-weighting described in Sec. 3.4 ;
+       this is a fairer reading than claiming the defaults are
+       optimal.
 
+   2.3 KG noise robustness (Sec. 4.9.3)
+       Already summarised under 1.2 above.
+
+   Notation alignment: the threshold variable in Sec. 4.9 is now
+   theta_base, matching the calibration formula introduced in Sec. 3.4
+   (the earlier `tau' usage was internally inconsistent with methods).
+
+   Reproducibility: experiments/sensitivity_analysis.py and
+   experiments/results/sensitivity_results.json.
+
+
+-----------------------------------------------------------------------
 3. NO FAILURE CASE ANALYSIS
+-----------------------------------------------------------------------
 
-Concern: The paper does not examine incorrect corrections, over-correction, or potential degradation.
+Sec. 4.10 is a new subsection devoted to failure modes. The opening
+sentence states that the five probes are intentionally adversarial
+and not a random sample, so the 60% case-level failure rate cannot
+be misread as an operating-point error rate.
 
-Response:
-  We have added Section 4.6 "Failure Case Analysis" and a dedicated Limitations section in Section 4.8. We provide:
-  - A taxonomy of 3 failure modes: over-correction (valid token absent from graph), under-correction (hallucinated token has spurious graph support), wrong-correction (flagged correctly but replacement is contextually wrong).
-  - Curated Stress-Test Analysis: We run 5 curated test probes through the full verification pipeline. We honestly clarify in the text that these probes were intentionally curated to stress-test the system's boundaries and thus reflect a high (60%) failure rate.
-  - Statistical Context: We report that on the full 500-probe sensitivity set, the effective combined error rate from wrong/over-correction is approximately 11.2% (100% - 88.8% accuracy at default tau=0.70).
-  - Practical Impact: We analyze the practical impact of over-correction, which accounts for an estimated 72% of remaining errors on the POPE benchmark. We note that over-correction typically replaces a valid token with a fluent synonym present in the scene graph, preserving readability but technically violating precision.
+Three-mode taxonomy (each mode traced through the full pipeline):
 
----
+   - Over-correction (2/2 triggered).
+     Visually valid tokens absent from the DH-MMKG receive near-zero
+     S_kg and are falsely flagged. Examples: `umbrella' (UVS 0.393),
+     action verb `sitting' (UVS 0.394). Proximate cause: YOLO-World
+     recall miss.
 
+   - Under-correction (0/2 triggered).
+     For probes in which a hallucinated token was spuriously injected
+     into the graph, the multi-layer UVS still scored both below
+     theta_base = 0.7 (UVS approximately 0.555) and flagged them. We
+     interpret this as evidence that L_1 and L_3 act as a partial
+     backstop against detection-side contamination, and we explicitly
+     caution that 2 probes is not statistically conclusive.
+
+   - Wrong-correction (1/1 triggered).
+     A correctly-flagged hallucination is replaced by a contextually
+     inappropriate candidate (e.g., `airplane' --> `bicycle'). This is
+     an architectural limitation of the current beam search, which
+     scores candidates against P_KG and a D-step VLM rollout but not
+     against a longer-range semantic-context model. Listed as item 4
+     in Sec. 4.13 Limitations; named beam-rerank with sentence
+     embeddings is the planned mitigation.
+
+Practical-impact context:
+   - 60% case-rate comes from the curated probes.
+   - Estimated 11.2% combined error rate on the 500-probe controlled
+     set at theta_base = 0.70, with approximately 72% of that mass
+     attributable to over-correction.
+
+Reproducibility: experiments/failure_analysis.py and
+experiments/results/failure_cases.json.
+
+
+-----------------------------------------------------------------------
 4. LIMITED EVALUATION TRANSPARENCY
+-----------------------------------------------------------------------
 
-Concern: Baseline implementations unclear; statistical reporting lacks variance and number of runs.
+Two new pieces of transparency machinery have been added so the
+reader does not need to consult this letter to understand the scope
+of any result:
 
-Response:
-  - We have revised Section 4.1.2 (Implementation Details) to make our reporting fully transparent.
-  - We explicitly state that the main POPE and CHAIR results (Tables 1 and 2) are reported as single-run evaluations with a fixed seed=42, which is consistent with the practice of compared baselines to ensure a fair comparison.
-  - For our newly added analyses in Sections 4.4–4.7, we report the mean and standard deviation over three independent runs to provide rigorous statistical variance.
+   (a) Sec. 4.1.2 "Reporting transparency" block.
+       Classifies every empirical result in the paper into one of
+       three buckets and states which bucket each subsection belongs
+       to:
 
----
+         - Benchmark evaluations (Sec. 4.2-4.4, Sec. 4.7 ablation):
+           single-run with fixed seed = 42 on the public datasets in
+           Table 1. Single-run reporting matches the standard practice
+           of the compared baselines (which also report single-seed
+           numbers).
+         - Controlled generalization (Sec. 4.5): three seeds * 100
+           probes per VLM, full mean +- std.
+         - Stress-test and sensitivity probes (Sec. 4.9, 4.10, 4.11):
+           controlled synthetic probe sets (500 / 5 / 7 probes),
+           single-variable isolation, NOT benchmark numbers.
 
+   (b) Each of the three new analysis subsections (4.9, 4.10, 4.11)
+       repeats its bucket and probe count in its opening sentence so
+       that scope is local to the subsection.
+
+   (c) Baselines: Sec. 4.1.3 enumerates the four categories of
+       baselines (base model, training-free, knowledge-enhanced,
+       training-based for reference) and lists OPERA, REVERSE, MARINE,
+       and DeGF as the recent additions, each with a citation to the
+       original paper. Implementation: official released code with
+       default hyperparameters.
+
+   We have NOT artificially re-run the main POPE / CHAIR / MMHal /
+   MedHall / InfoSeek / KVQA tables across multiple seeds to inflate
+   the variance reporting beyond what was actually measured. The
+   single-seed scope of those tables is now disclosed twice (once in
+   Sec. 4.1.2 and once in Sec. 4.13 item 6) so the reviewer is aware
+   of the limit.
+
+
+-----------------------------------------------------------------------
 5. NOVELTY REMAINS INCREMENTAL
+-----------------------------------------------------------------------
 
-Concern: Contribution is primarily integration rather than new algorithmic advance.
+We accept this framing and have aligned the manuscript with it
+rather than overstating originality.
 
-Response:
-  We acknowledge this constructive critique and have adjusted our tone and framing in Section 1.3 (Contributions) to be fully honest:
-  - We now explicitly position our work as a **rigorously evaluated system contribution** and real-time middleware architecture, rather than claiming fundamentally new algorithmic components.
-  - We highlight the primary novelty as the **token-level compositional architecture** that intercepts decoding to correct hallucinations in real-time before error propagation.
-  - We contrast our token-level approach with concurrent response- or sentence-level grounding methods like MARINE and DeGF, clarifying our unique placement in the VLM decoding loop.
+   - Sec. 1.3 (Contributions) now positions CMVKG-Guard as a
+     rigorously-evaluated SYSTEM contribution and explicitly states
+     that the constituent modules --- open-vocabulary detection,
+     knowledge-graph retrieval, attention-based visual scoring, and
+     beam-search correction --- are individually drawn from the
+     existing literature. The novel piece is the composition into a
+     per-token, in-the-loop verify-and-correct architecture, together
+     with the documented operating envelope (sensitivity cliff,
+     failure-mode taxonomy, Layer-3 reasoning limits).
 
----
+   - The same framing is repeated up-front in Sec. 3 opening and
+     again in Sec. 4.12 Discussion, so the reviewer encounters it
+     three times: in the introduction, before the methods, and after
+     the results. Where MARINE and DeGF address grounding at the
+     response or sentence level, CMVKG-Guard is distinguished by
+     token-level intervention during decoding (correction before
+     error propagation).
 
+   We have made no claim of new algorithms for any constituent layer.
+
+
+-----------------------------------------------------------------------
 6. POOR REVISION TRACEABILITY
+-----------------------------------------------------------------------
 
-Concern: Absence of tracked changes makes it difficult to verify revisions.
+   (a) Highlighted version.
+       All Revision 2 additions are wrapped in a dedicated highlight
+       macro \revisiontwo{...} that renders the new content in blue.
+       The macro is defined as a single line in main.tex preamble and
+       can be toggled off for the camera-ready version by swapping it
+       to a no-op.
 
-Response:
-  We have fully updated `manuscript/revision2_changes.txt` to provide extreme detail. This change log lists every modified file, the exact section/line adjusted, and a clear before/after comparison of the text. A full git diff is also available in our repository commit history, ensuring complete line-level traceability.
+   (b) Tracked-changes log.
+       manuscript/revision2_changes.txt is a fresh document that maps
+       every edit in this revision to (i) the reviewer bullet it
+       addresses, (ii) the manuscript section/figure/table affected,
+       and (iii) the experimental artefact (script + JSON file) that
+       backs the quantitative claim. We recommend this file as the
+       primary auditing aid.
 
----
+   (c) Reproducibility.
+       Every new quantitative claim in the manuscript is reproducible
+       by re-running the script named in revision2_changes.txt. The
+       output JSON files are committed alongside the manuscript:
 
-We believe these substantial and honest additions in Revision 2 successfully address your concerns, turning a previously qualitative manuscript into a scientifically rigorous, transparent, and balanced system paper.
+         experiments/results/sensitivity_results.json
+         experiments/results/failure_cases.json
+         experiments/results/layer3_standalone_results.json
+         experiments/results/generalization_results.json
+
+
+-----------------------------------------------------------------------
+SUMMARY OF WHAT IS STILL OUT OF SCOPE FOR THIS REVISION
+-----------------------------------------------------------------------
+
+Listed transparently in Sec. 4.13 (Limitations and Future Work) so
+the reviewer is not surprised by their absence:
+
+   1. The sensitivity cliff at theta_base > 0.72 is intrinsic to the
+      current heuristic threshold and is not smoothed by the existing
+      adaptive calibration.
+   2. Over-correction remains the dominant residual error, bounded by
+      YOLO-World recall.
+   3. The Layer-3 NLI proxy is a token-overlap heuristic (recall
+      0.500 on the standalone probes); a dedicated NLI model on a
+      larger probe set is the planned successor.
+   4. Wrong-correction will be mitigated by beam-rerank with a
+      sentence-embedding model conditioned on t_{<i}.
+   5. The sensitivity / failure / Layer-3 analyses use synthetic
+      probe sets (500 / 5 / 7) rather than a public benchmark. Full
+      real-benchmark sweeps over the same axes are future work.
+   6. The main POPE / CHAIR tables are reported as single-seed,
+      consistent with the compared baselines. Multi-seed re-runs of
+      those tables are future work.
+
+We hope this revision substantially closes the gaps identified in
+your review. We are grateful for the rigor of the feedback, which
+materially improved the paper.
 
 Best regards,
 The Authors
