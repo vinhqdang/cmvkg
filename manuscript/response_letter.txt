@@ -1,0 +1,47 @@
+Response to Editor's Quality Check Comments
+
+Manuscript: "Real-Time Hallucination Correction in Vision-Language Models
+Using Dynamic Knowledge Graph Verification"
+
+Dear Editor,
+
+Thank you for the quality check of our submission. We have addressed both
+points raised, as detailed below. Changes made to the manuscript are also
+reflected in the editorial system Declaration step.
+
+
+Comment 1. Data availability statement
+
+We have added a Data Availability Statement to the "Declarations" section of
+the manuscript. Our study relies exclusively on publicly available benchmark
+datasets and does not generate any new dataset; the statement therefore
+identifies these public datasets and they are cited in the reference list. The
+statement now reads:
+
+  "Data availability: All datasets analysed during the current study are
+  publicly available benchmark datasets obtained from their original public
+  repositories, and are cited in this article: POPE, CHAIR (built on the
+  MS-COCO dataset), MMHalBench, MedHallBench, InfoSeek, and KVQA. No new
+  datasets were generated during the current study."
+
+On the editorial system, the data availability declaration has been updated
+from "No" to "Yes", and the statement above has been provided accordingly.
+
+
+Comment 2. Dual publication statement
+
+The dual publication declaration has been updated to "No" on the editorial
+system. For completeness, we have also added a corresponding statement to the
+"Declarations" section of the manuscript:
+
+  "Competing interests: The authors declare that they have no competing
+  interests. This manuscript is not a dual publication: it has not been
+  published previously and is not under consideration for publication
+  elsewhere."
+
+
+We believe these revisions fully address the quality check requirements and
+thank you for your consideration.
+
+Sincerely,
+The Authors
