@@ -77,6 +77,31 @@ converts into conformal efficiency.
 Reproduce the grounding comparison with `python local_analysis_owlv2.py`
 (reads `raw_scores.json` + `owlv2_scores.json`, CPU-only).
 
+## Head-to-head vs a ConfLVLM-style baseline
+
+ConfLVLM (EMNLP 2025) and related conformal-LVLM work rank/filter with
+**model-internal heuristic uncertainty** and no external grounding. We reproduce
+that in our pipeline (steelmanned as a learned combiner over internal features
+only) and compare against the same conformal procedure **plus structured grounding**
+(OWLv2), on the empirical risk-coverage curve (`risk_coverage.png`,
+`risk_coverage_vs_conflvlm.py`, 20 splits).
+
+| | ConfLVLM-style (internal) | Ours (+ structured grounding) |
+|---|---|---|
+| AURC ↓ | 0.0696 | **0.0559** |
+| Coverage at 10% risk | 71.7% | **78.9%** |
+| Dominates risk-coverage curve | — | **at 100% of coverage levels** |
+
+Our curve lies strictly below the baseline **everywhere** — lower error at every
+coverage, more coverage at every error target. This is the concrete evidence for
+"why we're better than conformal SOTA": not the guarantee (both have it), but the
+**efficiency the structured grounding buys** under that guarantee.
+
+**Caveat (honest):** this is a faithful-in-spirit reproduction of the ConfLVLM
+*scoring philosophy* (internal uncertainty, single-pass), not their exact codebase
+or their sampling-based self-consistency score. A maximally faithful baseline would
+add multi-sample self-consistency (one more GPU run).
+
 ## Reproduce
 
 ```bash
