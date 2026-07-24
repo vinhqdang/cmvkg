@@ -17,14 +17,21 @@ row valid (test error ≤ α). "conf→+g" = confidence-only → + OWLv2 groundi
 | POPE-adv | LLaVA-1.5 | 82.7% | ✓ | 0.081 → **0.060** | 46.6% → **57.4%** |
 | POPE-adv | Qwen2-VL-2B | 87.3% | ✓ | 0.035 → **0.031** | 83.5% → **85.5%** |
 | POPE-adv | LLaVA+VCD | 80.3% | ✓ | 0.097 → **0.060** | 21.8% → **53.9%** |
-| MME | LLaVA-1.5 | 68.9% | – | 0.185 | 5.7% |
+| MME (full) | LLaVA-1.5 | 68.9% | – | 0.185 | 5.7% |
+| MME-existence† | LLaVA-1.5 | 95.0% | ✓ | 0.012 → **0.007** | 0% (n=60, underpowered) |
+| GQA (yes/no) | LLaVA-1.5 | 72.4% | – | 0.130 | 17.8% |
 | HallusionBench | LLaVA-1.5 | 51.2% | – | 0.421 | 0.0% |
 
 Grounding improves AURC and coverage on every object-existence row; the gain is
-largest when base confidence is poorly calibrated (VCD, +32pp). MME/HallusionBench
-have no object-existence questions (grounding n/a) — the guarantee still holds via
-confidence, correctly forcing heavy abstention on the near-chance HallusionBench.
-Pending (account GPU throttled): MME-existence subset, GQA yes/no, AMBER.
+largest when base confidence is poorly calibrated (VCD, +32pp). MME-full / GQA /
+HallusionBench have (mostly) non-object questions (grounding n/a) — the guarantee
+still holds via confidence, correctly forcing heavy abstention on near-chance
+HallusionBench. †MME-existence is only 60 items (95% acc) — too small for a
+reliable conformal split (0 certified at α=10%), though grounding still improves
+its AURC. AMBER not on HuggingFace (needs manual load) — deferred.
+
+**Coverage: 5 datasets (POPE, MME, MME-existence, GQA, HallusionBench) ·
+3 backbones/decoders (LLaVA-1.5, Qwen2-VL-2B, LLaVA+VCD) · every row valid.**
 
 ## 1. Core result — structured grounding vs weaker signals (POPE, LLaVA-1.5-7B)
 

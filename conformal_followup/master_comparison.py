@@ -34,11 +34,13 @@ def evaluate(p_yes,answer,correct,owl,extra=None):
     rng=np.random.default_rng(0);R={k:{"aurc":[],"cov":[],"err":[]} for k in feats}
     for _ in range(20):
         idx=rng.permutation(n);t=n//3;tr,cal,te=idx[:t],idx[t:2*t],idx[2*t:]
+        if len(np.unique(correct[tr]))<2: continue          # tiny/degenerate fold
         for k,cols in feats.items():
             X=np.column_stack(cols)
             clf=LogisticRegression(max_iter=1000).fit(X[tr],correct[tr]);pc=clf.predict_proba(X)[:,1]
             cv,er=cov_err(pc[cal],correct[cal],pc[te],correct[te])
             R[k]["aurc"].append(rc(pc[te],correct[te]).mean());R[k]["cov"].append(cv);R[k]["err"].append(er)
+    if not R["conf"]["aurc"]: return None, has_g            # too small to evaluate
     return {k:{m:np.mean(v) for m,v in d.items()} for k,d in R.items()}, has_g
 
 ROWS=[]
@@ -57,6 +59,12 @@ ROWS.append(("POPE-adv (600)","LLaVA+VCD",np.array(d["p_vcd"]),ans,np.array(d["c
 # MME LLaVA (no grounding)
 d=J("exp10_mme.json")
 ROWS.append(("MME (700)","LLaVA-1.5",np.array(d["p_yes"]),np.array(d["answer"]),np.array(d["correct"]),d["owl"],None))
+# MME-existence LLaVA (fully grounded, small n)
+d=J("exp11_mme_exist.json")
+ROWS.append(("MME-exist (60)","LLaVA-1.5",np.array(d["p_yes"]),np.array(d["answer"]),np.array(d["correct"]),d["owl"],None))
+# GQA LLaVA (no grounding)
+d=J("exp11_gqa.json")
+ROWS.append(("GQA (700)","LLaVA-1.5",np.array(d["p_yes"]),np.array(d["answer"]),np.array(d["correct"]),d["owl"],None))
 # HallusionBench LLaVA (no grounding)
 d=J("exp11_hallusion.json")
 ROWS.append(("HallusionBench (447)","LLaVA-1.5",np.array(d["p_yes"]),np.array(d["answer"]),np.array(d["correct"]),d["owl"],None))
@@ -68,6 +76,10 @@ print("-"*104)
 for name,bb,p,a,c,owl,extra in ROWS:
     res,has_g=evaluate(p,a,c,owl,extra)
     acc=c.mean()
+    if res is None:
+        print(f"{name:22s}{bb:13s}{acc*100:5.1f}%{('yes' if has_g else 'no'):>6s}"
+              f"{'  n too small for conformal split':>44s}")
+        continue
     cf=res["conf"];gf=res.get("grnd")
     au_c=f"{cf['aurc']:.4f}";cov_c=f"{cf['cov']*100:.1f}%";err=cf['err']
     if gf:
