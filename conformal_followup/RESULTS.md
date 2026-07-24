@@ -6,6 +6,26 @@ splits unless noted. Metric key: **AURC** = area under risk-coverage curve
 (lower better); **cov@10%** = coverage retained at a certified 10% error budget
 (higher better).
 
+## 0. Master comparison (all datasets/backbones, `master_comparison.py`)
+
+Strict 3-way split (train combiner / calibrate τ / test), RCPS, 20 reps. Every
+row valid (test error ≤ α). "conf→+g" = confidence-only → + OWLv2 grounding.
+
+| Dataset | Backbone | acc | grnd | AURC conf→+g | cov@10% conf→+g |
+|---|---|---|:--:|---|---|
+| POPE (1500) | LLaVA-1.5 | 81.9% | ✓ | 0.072 → **0.058** | 63.6% → **73.1%** |
+| POPE-adv | LLaVA-1.5 | 82.7% | ✓ | 0.081 → **0.060** | 46.6% → **57.4%** |
+| POPE-adv | Qwen2-VL-2B | 87.3% | ✓ | 0.035 → **0.031** | 83.5% → **85.5%** |
+| POPE-adv | LLaVA+VCD | 80.3% | ✓ | 0.097 → **0.060** | 21.8% → **53.9%** |
+| MME | LLaVA-1.5 | 68.9% | – | 0.185 | 5.7% |
+| HallusionBench | LLaVA-1.5 | 51.2% | – | 0.421 | 0.0% |
+
+Grounding improves AURC and coverage on every object-existence row; the gain is
+largest when base confidence is poorly calibrated (VCD, +32pp). MME/HallusionBench
+have no object-existence questions (grounding n/a) — the guarantee still holds via
+confidence, correctly forcing heavy abstention on the near-chance HallusionBench.
+Pending (account GPU throttled): MME-existence subset, GQA yes/no, AMBER.
+
 ## 1. Core result — structured grounding vs weaker signals (POPE, LLaVA-1.5-7B)
 
 | Selective score | AURC ↓ | cov@10% ↑ | AUROC ↑ |
