@@ -82,6 +82,53 @@ grounding. Ours is the only approach combining structured grounding + real-time
 correction + a distribution-free guarantee + selective coverage, and it *composes
 on top of* the mitigation methods (see §5). See `comparison_figure.png`.
 
+## 8. Ablation — nonconformity combiner (`combiner_ablation.py`)
+
+Does a higher-capacity combiner beat logistic regression? Two calibration
+protocols, 6 features, target error 10%.
+
+**Protocol I — combiner trained on the same fold used to calibrate τ (naive):**
+
+| Combiner | cov@10% | test error | valid? |
+|---|---|---|---|
+| Logistic | 74.8% | 8.8% | ✅ |
+| GradBoost | 91.3% | 13.3% | ❌ VIOLATED |
+| RandForest | 88.5% | 12.1% | ❌ VIOLATED |
+| MLP (64,32) | ~28% (unstable) | — | overfits |
+
+**Protocol II — proper 3-way split (train combiner / calibrate τ / test, disjoint):**
+
+| Combiner | cov@10% | test error | valid? |
+|---|---|---|---|
+| Logistic | 72.5% | 8.4% | ✅ |
+| GradBoost | 72.5% | 8.3% | ✅ |
+| RandForest | 75.7% | 8.5% | ✅ |
+
+High-capacity combiners only *appear* better under data reuse, where they overfit
+the calibration set and **break the guarantee** (13.3% > 10%). With a proper split
+all combiners are valid and statistically tied, so **logistic regression is chosen
+deliberately**: equal efficiency, lowest variance, interpretable, robust to the
+data-reuse trap. Capacity is not the bottleneck — grounding-signal quality is; a
+deep combiner would only help if fed rich high-dimensional inputs (raw
+embeddings / hidden states / attention), which needs far more calibration data.
+**Design rule: train the combiner on a fold disjoint from conformal calibration.**
+
+## 9. Ablation — risk upper-bound method (binary loss, POPE, 3-way split)
+
+| Upper bound | cov@10% | test error | valid? |
+|---|---|---|---|
+| **Clopper–Pearson (exact binomial)** | **72.5%** | 8.4% | ✅ |
+| Empirical-Bernstein | 54.9% | 4.6% | ✅ |
+| Hoeffding | 38.3% | 3.2% | ✅ |
+
+The accepted-set error is a Binomial proportion, so the exact interval
+(Clopper–Pearson) is near-optimal; general-bounded-loss concentration bounds
+(Hoeffding, Bernstein, WSR) are looser here and waste coverage. **CP is used for
+the binary experiments.** For graded/continuous factuality losses,
+variance-adaptive bounds (empirical-Bernstein, WSR betting) become preferable.
+Multiplicity across the threshold scan is handled in the Learn-Then-Test /
+fixed-sequence-testing framing (RCPS); CP's conservativeness currently absorbs it.
+
 ### Honest caveats
 - POPE samples here are the **adversarial** split (hardest); grounding coverage
   ~99% of items. Per-category Mondrian conditional coverage is shown on synthetic
