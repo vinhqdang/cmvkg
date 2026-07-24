@@ -43,12 +43,23 @@ def load_items(key,N):
             items.append((r["image"],r["question"],int(g),r.get("category","")))
             if len(items)>=N: break
     elif key=="gqa":
-        ds=load_dataset("lmms-lab/GQA","testdev_balanced_instructions",split="testdev",streaming=True)
-        for r in ds:
+        # GQA splits questions (instructions cfg) and images (images cfg) -> join by imageId
+        inst=load_dataset("lmms-lab/GQA","testdev_balanced_instructions",split="testdev",streaming=True)
+        picks=[]
+        for r in inst:
             a=str(r["answer"]).lower().strip()
             if a not in ("yes","no"): continue
-            items.append((r["image"],r["question"],1 if a=="yes" else 0,"gqa"))
-            if len(items)>=N: break
+            picks.append((r["imageId"],r["question"],1 if a=="yes" else 0))
+            if len(picks)>=N: break
+        needed={p[0] for p in picks}
+        imgs=load_dataset("lmms-lab/GQA","testdev_balanced_images",split="testdev",streaming=True)
+        idmap={}
+        for r in imgs:
+            if r["id"] in needed:
+                idmap[r["id"]]=r["image"]
+                if len(idmap)>=len(needed): break
+        for iid,q,g in picks:
+            if iid in idmap: items.append((idmap[iid],q,g,"gqa"))
     elif key=="mme_exist":
         ds=load_dataset("lmms-lab/MME",split="test",streaming=True)
         for r in ds:
