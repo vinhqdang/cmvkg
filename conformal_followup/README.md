@@ -40,23 +40,42 @@ just post-hoc filtering; **(c)** group-conditional coverage under visual shift.
 
 ## Results (real data, POPE, LLaVA-1.5-7B, 20 random splits)
 
-VLM raw POPE accuracy = 0.819. Target risk α = 0.10, δ = 0.10.
+VLM raw POPE accuracy = 0.819. Target risk α = 0.10, δ = 0.10. Error among
+accepted stayed ≤ α (valid) for every row.
 
-| Selective score | AURC ↓ | Coverage@10% ↑ | err@10% (valid?) | AUROC ↑ |
-|---|---|---|---|---|
-| raw confidence (baseline) | 0.0775 | 62.1% | 0.083 ✓ | 0.767 |
-| learned (confidence only) | 0.0681 | 65.2% | 0.084 ✓ | 0.786 |
-| **learned (confidence + grounding)** | **0.0632** | **67.5%** | 0.084 ✓ | **0.800** |
+| Selective score | AURC ↓ | Coverage@10% ↑ | AUROC ↑ |
+|---|---|---|---|
+| raw confidence (baseline) | 0.0775 | 62.1% | 0.767 |
+| learned (confidence only) | 0.0681 | 65.2% | 0.786 |
+| learned + CLIP grounding | 0.0632 | 67.5% | 0.800 |
+| learned + **OWLv2** grounding | **0.0546** | **73.6%** | **0.835** |
+| learned + both | 0.0538 | 74.9% | 0.838 |
 
-**Grounding effect (paired across splits):** ΔAURC = +0.0049 ± 0.0017 (robust,
-~2.9σ); ΔCoverage@10% = +2.3 ± 1.6 pp.
+**Paired gains over confidence-only (same splits):**
+
+| Grounding signal | ΔCoverage@10% | ΔAURC |
+|---|---|---|
+| CLIP-B/32 (weak, full-image similarity) | +2.3 ± 1.6 pp | +0.0049 ± 0.0017 |
+| **OWLv2 (detection-based)** | **+8.4 ± 3.4 pp** | **+0.0135 ± 0.0014** |
+| both | +9.8 ± 2.9 pp | +0.0143 ± 0.0023 |
+
+**Finding.** The nonconformity *score* is the crux. A structured, detection-based
+grounding signal (OWLv2 — the analogue of CMVKG-Guard's L1) lets us confidently
+answer **73.6%** of questions vs **65.2%** on model confidence alone, at the same
+≤10% error guarantee — a ~13% relative jump in usable coverage. Generic CLIP
+similarity gives only a small gain; the *quality* of the grounding signal is what
+converts into conformal efficiency.
 
 ### Honest caveats
-- The gain is **modest** and uses a deliberately **weak CLIP-B/32 grounder** — a
-  lower bound on what CMVKG-Guard's full structured score should achieve.
 - A **naive min-max fusion made coverage *worse***; the gain only appears with a
   **learned combiner**. Fusion design matters.
-- Single benchmark (POPE), single backbone. This is a validated core, not a paper.
+- Single benchmark (POPE), single backbone (LLaVA-1.5-7B). A validated core, not
+  yet a paper — needs a second benchmark and risk-coverage curves across α.
+- OWLv2 is a strong stand-in for CMVKG-Guard's detection layer; wiring in the full
+  UVS (detection + KG + reasoning) is the next step.
+
+Reproduce the grounding comparison with `python local_analysis_owlv2.py`
+(reads `raw_scores.json` + `owlv2_scores.json`, CPU-only).
 
 ## Reproduce
 
