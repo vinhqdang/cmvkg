@@ -64,7 +64,11 @@ ZIP="/content/AMBER.zip"; IMGDIR="/content/amber_images"
 if not os.path.isdir(IMGDIR):
     url="https://huggingface.co/datasets/stzhao/amber/resolve/main/AMBER.zip"
     log("[data] downloading AMBER.zip (~415MB) ...")
-    urllib.request.urlretrieve(url,ZIP)
+    _last=[0]
+    def _hb(blocks,bs,total):
+        mb=blocks*bs/1e6
+        if mb-_last[0]>=50: _last[0]=mb; log(f"    ...{mb:.0f}MB (+{time.time()-t0:.0f}s)")
+    urllib.request.urlretrieve(url,ZIP,reporthook=_hb)
     log(f"[data] unzipping (+{time.time()-t0:.0f}s)")
     os.makedirs(IMGDIR,exist_ok=True)
     with zipfile.ZipFile(ZIP) as z: z.extractall(IMGDIR)
@@ -85,6 +89,7 @@ def extract_object(q):
 
 # ---- 3. LLaVA ----
 M="llava-hf/llava-1.5-7b-hf"
+log("[model] fetching LLaVA weights (may take ~5min, silent) ...")
 proc=AutoProcessor.from_pretrained(M)
 bnb=BitsAndBytesConfig(load_in_4bit=True,bnb_4bit_compute_dtype=torch.float16)
 llava=LlavaForConditionalGeneration.from_pretrained(M,quantization_config=bnb,
@@ -110,7 +115,7 @@ for i,(qid,fn,q,g,typ) in enumerate(picks):
         lg=llava(**inp).logits[0,-1].float()
         p_yes[i]=torch.sigmoid(torch.logsumexp(lg[YES],0)-torch.logsumexp(lg[NO],0)).item()
         ans[i]=int(p_yes[i]>=.5)
-    if (i+1)%100==0: log(f"  amber-{SUBSET} {i+1}/{n} (+{time.time()-t0:.0f}s)")
+    if (i+1)%50==0: log(f"  amber-{SUBSET} {i+1}/{n} (+{time.time()-t0:.0f}s)")
 del llava; torch.cuda.empty_cache()
 
 # ---- 4. OWLv2 grounding ----
@@ -122,7 +127,7 @@ for i,(qid,fn,q,g,typ) in enumerate(picks):
         oi=op(text=[[f"a photo of a {objs[i]}"]],images=Image.open(index[fn]).convert("RGB"),
               return_tensors="pt").to(device)
         owl[i]=float(od(**oi).logits.sigmoid().max().item())
-    if (i+1)%200==0: log(f"  owl {i+1}/{n} (+{time.time()-t0:.0f}s)")
+    if (i+1)%100==0: log(f"  owl {i+1}/{n} (+{time.time()-t0:.0f}s)")
 correct=(ans==gold).astype(int)
 out=dict(dataset=f"AMBER-{SUBSET}",p_yes=p_yes.tolist(),answer=ans.tolist(),gold=gold.tolist(),
          correct=correct.tolist(),owl=owl.tolist(),obj=objs,category=[p[4] for p in picks])

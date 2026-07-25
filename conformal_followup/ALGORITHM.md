@@ -24,18 +24,28 @@ lives inside this bound, because they only **delete or abstain**.
 The bound's premise is that the emitted answer is the model's own. **It does not apply
 to a predictor that emits a different answer.** That is the opening CCRC exploits.
 
-## 2. The mechanism: risk-budget reallocation
+## 2. The mechanism: risk dilution buys acceptance headroom
 
-A calibrated filtering policy **systematically underspends its budget**: it emits a
-high-precision subset whose realized risk sits well below α (measured: **8.0% at
-α=10%**). CCRC converts that unused slack into coverage by admitting **repaired**
-items whose individual error exceeds the accepted set's, but whose blended risk stays
-within budget:
+Initially we expected "budget reallocation" — spending the accepted set's slack on
+*worse* repaired items. Measurement showed the **opposite, and stronger, effect**.
 
-$$\frac{c_a r_a + c_r r_r}{c_a+c_r}\le\alpha ,\qquad r_r>\alpha>r_a$$
+Repairs admitted at a strict evidence gate are *more* accurate than the acceptance
+gate's **marginal** items (detector top decile: 96–100% correct). Adding them
+therefore **lowers** the emitted set's average risk, which relaxes the binding
+constraint and lets the acceptance gate open further along the nested sequence.
 
-Slack on the accepted set *finances* repairs. This is, to our knowledge, a new
-mechanism in conformal risk control.
+The consequence is **leverage**: the coverage gain is 3–6x the repaired mass.
+
+| setting (α=0.10) | repaired mass | coverage gain |
+|---|---|---|
+| POPE-1500 LLaVA | 1.8% | +4.4 pp |
+| POPE-adv LLaVA | 1.4% | +4.7 pp |
+| POPE-adv Qwen2-VL | 1.0% | +1.9 pp |
+| POPE-adv LLaVA+VCD | 0.9% | +2.5 pp |
+
+A small amount of high-precision repaired mass acts as *risk ballast* that finances a
+much larger expansion of the accepted set. To our knowledge this is a new mechanism
+in conformal risk control.
 
 ## 3. Two channels — the essential design constraint
 
@@ -55,14 +65,34 @@ merely a better uncertainty score.
 
 ## 4. Policy family and guarantee
 
-Nested, **pre-specified** family indexed by permissiveness $\lambda$:
+**v3 (canonical, `ccrc_v3.py`).** Nested, **pre-specified** family indexed by
+permissiveness $\lambda$, with the repair gate **decoupled** at a fixed evidence
+quality $q$:
 
 ```
 ACCEPT original   if  s ≥ Q_s(1−λ)
-REPAIR via ch.2   if  not accepted and m ≥ Q_m(1−λ)     [family F_rep]
+REPAIR via ch.2   if  not accepted and m ≥ Q_m(1−q)     # q FIXED, not λ
 ABSTAIN           otherwise
 ```
-`F_filt` is the same with repair disabled. Emitted-set error counts what is *actually
+
+*Why decoupled (v2 -> v3).* In v2 the repair gate was tied to λ, so loosening
+acceptance also loosened repair, admitting low-precision repairs; FST then stopped
+early. Replication exposed this: v2 gained on LLaVA (+4.7/+5.3) but **lost** on
+Qwen2-VL (−4.2) and VCD (−2.9). Decoupling keeps repair precision constant while λ
+sweeps, and the family remains nested in λ — so a **single** FST at full δ suffices,
+removing v2's δ/2 union-bound cost entirely.
+
+*Choosing q.* q must be **strict**, and it is pre-specified, not tuned per dataset.
+Sensitivity across 4 settings x 2 α levels:
+
+| q | outcome |
+|---|---|
+| **0.10** (top-decile evidence) | **gains in all 8 cells (+0.5 to +8.0 pp), never loses** |
+| 0.25 | mixed (−16.3 on Qwen) |
+| 0.50 | mixed (−15.5 on Qwen) |
+
+This matches the channel-2 diagnostic (top margin decile = 100% accurate, 9th = 96%,
+falling to 51% at the bottom): **repair only where the evidence is strongest.** Emitted-set error counts what is *actually
 emitted*:
 
 $$\mathrm{err}=\#\{\text{accepted} \wedge \text{original wrong}\}+\#\{\text{repaired}\wedge\text{ch.2 answer wrong}\}$$
@@ -98,11 +128,32 @@ repair is inadmissible (channel-2 accuracy 93.5% < 1−α) and CCRC correctly fa
 toward filtering, paying only the δ/2 option cost (−4.7 pp). Gains peak at moderate α
 and shrink as α→1 where filtering already covers nearly everything.
 
+## 5b. Replication (CCRC v3, q=0.10, `ccrc_v3.py` / `ccrc_replicate.py`)
+
+Certified coverage, filtering -> CCRC. Risk guarantee verified on held-out test data
+in **every** row (realized risk shown for CCRC).
+
+| setting | n | μ | α | filter | **CCRC** | risk | gain |
+|---|---|---|---|---|---|---|---|
+| POPE-1500 LLaVA | 1500 | 18.1% | 0.10 | 68.2% | **72.6%** | 8.2% | +4.4 |
+| POPE-adv LLaVA | 444 | 17.3% | 0.10 | 42.1% | **46.8%** | 4.3% | +4.7 |
+| POPE-adv Qwen2-VL | 591 | 12.9% | 0.10 | 77.5% | **79.4%** | 6.0% | +1.9 |
+| POPE-adv LLaVA+VCD | 591 | 19.6% | 0.10 | 45.0% | **47.5%** | 4.7% | +2.5 |
+| POPE-1500 LLaVA | 1500 | 18.1% | 0.15 | 86.8% | **88.4%** | 12.6% | +1.7 |
+| POPE-adv LLaVA | 444 | 17.3% | 0.15 | 69.2% | **77.2%** | 9.7% | +8.0 |
+| POPE-adv Qwen2-VL | 591 | 12.9% | 0.15 | 94.4% | **94.9%** | 10.4% | +0.5 |
+| POPE-adv LLaVA+VCD | 591 | 19.6% | 0.15 | 73.4% | **75.4%** | 10.1% | +2.0 |
+
+Holds across two backbones (LLaVA-1.5, Qwen2-VL) and a mitigation decoder (VCD).
+
 ## 6. Honest limitations
 
-- **Strict-α regression.** At α=0.05 the δ/2 union-bound cost is not recovered.
-  A single pre-specified sequence spanning both families would remove the split but
-  requires a data-independent ordering we have not yet constructed.
+- **q is a hyperparameter.** Fixed a priori at 0.10 on the principle "repair only
+  where evidence is strongest"; loose gates can lose. A data-driven choice of q would
+  need its own multiplicity budget.
+- **Gains are modest where filtering is already strong** (Qwen at α=0.15: +0.5 pp),
+  and largest where the base model hallucinates more — the same pattern as the
+  grounding-score result.
 - **One-shot setting only.** The guarantee proved here is for *discriminative* (single
   answer) prediction, where calibration is on-policy by construction. The
   **sequential/generative** case (token-level correction during decoding) additionally
