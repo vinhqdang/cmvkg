@@ -239,3 +239,56 @@ selective coverage collapses (13–55%): raw accuracy does not imply a **separab
 correctness score**, and conformal coverage depends on the latter. Where the detector is
 genuinely stronger than the VLM (AMBER: 95.6% vs 88.6%) it also wins as a standalone
 predictor — a second reason CCRC is the wrong tool in that regime.
+
+## 5e. Head-to-head vs ConfLVLM's scorer, with attribution
+
+ConfLVLM's published scoring function is CLIP-ViT-B/32 image–text similarity. Running
+it as the nonconformity score in our pipeline (same FST+CP protocol, POPE-1500/LLaVA),
+and then adding our components one at a time:
+
+| method (α=0.10) | coverage | risk | Δ vs ConfLVLM-style |
+|---|---|---|---|
+| ConfLVLM-style (CLIP score, filter) | 5.6% | 1.9% | — |
+| + VLM confidence (filter) | 41.5% | 5.2% | +35.9 |
+| + OWLv2 grounding (filter) | 68.2% | 7.9% | +62.6 |
+| **CCRC (ours: + repair, q=0.10)** | **72.6%** | 8.2% | **+67.0** |
+
+**Honest attribution.** Of the +67 pp total, **+35.9 comes from using model confidence
+and +26.7 from detector grounding — i.e. from the SCORE. Only +4.4 pp comes from our
+algorithmic contribution (certified repair).** A "+67 pp over ConfLVLM" headline would
+be misleading.
+
+**Caveat that favours ConfLVLM.** ConfLVLM was designed for *free-form caption claims*,
+not POPE yes/no probes. We transplanted their scorer, not their system, so 5.6% likely
+understates them in their own setting.
+
+## 7b. Prior art that narrows the novelty claim (verified)
+
+**"Look Again Before You Abstain: Budgeted Conformal Evidence Acquisition for Reliable
+Vision-Language Models"** (arXiv 2606.16667) is close prior art and must be cited:
+
+- Same domain (VLM claims, POPE + COCO val2017), same models (LLaVA-1.5-7B, Qwen2.5-VL).
+- **Same statistical machinery**: Clopper–Pearson + fixed-sequence procedure.
+- Same goal — avoid heavy abstention: reports 28% → **37%** coverage at α=0.10 with risk
+  0.10 held (and shows the naive un-recalibrated variant hits 0.30 risk, violating it).
+- Their Theorem 1 (acquisition-adaptive validity) is exactly the "intervention requires
+  recalibration" principle.
+
+**What CCRC still contributes, precisely:**
+
+1. **It emits a corrected answer.** BCEA acquires zoomed views and *re-scores the model's
+   original claim* — explicitly, "the model makes no corrected answer." ConfLVLM and
+   conformal abstention only delete. CCRC's emitted answer may **differ** from the
+   model's, and the guarantee covers that modified output.
+2. **The independent-channel requirement, with a proof of necessity.** BCEA lets the same
+   score flag *and* rescue (validity restored by recalibration) — admissible because it
+   never changes the answer. For *correction* that is impossible: we showed
+   self-certification is circular and empirically dead (bottom 2% of s still 13.3%
+   correct > α). Correction therefore **requires** a second, independent channel.
+3. **The risk-dilution mechanism** and its 3–6x leverage.
+4. **The μ−α precondition** linking the gain to Prop. 3's closed-form abstention floor.
+
+**What CCRC can no longer claim:** being first to escape heavy abstention in VLM
+selective prediction via extra visual evidence — BCEA did that. The two are
+**complementary** (rescue-by-looking-again vs rescue-by-replacing), and a direct
+comparison against BCEA has **not** been run.
