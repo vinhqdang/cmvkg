@@ -4,8 +4,10 @@ A new selective-prediction procedure: it **emits repaired answers** rather than 
 accepting or abstaining, while keeping a distribution-free finite-sample guarantee on
 everything it emits.
 
-Implementation: `ccrc.py` (canonical) · development history: `ccrc_algorithm.py` (v1,
-failed), `ccrc_v2.py`, `ccrc_validate.py`.
+Implementation: **`ccrc_v3.py` (canonical)** · `ccrc_replicate.py` (multi-backbone) ·
+development history kept as the record of what failed and why: `ccrc_algorithm.py`
+(v1, circular certification), `ccrc.py` + `ccrc_v2.py` + `ccrc_validate.py` (v2,
+coupled gate + δ/2 split).
 
 ---
 
@@ -97,21 +99,27 @@ emitted*:
 
 $$\mathrm{err}=\#\{\text{accepted} \wedge \text{original wrong}\}+\#\{\text{repaired}\wedge\text{ch.2 answer wrong}\}$$
 
-**Calibration.** Fixed-sequence testing (FST) over each nested family — no multiplicity
-tax — with Clopper–Pearson upper bounds; each family at level $\delta/2$; deploy
-whichever certifies more coverage. By the union bound:
+**Calibration (v3).** A *single* fixed-sequence test over the nested family in
+$\lambda$, with Clopper–Pearson upper bounds at full level $\delta$. FST carries no
+multiplicity tax, and because the repair gate is fixed at $q$ the family is nested,
+so no union-bound split is needed:
 
 $$\Pr\big[\mathrm{risk}(\text{emitted})\le\alpha\big]\ \ge\ 1-\delta .$$
 
-Adaptive family selection is what keeps CCRC from being worse than filtering when
-repair is inadmissible.
+(v2 instead certified two families at $\delta/2$ and selected between them; that
+split is what made it lose on Qwen2-VL and VCD. v3 removes it.)
 
 **Sequence start.** CP cannot certify risk ≤ α with fewer than
 $k_{\min}=\ln\delta/\ln(1-\alpha)\approx 22$ clean samples; starting the FST below that
 aborts the sequence at step 1 (a bug we hit). The grid therefore starts at the
 analytically derived minimum.
 
-## 5. Results (POPE / LLaVA-1.5-7B, n=1500, 3-way split, 100 reps)
+## 5. Results — v2 (coupled gate, δ/2 split), kept for the ablation record
+
+Shows the cost of the coupled gate: gains at moderate α but a regression at α=0.05.
+Superseded by §5b.
+
+### v2 (POPE / LLaVA-1.5-7B, n=1500, 3-way split, 100 reps)
 
 Base risk μ=0.181, δ=0.10. Risk guarantee verified on held-out test data in **all** rows.
 
