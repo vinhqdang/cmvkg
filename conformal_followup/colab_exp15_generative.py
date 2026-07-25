@@ -88,7 +88,7 @@ def caption_with_logprobs(img):
     for i, sc in enumerate(out.scores):
         if i >= len(seq): break
         lps.append(float(torch.log_softmax(sc[0].float(), -1)[seq[i]]))
-    toks = [tok.decode([t], skip_special_tokens=True) for t in seq.tolist()]
+    toks = tok.convert_ids_to_tokens(seq.tolist())   # keeps the "\u2581" word marker
     return tok.decode(seq, skip_special_tokens=True), toks, lps
 
 def owl_score(img, obj, cache):
@@ -108,11 +108,12 @@ for c, iid in enumerate(ids):
     cache = {}
     # map word -> mean logprob of the tokens that spell it
     words, wlp, buf, blp = [], [], "", []
+    SP = "\u2581"                                   # SentencePiece word boundary
     for t, lp in zip(toks, lps):
-        if t.startswith(" ") and buf:
-            words.append(buf.strip()); wlp.append(float(np.mean(blp))); buf, blp = "", []
-        buf += t; blp.append(lp)
-    if buf: words.append(buf.strip()); wlp.append(float(np.mean(blp)))
+        if t.startswith(SP) and buf:
+            words.append(buf); wlp.append(float(np.mean(blp))); buf, blp = "", []
+        buf += t.replace(SP, ""); blp.append(lp)
+    if buf: words.append(buf); wlp.append(float(np.mean(blp)))
     Tst = {stem(x) for x in truth}
     # best repair candidate for this image (strongest detected truth object)
     reps = [(owl_score(img, o, cache), o) for o in truth[:5]]
