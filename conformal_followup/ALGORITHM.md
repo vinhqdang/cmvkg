@@ -220,3 +220,22 @@ known — no extra data needed.
 | ConfLVLM, conformal abstention | ✓ | ✗ | ✓ | ✗ |
 | Conformal editing (RAG, text) | ✓ | ✓ | ✓ | not framed/proved |
 | **CCRC (ours)** | ✓ | ✓ | ✓ | **✓ by construction** |
+
+## 5d. Missing baseline: the detector alone
+
+A reviewer's first question: if the independent channel is that good, why not just
+*answer with it*? Selective prediction on the detector alone (same FST+CP protocol,
+α=0.10, emit the detector's answer):
+
+| setting | VLM acc | det acc | filter(VLM) | **CCRC** | detector-only | winner |
+|---|---|---|---|---|---|---|
+| POPE-1500 LLaVA | 81.9% | 83.1% | 68.2% | **72.6%** | 55.3% | CCRC |
+| POPE-adv LLaVA | 82.7% | 82.4% | 42.1% | **46.8%** | 13.0% | CCRC |
+| POPE-adv Qwen2-VL | 87.1% | 82.9% | 77.5% | **79.4%** | 21.8% | CCRC |
+| AMBER(d) LLaVA | 88.6% | 95.6% | 92.1% | 84.5% | **92.6%** | detector |
+
+CCRC wins 3 of 4. Note the detector's *accuracy* is comparable on POPE (82–83%) yet its
+selective coverage collapses (13–55%): raw accuracy does not imply a **separable
+correctness score**, and conformal coverage depends on the latter. Where the detector is
+genuinely stronger than the VLM (AMBER: 95.6% vs 88.6%) it also wins as a standalone
+predictor — a second reason CCRC is the wrong tool in that regime.
