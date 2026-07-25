@@ -212,9 +212,14 @@ beat BCEA** — only that composition helps and that our grounding score is stro
 setup.
 
 # Open items
-2. **Sequential/generative extension** — theory drafted (`SEQUENTIAL.md`); gating
-   falsification experiment (does correcting token *t* raise or lower downstream
-   hallucination?) not yet run.
+2. **Sequential extension** — gating experiment RUN. **Monotonicity fails:** repair
+   raises downstream hallucination by **+0.207 ± 0.091** mentions (n=121, p=0.025,
+   Wilcoxon 0.035; 25 better / 45 worse / 51 tie). Kills the fixed-point argument;
+   mandates the coupling bound, and *forces* a lookahead procedure since myopic repair
+   pays an unpriced downstream externality. See `SEQUENTIAL.md` §4b. (An n=5 pilot
+   suggested the opposite and was underpowered, p=0.62 — retained as a cautionary record.)
+3. **Conformal Trajectory Search (CTS)** — new algorithm motivated by the above;
+   substrate extraction running (`colab_exp15_generative.py`).
 3. AMBER generative subset (CHAIR-style) untouched; per-category Mondrian conditional
    coverage still only on synthetic data (`conformal_sim.py`).
 

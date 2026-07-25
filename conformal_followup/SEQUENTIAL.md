@@ -110,7 +110,54 @@ route to sequence-level certification without heavy deletion.
 4. **E-value power.** $e_t=1/p_t$ is valid but weak; Kelly-style betting is tighter but
    needs a working null model per bucket.
 
-## 5. Immediate next step (measurement before theory)
+## 4b. RESULT: monotonicity FAILS (measured, n=121)
+
+The falsification test in §5 was run (`colab_exp14_monotonicity.py`,
+`exp14_monotonicity.json`). Paired matched-prefix design: caption an AMBER image, find
+the first hallucinated object mention at position t, build two prefixes identical up to
+t (one keeping the hallucinated word, one substituting the best-detected `truth`
+object), continue decoding equally from each, and count hallucinated mentions in the
+continuations only.
+
+| downstream hallucinated mentions | original prefix | repaired prefix |
+|---|---|---|
+| mean | 1.207 | **1.413** |
+| paired diff (rep − orig) | **+0.207 ± 0.091** | t=2.27, p=0.025; Wilcoxon p=0.035 |
+| per 100 words | 3.61 | 4.30 |
+| cases | 25 better / **45 worse** / 51 tie | |
+
+**Repairing a claim significantly INCREASES downstream hallucination.** (A pilot with
+n=5 suggested the opposite; it was underpowered — p=0.62 — and is retained in the log as
+a cautionary record.)
+
+### Consequences
+
+1. **The fixed-point / monotone-convergence argument (§2.4) is dead.** The correction map
+   is not monotone, so Knaster–Tarski does not apply and the iteration has no guaranteed
+   fixed point. Do not attempt that proof.
+2. **Use the coupling fallback** for validity:
+   risk(corrected) ≤ risk(original) + Pr(repair wrong), each term controlled separately
+   with 2-D LTT. Weaker, tractable, and still gives a guarantee on a corrected output.
+3. **Myopic repair is measurably harmful in sequence** — and this now *forces* a
+   lookahead algorithm rather than merely motivating one. A greedy per-claim rule (CCRC
+   as it stands) optimises local risk while paying an unpriced downstream externality of
+   +0.21 hallucinated claims. Any correct sequential procedure must **price the
+   continuation**, i.e. search over rewrite trajectories under a risk ledger
+   (Conformal Trajectory Search).
+
+### Interpretation and an important limitation
+
+Plausible mechanism: substituting a word the model did not choose pushes the prefix
+off-policy, and off-policy prefixes degrade downstream faithfulness. Note the repair
+here is the *globally* best-detected `truth` object, which may be contextually
+inappropriate mid-sentence ("...sitting on a **person**...") — so the honest claim is
+that **naive, context-blind substitution carries a downstream cost**, not that all
+correction must. A context-aware repair (constrained to the model's own top-k, as CCRC's
+one-shot version requires) may reduce or remove it. That is a testable follow-up and a
+second reason to prefer trajectory search, which selects repairs by their *continuation*
+quality rather than their local evidence alone.
+
+## 5. Original plan (kept for the record)
 
 Do **not** write the proof first. Run the falsification test for failure mode 3:
 
