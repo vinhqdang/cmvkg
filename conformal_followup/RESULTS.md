@@ -223,6 +223,26 @@ setup.
 3. AMBER generative subset (CHAIR-style) untouched; per-category Mondrian conditional
    coverage still only on synthetic data (`conformal_sim.py`).
 
+# Part C — TMLR manuscript
+
+Location: `manuscript_tmlr/` (official TMLR style files from `JmlrOrg/tmlr-style-file`).
+Build: `pdflatex -> bibtex -> pdflatex x2`. Authors: Quang-Vinh Dang, Phuong-Lan Nguyen.
+
+| block | what | state |
+|---|---|---|
+| C1 | Skeleton on TMLR template; Thm 1 (validity), Lem 1 (k_min), Thm 2 (impossibility), Prop 2 (dilution), Prop 3 (precondition), Thm 3 (coupling), Alg 1 | done |
+| C2 | 7 figures wired in (`fig_method`, `fig_monotonicity`, `fig_precondition`, `fig_qualitative`, `risk_coverage`, `coverage_vs_alpha`, `comparison_figure`) | done |
+| C3 | 10+ result tables from all Part A/B JSONs | done |
+| C4 | Qualitative figure with **real POPE images** (9 imgs in `qual_imgs/`) | done |
+| C5 | **Introduction rewritten as narrative** — opening vignette (POPE item 518: mouse present, LLaVA says "no" p=0.207, s=0.18, OWLv2 conf=0.903), "three unsatisfying options", "two literatures that do not meet", price-of-guarantee (mu=0.18 -> 8.9% floor; POPE-adv 42.1%; HallusionBench 0.0%), re-reading the premise, six named failure paragraphs, contributions, roadmap | done |
+| C6 | **Related work extended** to 7 subsections: hallucination (causes/benchmarks/decoding/attention/training/verify-rewrite), conformal + risk control (coverage->risk, bound hierarchy, selective prediction pre-history), conformal for LM/VLM, non-conformal UQ, the two closest works (crcimposs, bcea) + a note on the word "certified", predictor-induced shift, "what is new here" | done |
+| C7 | refs.bib grown 47 -> 87 entries (added 39: papadopoulos2002, lei2018, romano2019, angelopoulos2023gentle, angelopoulos2024crc, barber2021/2023, vovk2003mondrian, sadinle2019, ding2023, cortes2016, bartlett2008, geifman2019, guo2017, kadavath2022, kuhn2023, farquhar2024, lin2022, manakul2023, wang2023selfconsistency, ji2023, bai2024survey, liu2024survey, zhu2023minigpt, dai2023instructblip, liu2023lrv, yu2024rlhfv, chen2024halc, favero2024, liu2024groundingdino, ren2023knowno, kumar2023, gui2024conformal, chen2023frugalgpt, gupta2024, legoues2019, cohen2019) | done |
+| C8 | Compile status: **30 pages, 0 undefined refs/citations, 0 errors, 0 overfull boxes** | done |
+
+Still outstanding on the manuscript: `crcimposs` (arXiv 2606.29054) and `bcea`
+(arXiv 2606.16667) bib entries carry `author = {Anonymous}` — need real author lists
+(user offered to supply the PDFs).
+
 # File index
 | file | purpose |
 |---|---|
