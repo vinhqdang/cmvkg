@@ -1,0 +1,104 @@
+\begin{thebibliography}{12}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Angelopoulos et~al.(2021)Angelopoulos, Bates, Cand{\`e}s, Jordan, and
+  Lei]{angelopoulos2021ltt}
+Anastasios~N. Angelopoulos, Stephen Bates, Emmanuel~J. Cand{\`e}s, Michael~I.
+  Jordan, and Lihua Lei.
+\newblock Learn then test: Calibrating predictive algorithms to achieve risk
+  control.
+\newblock \emph{arXiv preprint arXiv:2110.01052}, 2021.
+
+\bibitem[Anonymous(2025{\natexlab{a}})]{attnlens}
+Anonymous.
+\newblock Devils in middle layers of large vision-language models:
+  Interpreting, detecting and mitigating object hallucinations via attention
+  lens.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2025{\natexlab{a}}.
+\newblock URL \url{https://arxiv.org/abs/2411.16724}.
+
+\bibitem[Anonymous(2025{\natexlab{b}})]{conflvlm}
+Anonymous.
+\newblock Towards statistical factuality guarantee for large vision-language
+  models.
+\newblock In \emph{Proceedings of the 2025 Conference on Empirical Methods in
+  Natural Language Processing (EMNLP)}, Suzhou, China, 2025{\natexlab{b}}.
+  Association for Computational Linguistics.
+\newblock URL \url{https://aclanthology.org/2025.emnlp-main.576/}.
+
+\bibitem[Anonymous(2025{\natexlab{c}})]{reverse}
+Anonymous.
+\newblock Generate, but verify: Reducing hallucination in vision-language
+  models with retrospective resampling.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2025{\natexlab{c}}.
+\newblock URL \url{https://reverse-vlm.github.io/}.
+
+\bibitem[Anonymous(2026{\natexlab{a}})]{bcea}
+Anonymous.
+\newblock Look again before you abstain: Budgeted conformal evidence
+  acquisition for reliable vision-language models.
+\newblock \emph{arXiv preprint arXiv:2606.16667}, 2026{\natexlab{a}}.
+\newblock URL \url{https://arxiv.org/abs/2606.16667}.
+
+\bibitem[Anonymous(2026{\natexlab{b}})]{crcimposs}
+Anonymous.
+\newblock When can conformal risk control certify {LLM} outputs? bounds,
+  impossibility, and adaptation for structured generation.
+\newblock \emph{arXiv preprint arXiv:2606.29054}, 2026{\natexlab{b}}.
+\newblock URL \url{https://arxiv.org/abs/2606.29054}.
+
+\bibitem[Bates et~al.(2021)Bates, Angelopoulos, Lei, Malik, and
+  Jordan]{bates2021rcps}
+Stephen Bates, Anastasios~N. Angelopoulos, Lihua Lei, Jitendra Malik, and
+  Michael~I. Jordan.
+\newblock Distribution-free, risk-controlling prediction sets.
+\newblock \emph{Journal of the ACM}, 68\penalty0 (6):\penalty0 1--34, 2021.
+
+\bibitem[Clopper \& Pearson(1934)Clopper and Pearson]{clopper1934}
+C.~J. Clopper and E.~S. Pearson.
+\newblock The use of confidence or fiducial limits illustrated in the case of
+  the binomial.
+\newblock \emph{Biometrika}, 26\penalty0 (4):\penalty0 404--413, 1934.
+
+\bibitem[Fannjiang et~al.(2022)Fannjiang, Bates, Angelopoulos, Listgarten, and
+  Jordan]{fannjiang2022fcs}
+Clara Fannjiang, Stephen Bates, Anastasios~N. Angelopoulos, Jennifer
+  Listgarten, and Michael~I. Jordan.
+\newblock Conformal prediction under feedback covariate shift for biomolecular
+  design.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 119\penalty0
+  (43), 2022.
+
+\bibitem[Huang et~al.(2024)Huang, Dong, Zhang, Wang, He, Wang, Lin, Zhang, and
+  Yu]{opera}
+Qidong Huang, Xiaoyi Dong, Pan Zhang, Bin Wang, Conghui He, Jiaqi Wang, Dahua
+  Lin, Weiming Zhang, and Nenghai Yu.
+\newblock {OPERA}: Alleviating hallucination in multi-modal large language
+  models via over-trust penalty and retrospection-allocation.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, Seattle, WA, USA, 2024.
+
+\bibitem[Leng et~al.(2024)Leng, Zhang, Chen, Li, Lu, Miao, and Bing]{vcd}
+Sicong Leng, Hang Zhang, Guanzheng Chen, Xin Li, Shijian Lu, Chunyan Miao, and
+  Lidong Bing.
+\newblock Mitigating object hallucinations in large vision-language models
+  through visual contrastive decoding.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, Seattle, WA, USA, 2024.
+
+\bibitem[Quach et~al.(2024)Quach, Fisch, Schuster, Yala, Sohn, Jaakkola, and
+  Barzilay]{conformallm}
+Victor Quach, Adam Fisch, Tal Schuster, Adam Yala, Jae~Ho Sohn, Tommi~S.
+  Jaakkola, and Regina Barzilay.
+\newblock Conformal language modeling.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2024.
+\newblock URL \url{https://arxiv.org/abs/2306.10193}.
+
+\end{thebibliography}

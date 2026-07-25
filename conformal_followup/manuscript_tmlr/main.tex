@@ -1,0 +1,532 @@
+\documentclass{article}
+% Use \usepackage{tmlr} for the anonymous submission version.
+% Use \usepackage[accepted]{tmlr} for the camera-ready version (reveals authors).
+% Use \usepackage[preprint]{tmlr} for an arXiv preprint.
+\usepackage[accepted]{tmlr}
+
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{xcolor}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\title{Certified Correction of Vision--Language Hallucinations:\\
+Gains, Preconditions, and a Sequential Failure Mode}
+
+\author{%
+  \name Quang-Vinh Dang \email vinh.dq4@buv.edu.vn \\
+  \addr British University Vietnam, Hung Yen, Viet Nam
+  \AND
+  \name Anh Dat Le \email datla@uef.edu.vn \\
+  \addr University of Economics and Finance, Ho Chi Minh City, Viet Nam
+  \AND
+  \name Ngoc-Son-An Nguyen \email annns25871@pgr.iuh.edu.vn \\
+  \addr Industrial University of Ho Chi Minh City, Viet Nam
+  \AND
+  \name Thi-Bich-Diem Vo \email misdiem@gmail.com \\
+  \addr GiaoHangNhanh, Ho Chi Minh City, Viet Nam
+  \AND
+  \name Minh Ngoc Dinh \email minh.dinh@maeducation.com \\
+  \addr Millennia Education, Ho Chi Minh City, Viet Nam
+  \AND
+  \name Hoang Viet Vu \email 30066555@st.buv.edu.vn \\
+  \addr British University Vietnam, Hung Yen, Viet Nam
+  \AND
+  \name Phuong Lan Nguyen \email 30066017@st.buv.edu.vn \\
+  \addr British University Vietnam, Hung Yen, Viet Nam
+}
+
+\def\month{07}
+\def\year{2026}
+\def\openreview{\url{https://openreview.net/forum?id=XXXXXXXXXX}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Selective prediction gives vision--language models (VLMs) a distribution-free guarantee
+on the answers they emit, at the cost of abstaining on the rest. A recent impossibility
+result shows this cost is irreducible: any predictor that may only \emph{emit or abstain}
+the model's own answer must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of inputs when
+the base risk $\mu$ exceeds the target $\alpha$. We observe that the bound's premise --
+that the emitted answer is the model's own -- can be broken, and study what happens when
+a selective predictor is allowed to emit a \emph{repaired} answer instead.
+We introduce \textbf{CCRC} (Certified-Correction Risk Control), which accepts the model's
+answer when a correctness score is high, substitutes an answer drawn from an
+\emph{independent} evidence channel when that channel's evidence is strong, and abstains
+otherwise, retaining the guarantee $\Pr[\text{risk(emitted)}\le\alpha]\ge 1-\delta$.
+Three findings follow. (i) The nonconformity \emph{score} dominates: a detection-grounded
+score raises certified coverage over model-internal uncertainty by up to $10.2$ points,
+and over a faithful reproduction of a published CLIP-based scorer by far more --- though we
+show by attribution that most of that margin is the score, not the procedure.
+(ii) Repairs must be certified by an independent channel; self-certification is provably
+circular and empirically dead. Where CCRC helps, a small mass of high-precision repairs
+($\approx\!1.5\%$) buys $3$--$6\times$ its own size in coverage by diluting emitted risk,
+and we give a checkable precondition ($\mu$ comfortably above $\alpha$) that also predicts
+the one dataset where CCRC loses.
+(iii) In the \emph{generative} setting the natural sequential extension fails: in a paired
+matched-prefix experiment, repairing a claim significantly \emph{increases} downstream
+hallucination ($+0.207\pm0.091$ mentions, $n=121$, $p=0.025$), which invalidates a
+fixed-point calibration argument and shows that myopic repair carries an unpriced
+downstream cost. We report negative results and attributions in full, and position the
+method as complementary to --- not superseding --- concurrent evidence-acquisition work.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Vision--language models (VLMs) hallucinate: they assert objects, attributes and relations
+that the image does not support. A large body of work reduces hallucination
+heuristically, by contrastive or attention-modified decoding, external verification, or
+retrieval. These methods lower error rates but provide no \emph{bound}: a deployer cannot
+state how often an emitted claim is wrong.
+
+Conformal risk control supplies exactly that missing bound. Applied to VLMs, it yields
+\emph{selective prediction}: emit an answer when a nonconformity score clears a
+calibrated threshold, abstain otherwise, and the error rate among emitted answers is
+provably at most $\alpha$ with probability $1-\delta$, without distributional
+assumptions. The price is abstention, and the price is not small.
+\citet{crcimposs} make this precise with a distribution-free lower bound: when the base
+risk $\mu$ exceeds $\alpha$, \emph{any} such predictor must abstain on at least
+$(\mu-\alpha)/(1-\alpha)$ of inputs, regardless of score quality, bound tightness, or
+calibration set size.
+
+That bound rests on a premise which is easy to miss: the predictor may only \emph{emit or
+abstain the model's own answer}. Every conformal method for VLMs we are aware of respects
+it --- they delete claims, abstain, or re-score the original assertion. This paper asks
+what a selective predictor can do if it is allowed to emit a \emph{different} answer.
+
+\paragraph{Contributions.}
+\begin{itemize}
+\item \textbf{CCRC}, a selective-prediction procedure that emits accepted, \emph{repaired},
+or abstained outputs and controls the risk of everything it emits
+(\S\ref{sec:ccrc}). Repairs are drawn and certified from an evidence channel that is
+independent of the score used to flag the original answer; we show this independence is
+not a design preference but a necessity (\S\ref{sec:independence}).
+\item An account of \emph{why} it works and \emph{when}. A small mass of high-precision
+repairs lowers the emitted set's average risk and thereby relaxes the binding
+constraint, buying $3$--$6\times$ its own size in coverage. The gain tracks the
+abstention floor $\mu-\alpha$, giving a precondition that is checkable before any
+calibration and that correctly predicts the single dataset on which CCRC loses
+(\S\ref{sec:precondition}).
+\item A \textbf{sequential negative result}. The natural generative extension --- repair a
+hallucinated claim, keep decoding --- is worse than it looks: in a paired matched-prefix
+experiment, repair significantly \emph{increases} hallucination in the continuation. This
+rules out the monotone fixed-point argument that a sequential guarantee would otherwise
+rest on, and identifies an unpriced downstream cost that any correct sequential procedure
+must account for (\S\ref{sec:sequential}).
+\item An \textbf{attribution analysis} of our own gains. Against a faithful reproduction
+of a published CLIP-based scorer, our total improvement is large, but we decompose it and
+report that most of it comes from the nonconformity score rather than from the procedure
+(\S\ref{sec:attribution}). We also run the closest concurrent method and find the two are
+\emph{complementary} rather than competing (\S\ref{sec:bcea}).
+\end{itemize}
+
+We regard the negative results as part of the contribution rather than as caveats
+attached to it, and we have tried to make every claim in the paper checkable from the
+released code and extracted per-item signals.
+
+\section{Background and setup}
+\label{sec:setup}
+
+\paragraph{Selective prediction with a risk guarantee.}
+A VLM answers a query about an image. Let $Y\in\{0,1\}$ indicate whether the model's
+answer is correct, $\mu=\Pr[Y=0]$ the base risk, and $s(x)\in[0,1]$ a score intended to
+increase with correctness. A filtering policy emits when $s(x)\ge\tau$. Calibrating
+$\tau$ on a held-out set so that the error rate among emitted answers is at most
+$\alpha$ with confidence $1-\delta$ is a conformal risk control problem
+\citep{bates2021rcps,angelopoulos2021ltt}. We use exact Clopper--Pearson upper confidence
+bounds \citep{clopper1934} on the emitted-set error rate, and fixed-sequence testing over
+a pre-specified nested family of policies, which controls the error probability without a
+multiplicity penalty.
+
+\paragraph{The abstention floor.}
+\begin{proposition}[\citealt{crcimposs}, Prop.~3]
+\label{prop:floor}
+If $\mu>\alpha$, any selective predictor that emits or abstains the model's own answer
+must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of inputs to guarantee emitted-set
+risk $\le\alpha$, irrespective of score quality, bound tightness, or calibration size.
+\end{proposition}
+The floor depends only on $\mu$ and $\alpha$, both known in advance. It is the reason
+selective prediction is expensive on hard benchmarks, and it is the constraint the rest of
+this paper is organised around.
+
+\paragraph{Two channels.}
+Throughout, \emph{channel~1} is a learned correctness score
+$s(x)=\hat\Pr[Y=1\mid \text{features}]$ built from the VLM's own confidence together with
+grounding features; \emph{channel~2} is an open-vocabulary object detector that can answer
+the query itself, with evidence margin $m(x)$. Channel~2 is what makes repair possible,
+and its independence from channel~1 is what makes repair certifiable.
+
+\paragraph{Protocol.}
+Unless stated otherwise every number in this paper uses a three-way disjoint split
+(fit the score / calibrate the threshold / test), fixed-sequence testing with
+Clopper--Pearson at $\delta=0.10$, and $20$--$100$ random repetitions; we report the
+realised test risk alongside coverage so validity can be audited in every table. The
+three-way split is not incidental: \S\ref{sec:ablations} shows that reusing the
+calibration fold to fit the score silently breaks the guarantee for high-capacity scores.
+
+\section{The nonconformity score}
+\label{sec:score}
+
+Validity holds for \emph{any} score; only \emph{efficiency} --- how much output survives at
+a given $\alpha$ --- depends on which score is used. We therefore first ask what kind of
+score is efficient for VLM hallucination.
+
+Table~\ref{tab:score} compares scores on POPE with LLaVA-1.5-7B. A learned combination of
+the model's own confidence signals is a strong baseline. Adding generic image--text
+similarity (CLIP) helps a little; adding an open-vocabulary \emph{detection} signal helps
+substantially. On the adversarial POPE split, and against a baseline that is given both
+confidence and multi-sample self-consistency --- the scoring philosophy of
+\citet{conflvlm} --- detection grounding still adds $10.2\pm8.6$ points of certified
+coverage.
+
+\begin{table}[t]
+\centering
+\caption{Selective prediction on POPE (LLaVA-1.5-7B, $n=1500$). AURC is the area under the
+risk--coverage curve (lower is better); cov@$10\%$ is certified coverage at $\alpha=0.10$.
+Realised test risk was $\le\alpha$ for every row.}
+\label{tab:score}
+\begin{tabular}{lccc}
+\toprule
+Score & AURC $\downarrow$ & cov@$10\%$ $\uparrow$ & AUROC $\uparrow$\\
+\midrule
+Raw confidence                      & 0.0775 & 62.1\% & 0.767\\
+Learned, confidence only            & 0.0681 & 65.2\% & 0.786\\
+\quad + CLIP grounding              & 0.0632 & 67.5\% & 0.800\\
+\quad + detection grounding (OWLv2) & \textbf{0.0546} & \textbf{73.6\%} & \textbf{0.835}\\
+\quad + both                        & 0.0538 & 74.9\% & 0.838\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two observations shape the rest of the paper. First, the advantage of grounding
+\emph{grows as the guarantee tightens}: at $\alpha=0.05$ detection grounding nearly
+doubles usable coverage ($30.0\%\to52.5\%$), while at $\alpha=0.20$ both scores certify
+almost everything. Second, the benefit tracks how much the base model hallucinates: on
+Qwen2-VL-2B, which is more accurate on this benchmark, the same addition is worth only
+$1.9$ points. Grounding is most valuable exactly where selective prediction is most
+expensive.
+
+\begin{remark}[accuracy is not separability]
+A detector whose standalone accuracy matches the VLM's on POPE ($83.1\%$ vs.\ $81.9\%$)
+certifies far less coverage as a selective predictor ($55.3\%$ vs.\ $68.2\%$). Conformal
+coverage depends on how well a score \emph{separates} correct from incorrect outputs, not
+on how often the underlying predictor is right.
+\end{remark}
+
+\section{CCRC: certified correction}
+\label{sec:ccrc}
+
+\subsection{Procedure}
+
+Fix a strict, pre-specified evidence quantile $q$ (we use $q=0.10$ throughout: repair only
+in the top decile of channel-2 evidence). For a permissiveness parameter $\lambda$,
+
+\begin{align*}
+\textsc{accept } \text{the model's answer} \quad&\text{if } s(x)\ge Q_s(1-\lambda),\\
+\textsc{repair } \text{with channel 2's answer} \quad&\text{if not accepted and } m(x)\ge Q_m(1-q),\\
+\textsc{abstain} \quad&\text{otherwise.}
+\end{align*}
+
+The emitted set is the union of accepted and repaired items, and its error counts what is
+\emph{actually emitted}:
+\[
+\mathrm{err}=\#\{\text{accepted}\wedge\text{model's answer wrong}\}
+            +\#\{\text{repaired}\wedge\text{channel-2 answer wrong}\}.
+\]
+Because $q$ is fixed, the family is nested in $\lambda$: as $\lambda$ grows the accepted
+set grows and the repair set shrinks. A single fixed-sequence test over this family with
+Clopper--Pearson bounds at level $\delta$ therefore certifies
+$\Pr[\mathrm{risk}(\text{emitted})\le\alpha]\ge1-\delta$ with no multiplicity correction.
+Proposition~\ref{prop:floor} does not apply, since the emitted answer is not always the
+model's.
+
+\begin{remark}[a practical detail with teeth]
+Clopper--Pearson cannot certify risk $\le\alpha$ with fewer than
+$k_{\min}=\ln\delta/\ln(1-\alpha)\approx22$ clean observations. A fixed sequence that
+starts below $k_{\min}$ fails at its first step and aborts, returning zero coverage. Our
+grid starts at the analytically derived minimum.
+\end{remark}
+
+\subsection{Independence is necessary, not preferred}
+\label{sec:independence}
+
+The tempting design is to certify a repair with $1-s$: if the score says the answer is
+probably wrong, emit the opposite. This is circular, and it fails empirically. A
+hallucination score reports \emph{suspicion}, not knowledge of the truth. On POPE, even in
+the bottom $2\%$ of $s$ the model's answer was still correct $13.3\%$ of the time,
+exceeding $\alpha=0.10$; no repair region is certifiable this way, and a first version of
+CCRC built on this idea repaired essentially nothing. The detector channel, by contrast,
+is $93$--$100\%$ accurate in its top evidence deciles, so repairs drawn there are
+certifiable. Certified correction therefore \emph{requires} a second, independent
+evidence source --- which is a substantive constraint on system design, not a modelling
+convenience.
+
+\subsection{Why it gains: risk dilution}
+\label{sec:mechanism}
+
+We initially expected repairs to consume the accepted set's unused risk budget. The
+measured effect is the opposite and stronger. Repairs admitted at a strict evidence gate
+are \emph{more} reliable than the acceptance gate's \emph{marginal} items, so adding them
+\emph{lowers} the emitted set's average risk. That relaxes the binding constraint and lets
+the acceptance gate open further along the nested family. The result is leverage: with
+$0.9$--$1.8\%$ of items repaired, certified coverage rises by $1.9$--$4.7$ points, i.e.
+$3$--$6\times$ the repaired mass (Table~\ref{tab:ccrc}).
+
+\begin{table}[t]
+\centering
+\caption{CCRC ($q{=}0.10$) versus filtering, identical protocol. Realised test risk was
+$\le\alpha$ in every row; the risk column is CCRC's.}
+\label{tab:ccrc}
+\begin{tabular}{llcccccc}
+\toprule
+Dataset & Backbone & $n$ & $\mu$ & $\alpha$ & Filter & CCRC & Gain\\
+\midrule
+POPE            & LLaVA-1.5    & 1500 & 18.1\% & 0.10 & 68.2\% & \textbf{72.6\%} & $+4.4$\\
+POPE-adv        & LLaVA-1.5    & 444  & 17.3\% & 0.10 & 42.1\% & \textbf{46.8\%} & $+4.7$\\
+POPE-adv        & Qwen2-VL-2B  & 591  & 12.9\% & 0.10 & 77.5\% & \textbf{79.4\%} & $+1.9$\\
+POPE-adv        & LLaVA+VCD    & 591  & 19.6\% & 0.10 & 45.0\% & \textbf{47.5\%} & $+2.5$\\
+POPE-adv        & LLaVA-1.5    & 444  & 17.3\% & 0.15 & 69.2\% & \textbf{77.2\%} & $+8.0$\\
+AMBER(d)        & LLaVA-1.5    & 228  & 11.4\% & 0.10 & 92.1\% & 84.5\% & $-7.5$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{When it helps: a checkable precondition}
+\label{sec:precondition}
+
+The last row of Table~\ref{tab:ccrc} is a loss. We isolated its cause with two controlled
+tests. It is \emph{not} a weak repair channel: the detector is $95.6\%$ accurate on that
+dataset and $100\%$ accurate in the region repairs are drawn from. It is \emph{not} small
+sample size: subsampling POPE to the same $n$ still gains $+3.2$. The cause is missing
+headroom. With $\mu=11.4\%$ barely above $\alpha=10\%$, the abstention floor of
+Proposition~\ref{prop:floor} is only $1.6\%$; filtering alone already certifies $92.1\%$,
+so there is nothing for repair to recover, and admitting repaired mass perturbs a
+nearly-saturated constraint.
+
+The gain therefore tracks $\mu-\alpha$: it is $+1.9$ to $+4.7$ points when
+$\mu-\alpha\gtrsim3$ points and $-7.5$ when $\mu-\alpha\approx1.4$ points. Both
+quantities are known before any calibration, so a practitioner can decide whether to use
+CCRC \emph{a priori}. CCRC is a targeted tool for the high-base-risk regime --- precisely
+the regime in which Proposition~\ref{prop:floor} forces heavy abstention --- and not a
+drop-in improvement.
+
+\section{Attribution and comparison}
+\label{sec:attribution}
+
+\paragraph{Against a published scorer.}
+Table~\ref{tab:attrib} places the CLIP-similarity scoring function of \citet{conflvlm} in
+our pipeline and then adds our components one at a time. The total improvement is large,
+but the decomposition matters: most of it comes from the \emph{score}, and only $4.4$
+points from certified correction. We state this explicitly because the aggregate number
+alone would misattribute the gain. This comparison also understates
+\citet{conflvlm}, whose method was designed for free-form caption claims rather than
+yes/no probes; we transplant their scorer, not their system.
+
+\begin{table}[t]
+\centering
+\caption{Attribution on POPE ($\alpha=0.10$). Most of the margin over a published scorer
+comes from the score, not from our procedure.}
+\label{tab:attrib}
+\begin{tabular}{lcc}
+\toprule
+Method & Coverage & $\Delta$\\
+\midrule
+CLIP-similarity scorer \citep{conflvlm}, filtering & 5.6\%  & ---\\
+\quad + VLM confidence                             & 41.5\% & $+35.9$\\
+\quad + detection grounding                        & 68.2\% & $+26.7$\\
+\quad + certified correction (CCRC)                & \textbf{72.6\%} & $+4.4$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Against the closest concurrent method.}
+\label{sec:bcea}
+\citet{bcea} rescue borderline claims by \emph{acquiring more visual evidence} (zoomed
+views) and re-scoring the model's original assertion; they explicitly do not change the
+answer. Their machinery (Clopper--Pearson with fixed-sequence testing), domain, and goal
+coincide with ours, which makes them the right comparison. Holding the base score fixed
+and adding one mechanism per arm (Table~\ref{tab:bcea}), the two mechanisms are
+\textbf{complementary}: composing them beats every single-mechanism arm at both risk
+levels. Re-reading the image and replacing the answer rescue different claims. We do not
+claim to beat \citet{bcea}: our reproduction uses only three coarse crops and
+under-delivers relative to their published gain, so the defensible conclusion is
+composition, not superiority.
+
+\begin{table}[t]
+\centering
+\caption{One common base score, one mechanism added per arm (POPE, LLaVA-1.5, $n=394$).
+All arms valid.}
+\label{tab:bcea}
+\begin{tabular}{lcc}
+\toprule
+Arm & cov@$0.10$ & cov@$0.15$\\
+\midrule
+Base filter (confidence only)              & 5.5\%  & 16.5\%\\
+\quad + evidence acquisition \citep{bcea}  & 5.5\%  & 24.1\%\\
+\quad + detection-grounded score (ours)    & 32.1\% & 63.2\%\\
+\quad + certified correction (ours)        & 34.5\% & 71.8\%\\
+\textbf{Composed}                          & \textbf{35.8\%} & \textbf{74.2\%}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{A sequential failure mode}
+\label{sec:sequential}
+
+Extending certified correction from single answers to free-form generation looks
+straightforward: decompose a caption into claims, repair the unsupported ones, continue
+decoding. Two obstacles are known --- editing a prefix makes later tokens off-policy, an
+instance of feedback covariate shift \citep{fannjiang2022fcs}, and per-claim guarantees say
+nothing about a whole sequence. A guarantee could be recovered by calibrating
+\emph{on-policy}: iterate calibration and deployment to a fixed point. That argument needs
+the correction map to be monotone, so we measured whether it is, before attempting a
+proof.
+
+\paragraph{Design.} For each image we generate a caption greedily, locate the first
+hallucinated object mention at position $t$, and construct two prefixes that are
+\emph{identical up to $t$}: one retaining the hallucinated word, one substituting the
+best-detected object that the image genuinely contains. We then continue decoding equally
+from each and count hallucinated mentions in the continuations only. Matched prefixes make
+the comparison causal.
+
+\paragraph{Result.} Repair makes the continuation \emph{worse}
+(Table~\ref{tab:monotone}). Downstream hallucinated mentions rise from $1.207$ to
+$1.413$, a paired difference of $+0.207\pm0.091$ ($n=121$, $t=2.27$, $p=0.025$; Wilcoxon
+$p=0.035$); $45$ cases worsen against $25$ that improve.
+
+\begin{table}[t]
+\centering
+\caption{Paired matched-prefix test of monotonicity ($n=121$). Repair significantly
+increases hallucination in the continuation.}
+\label{tab:monotone}
+\begin{tabular}{lcc}
+\toprule
+Downstream measure & Original prefix & Repaired prefix\\
+\midrule
+Hallucinated mentions (mean)      & 1.207 & \textbf{1.413}\\
+Per 100 words                     & 3.61  & 4.30\\
+Faithful mentions (mean)          & 1.579 & 1.752\\
+\midrule
+\multicolumn{3}{l}{Paired difference $+0.207\pm0.091$; $t=2.27$, $p=0.025$; Wilcoxon $p=0.035$}\\
+\multicolumn{3}{l}{Better / worse / tie: $25$ / $45$ / $51$}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Consequences.} The monotone fixed-point argument is unavailable: the map is not
+monotone, so the iteration has no guaranteed fixed point and that proof should not be
+attempted. A guarantee on corrected generations must instead be obtained by coupling,
+bounding $\mathrm{risk}(\text{corrected})\le\mathrm{risk}(\text{original})+
+\Pr[\text{repair wrong}]$ and controlling both terms. More importantly, the result
+identifies a cost that a myopic procedure does not price: greedy per-claim repair
+optimises local risk while incurring roughly $0.21$ additional hallucinated claims
+downstream. Any correct sequential procedure must price the continuation rather than the
+claim.
+
+\paragraph{Scope.} Our repair substitutes the globally best-detected object, which can be
+contextually inappropriate mid-sentence and may push the prefix off-policy. The
+supported claim is that \emph{context-blind} substitution carries a downstream cost, not
+that all correction must. Constraining repairs to the model's own top-$k$ continuations is
+a natural remedy and remains to be tested.
+
+\section{Ablations}
+\label{sec:ablations}
+
+\paragraph{The combiner, and a validity trap.}
+Higher-capacity score combiners do not help, and they can silently invalidate the
+guarantee. When the combiner is fitted on the fold used to calibrate $\tau$, gradient
+boosting and random forests appear to certify far more coverage ($91.3\%$ and $88.5\%$)
+but their realised test risk is $13.3\%$ and $12.1\%$ against a $10\%$ target: they overfit
+the calibration scores, so the threshold is set too permissively. Under a three-way split
+all combiners are statistically tied ($\approx72$--$76\%$) and all are valid, while a small
+multilayer perceptron collapses ($\approx28\%$, high variance). We therefore use logistic
+regression, and we fit the score on a fold disjoint from calibration. The features are a
+handful of informative scalars; capacity is not the bottleneck.
+
+\paragraph{The risk bound.}
+The emitted-set error is a binomial proportion, so an exact interval dominates general
+concentration inequalities. At $\alpha=0.10$, Clopper--Pearson certifies $72.5\%$
+coverage, empirical Bernstein $54.9\%$, and Hoeffding $38.3\%$; all three are valid, and
+the latter two are simply conservative. Variance-adaptive or betting-style bounds become
+preferable for graded (non-binary) losses.
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Hallucination mitigation.}
+Decoding-time and verification-based methods reduce VLM hallucination without a
+guarantee: over-trust penalties \citep{opera}, visual contrastive decoding
+\citep{vcd}, attention-based localisation and intervention \citep{attnlens}, and
+generate-then-verify pipelines \citep{reverse}. These operate at full coverage and are
+complementary to risk control; we show in the appendix-level experiments that our layer
+composes on top of one of them (visual contrastive decoding), improving its selective
+behaviour substantially.
+
+\paragraph{Conformal risk control for language and vision--language models.}
+Conformal prediction has been adapted to language generation via calibrated sampling,
+stopping and rejection rules \citep{conformallm}, to claim-level factuality
+\citep{conflvlm}, and to abstention. \citet{crcimposs} characterise when certification is
+possible at all and supply Proposition~\ref{prop:floor}. All of these filter, abstain, or
+re-score; none emits a modified answer, which is the gap this paper addresses.
+\citet{bcea} is closest in spirit and setting: it also seeks to avoid heavy abstention
+using additional visual evidence, but rescues claims by re-scoring rather than replacing
+them, and we find the two mechanisms compose (\S\ref{sec:bcea}).
+
+\paragraph{Distribution shift induced by the predictor.}
+Editing a generation makes subsequent tokens off-policy. This is feedback covariate shift
+rather than exogenous shift, since the shift depends on the deployed threshold
+\citep{fannjiang2022fcs}. Our sequential result (\S\ref{sec:sequential}) shows that in this
+setting the shift is not benign.
+
+\section{Limitations}
+\label{sec:limitations}
+
+Our gains are modest in absolute terms ($+1.9$ to $+8.0$ points of certified coverage) and
+one dataset shows a loss, explained by the precondition in \S\ref{sec:precondition}. The
+repair gate $q$ is a hyperparameter fixed \emph{a priori} at $0.10$ rather than tuned;
+loose gates can lose substantially. Channel~2 is an object detector, so the method as
+evaluated covers object-existence hallucination; on benchmarks dominated by reasoning or
+attribute questions the detector does not apply and the procedure reduces to filtering
+(which remains valid, and correctly abstains almost entirely on a near-chance benchmark).
+Channel-2 independence is an assumption; a detector sharing failure modes with the VLM
+would weaken, though not invalidate, certification. Finally, the one-shot guarantee is a
+correct application of existing machinery rather than new theory, and the sequential
+guarantee is not established --- \S\ref{sec:sequential} shows the most natural route to it
+is closed.
+
+\section{Conclusion}
+
+Selective prediction for VLMs is expensive because of a bound that assumes the emitted
+answer is the model's own. Relaxing that assumption is worthwhile but not free: certified
+correction recovers coverage when the base risk is comfortably above the target, requires
+an independent evidence channel, and works through a dilution effect that gives it
+leverage over the repaired mass. In the generative setting the same idea, applied
+myopically, makes things worse in a way that is measurable and that constrains how a
+sequential version can be built. We hope the negative results are as useful as the
+positive ones.
+
+\subsubsection*{Broader Impact Statement}
+Methods that attach guarantees to model outputs can improve safety, but a guarantee is
+only as meaningful as its assumptions. Our procedure controls the error rate among emitted
+answers under exchangeability and requires a genuinely independent evidence channel; if
+either fails --- for instance under distribution shift, or with a detector that shares the
+VLM's blind spots --- the stated risk level may not hold in deployment. Emitting a
+\emph{corrected} answer also changes the failure mode presented to a user, from an
+abstention that invites scrutiny to a confident substitution that may not. We therefore
+regard the checkable precondition and the sequential negative result as safety-relevant
+parts of the contribution rather than as limitations to be minimised.
+
+\subsubsection*{Acknowledgments}
+Placeholder.
+
+\bibliographystyle{tmlr}
+\bibliography{refs}
+
+\end{document}
