@@ -87,11 +87,14 @@ removing v2's δ/2 union-bound cost entirely.
 *Choosing q.* q must be **strict**, and it is pre-specified, not tuned per dataset.
 Sensitivity across 4 settings x 2 α levels:
 
-| q | outcome |
+| q | outcome (4 POPE-family settings x 2 α) |
 |---|---|
-| **0.10** (top-decile evidence) | **gains in all 8 cells (+0.5 to +8.0 pp), never loses** |
+| **0.10** (top-decile evidence) | positive in all 8 cells (+0.5 to +8.0 pp) |
 | 0.25 | mixed (−16.3 on Qwen) |
 | 0.50 | mixed (−15.5 on Qwen) |
+
+**However, q=0.10 is not universally safe: it loses on AMBER(d) (−7.5 pp).** See §5c —
+the cause is a missing precondition, not the gate.
 
 This matches the channel-2 diagnostic (top margin decile = 100% accurate, 9th = 96%,
 falling to 51% at the bottom): **repair only where the evidence is strongest.** Emitted-set error counts what is *actually
@@ -154,11 +157,47 @@ in **every** row (realized risk shown for CCRC).
 
 Holds across two backbones (LLaVA-1.5, Qwen2-VL) and a mitigation decoder (VCD).
 
+## 5c. Negative result and the precondition for CCRC
+
+On **AMBER(d)** (n=228 grounded, μ=11.4%) CCRC **loses**: −7.5 pp at α=0.10 and
+−9.1 pp at α=0.15, even at the strict gate. Two candidate explanations were tested:
+
+- *Bad repair channel?* **No.** The detector on AMBER is excellent — 95.6% overall and
+  **100%** in the top-10% margin region where repairs are drawn.
+- *Small n?* **No.** POPE subsampled to AMBER's size still gains: n=228 → +3.2,
+  n=400 → +5.6, n=700 → +10.3. Small-n is not the cause.
+
+*The cause is missing headroom.* On AMBER μ=11.4% is barely above α=10%, so filtering
+alone already certifies **92.1%** coverage — the abstention floor
+$(\mu-\alpha)/(1-\alpha)$ is only 1.6%. There is almost nothing for repair to recover,
+while admitting any repaired mass perturbs a nearly-saturated constraint and forces λ to
+tighten. Net: a loss.
+
+**Precondition (empirical).** CCRC's gain tracks the abstention floor, i.e. how much
+filtering is *forced* to discard:
+
+| setting | μ | μ−α (α=0.10) | gain |
+|---|---|---|---|
+| POPE-adv LLaVA | 17.3% | 7.3 pp | +4.7 |
+| POPE-1500 LLaVA | 18.1% | 8.1 pp | +4.4 |
+| POPE-adv LLaVA+VCD | 19.6% | 9.6 pp | +2.5 |
+| POPE-adv Qwen2-VL | 12.9% | 2.9 pp | +1.9 |
+| **AMBER(d) LLaVA** | **11.4%** | **1.4 pp** | **−7.5** |
+
+**Use CCRC when μ is comfortably above α** (base risk well above the target, i.e. the
+regime where Prop. 3 forces heavy abstention — exactly the hard regime that motivates
+the method). When μ ≈ α, filtering is already near-complete and plain filtering is the
+right choice. A practitioner can check this *before* calibrating, since μ and α are both
+known — no extra data needed.
+
 ## 6. Honest limitations
 
 - **q is a hyperparameter.** Fixed a priori at 0.10 on the principle "repair only
   where evidence is strongest"; loose gates can lose. A data-driven choice of q would
   need its own multiplicity budget.
+- **Not universally beneficial.** CCRC requires μ comfortably above α (§5c); it loses
+  on AMBER(d) where filtering is already near-complete. The precondition is checkable a
+  priori, but it means CCRC is a targeted tool, not a drop-in improvement.
 - **Gains are modest where filtering is already strong** (Qwen at α=0.15: +0.5 pp),
   and largest where the base model hallucinates more — the same pattern as the
   grounding-score result.
