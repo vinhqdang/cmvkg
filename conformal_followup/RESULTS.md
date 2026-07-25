@@ -1,165 +1,202 @@
-# Consolidated Results
+# Consolidated Results — running log
 
-All numbers are real, reproducible from the scripts in this folder. Conformal
-target: error among accepted ≤ α = 10%, δ = 0.10, 20 random calibration/test
-splits unless noted. Metric key: **AURC** = area under risk-coverage curve
-(lower better); **cov@10%** = coverage retained at a certified 10% error budget
-(higher better).
+Everything is real, reproducible from the scripts in this folder. Default protocol:
+3-way disjoint split (train combiner / calibrate / test), fixed-sequence testing with
+Clopper–Pearson bounds, δ=0.10, 20–100 repetitions. Metric key: **AURC** = area under
+risk–coverage curve (lower better); **cov@α** = coverage certified at error budget α;
+**risk** = realized error on held-out test data (validity audit).
 
-## 0. Master comparison (all datasets/backbones, `master_comparison.py`)
+Two research threads:
+- **Part A — the score.** Does a structured, detection/KG-grounded nonconformity score
+  beat model-internal uncertainty for conformal selective prediction? *(Yes.)*
+- **Part B — the algorithm (CCRC).** Can we emit *corrected* answers under a
+  distribution-free guarantee, escaping the filtering abstention bound? *(Yes, in a
+  characterised regime.)* See `ALGORITHM.md` for the full write-up.
 
-Strict 3-way split (train combiner / calibrate τ / test), RCPS, 20 reps. Every
-row valid (test error ≤ α). "conf→+g" = confidence-only → + OWLv2 grounding.
+---
 
-| Dataset | Backbone | acc | grnd | AURC conf→+g | cov@10% conf→+g |
-|---|---|---|:--:|---|---|
-| POPE (1500) | LLaVA-1.5 | 81.9% | ✓ | 0.072 → **0.058** | 63.6% → **73.1%** |
-| POPE-adv | LLaVA-1.5 | 82.7% | ✓ | 0.081 → **0.060** | 46.6% → **57.4%** |
-| POPE-adv | Qwen2-VL-2B | 87.3% | ✓ | 0.035 → **0.031** | 83.5% → **85.5%** |
-| POPE-adv | LLaVA+VCD | 80.3% | ✓ | 0.097 → **0.060** | 21.8% → **53.9%** |
-| MME (full) | LLaVA-1.5 | 68.9% | – | 0.185 | 5.7% |
-| MME-existence† | LLaVA-1.5 | 95.0% | ✓ | 0.012 → **0.007** | 0% (n=60, underpowered) |
-| GQA (yes/no) | LLaVA-1.5 | 72.4% | – | 0.130 | 17.8% |
-| HallusionBench | LLaVA-1.5 | 51.2% | – | 0.421 | 0.0% |
+# PART A — grounding as the nonconformity score
 
-Grounding improves AURC and coverage on every object-existence row; the gain is
-largest when base confidence is poorly calibrated (VCD, +32pp). MME-full / GQA /
-HallusionBench have (mostly) non-object questions (grounding n/a) — the guarantee
-still holds via confidence, correctly forcing heavy abstention on near-chance
-HallusionBench. †MME-existence is only 60 items (95% acc) — too small for a
-reliable conformal split (0 certified at α=10%), though grounding still improves
-its AURC. AMBER not on HuggingFace (needs manual load) — deferred.
-
-**Coverage: 5 datasets (POPE, MME, MME-existence, GQA, HallusionBench) ·
-3 backbones/decoders (LLaVA-1.5, Qwen2-VL-2B, LLaVA+VCD) · every row valid.**
-
-## 1. Core result — structured grounding vs weaker signals (POPE, LLaVA-1.5-7B)
+## A1. Core result (POPE, LLaVA-1.5-7B, 1500 items)
 
 | Selective score | AURC ↓ | cov@10% ↑ | AUROC ↑ |
 |---|---|---|---|
 | raw confidence | 0.0775 | 62.1% | 0.767 |
 | learned (confidence only) | 0.0681 | 65.2% | 0.786 |
 | + CLIP grounding | 0.0632 | 67.5% | 0.800 |
-| + **OWLv2** grounding (ours) | **0.0546** | **73.6%** | **0.835** |
+| + **OWLv2** grounding | **0.0546** | **73.6%** | **0.835** |
 | + both | 0.0538 | 74.9% | 0.838 |
 
-Structured detection grounding beats generic CLIP similarity (+8.4pp coverage vs
-+2.3pp). Validity held (error ≤ α) on every row.
+Structured detection grounding beats generic CLIP similarity (+8.4 pp vs +2.3 pp).
+*(`local_analysis.py`, `local_analysis_owlv2.py`.)*
 
-## 2. vs ConfLVLM — real self-consistency baseline (POPE-adversarial, hardest split)
+## A2. vs a faithful ConfLVLM baseline (POPE-adversarial, hardest split)
+
+Real self-consistency (K=3 samples) as the baseline's uncertainty signal.
 
 | Score | AURC ↓ | cov@10% ↑ |
 |---|---|---|
-| self-consistency only (K=3) | 0.135 | 0.0% |
-| internal: confidence + self-consistency **[ConfLVLM-faithful]** | 0.077 | 61.8% |
-| **internal + grounding (ours)** | **0.059** | **72.0%** |
+| self-consistency only | 0.135 | 0.0% |
+| confidence + self-consistency **[ConfLVLM-faithful]** | 0.077 | 61.8% |
+| **+ grounding (ours)** | **0.059** | **72.0%** |
 
-Grounding gain over the faithful baseline: **+10.2 ± 8.6 pp coverage, ΔAURC
-+0.018 ± 0.008**. Even given both confidence and self-consistency, grounding adds.
+Gain **+10.2 ± 8.6 pp** coverage, ΔAURC **+0.018 ± 0.008**. *(`local_selfconsistency.py`.)*
 
-## 3. Multi-α — grounding helps most under strict guarantees (POPE)
+## A3. Multi-α — grounding helps most under strict guarantees (POPE)
 
 | Score | α=5% | α=10% | α=15% | α=20% |
 |---|---|---|---|---|
 | Confidence only | 30.0% | 65.2% | 84.6% | 99.1% |
-| + OWLv2 grounding (ours) | **52.5%** | **73.6%** | **89.7%** | **99.6%** |
+| + OWLv2 grounding | **52.5%** | **73.6%** | **89.7%** | **99.6%** |
 
-At the strict 5% budget, grounding nearly **doubles** usable coverage.
+At α=5% grounding nearly **doubles** usable coverage. *(`local_multi_alpha.py`.)*
 
-## 4. Cross-backbone generalization (POPE-adversarial)
+## A4. Master comparison — 5 datasets × 3 backbones/decoders
 
-| Backbone | base acc | Δcov@10% from grounding | ΔAURC |
-|---|---|---|---|
-| LLaVA-1.5-7B | 0.827 | +10.2 pp | +0.018 |
-| Qwen2-VL-2B | 0.873 | +1.9 pp | +0.0045 |
+Every row valid (test error ≤ α). "conf→+g" = confidence-only → + OWLv2 grounding.
 
-Method generalizes; grounding's benefit scales with how much the base model
-hallucinates (stronger Qwen hallucinates less → smaller gain).
+| Dataset | Backbone | acc | grnd | AURC conf→+g | cov@10% conf→+g |
+|---|---|---|:--:|---|---|
+| POPE (1500) | LLaVA-1.5 | 81.9% | ✓ | 0.072 → **0.058** | 63.6 → **73.1%** |
+| POPE-adv | LLaVA-1.5 | 82.7% | ✓ | 0.081 → **0.060** | 46.6 → **57.4%** |
+| POPE-adv | Qwen2-VL-2B | 87.3% | ✓ | 0.035 → **0.031** | 83.5 → **85.5%** |
+| POPE-adv | LLaVA+VCD | 80.3% | ✓ | 0.097 → **0.060** | 21.8 → **53.9%** |
+| MME (full) | LLaVA-1.5 | 68.9% | – | 0.185 | 5.7% |
+| MME-existence† | LLaVA-1.5 | 95.0% | ✓ | 0.012 → **0.007** | n=60, underpowered |
+| GQA (yes/no) | LLaVA-1.5 | 72.4% | – | 0.130 | 17.8% |
+| HallusionBench | LLaVA-1.5 | 51.2% | – | 0.421 | 0.0% |
+| AMBER(d) mixed | LLaVA-1.5 | 78.6% | partial | see Part B | — |
 
-## 5. Composition with a mitigation decoder (VCD, POPE-adversarial)
+Grounding improves every object-existence row; largest where base confidence is poorly
+calibrated (VCD, +32 pp). MME-full / GQA / HallusionBench have non-object questions
+(grounding n/a) — the guarantee still holds via confidence, correctly forcing near-total
+abstention on the near-chance HallusionBench. †n=60, too small to certify.
+*(`master_comparison.py`.)*
+
+## A5. Composition with a mitigation decoder (VCD, POPE-adv)
 
 | Score | AURC ↓ | cov@10% ↑ |
 |---|---|---|
 | VCD confidence (mitigation alone) | 0.1030 | 47.6% |
-| **VCD + grounding (ours, composition)** | **0.0603** | **64.2%** |
+| **VCD + grounding (ours)** | **0.0603** | **64.2%** |
 
-ΔAURC +0.043 ± 0.007 (~6σ). Our conformal grounding layer composes on top of a
-SOTA-style mitigation decoder and improves it, regardless of the decoder's own
-quality.
+ΔAURC +0.043 ± 0.007 (~6σ). Our layer composes on top of a SOTA-style mitigation
+decoder regardless of that decoder's own quality.
 
-## 6. Second dataset — MME (LLaVA-1.5-7B)
+## A6. Cross-backbone summary
 
-| | value |
+| Backbone | base acc | Δcov@10% from grounding |
+|---|---|---|
+| LLaVA-1.5-7B | 0.827 | +10.2 pp |
+| Qwen2-VL-2B | 0.873 | +1.9 pp |
+
+The method generalizes; **the benefit scales with how much the base model hallucinates.**
+
+---
+
+# PART B — CCRC (certified correction)
+
+Full write-up, theory and positioning: **`ALGORITHM.md`**. Summary:
+
+## B1. Motivation
+Prop. 3 of arXiv 2606.29054 proves any **emit-or-abstain** predictor must abstain on
+≥ (μ−α)/(1−α). CCRC emits a *modified* answer, so the bound's premise fails.
+
+## B2. Development history (each failure is documented)
+| version | flaw | fix |
+|---|---|---|
+| v1 | certified repair with `1−s` → **circular**; repaired ~0% | certify with an **independent channel** |
+| v2 | repair gate **coupled** to λ; needed δ/2 split → lost on Qwen (−4.2), VCD (−2.9) | **decouple** gate at fixed q → single FST at full δ |
+| **v3** | — | canonical (`ccrc_v3.py`) |
+
+## B3. CCRC v3 results (q=0.10, guarantee verified in every row)
+
+| setting | n | μ | α | filter | **CCRC** | risk | gain |
+|---|---|---|---|---|---|---|---|
+| POPE-1500 LLaVA | 1500 | 18.1% | 0.10 | 68.2% | **72.6%** | 8.2% | +4.4 |
+| POPE-adv LLaVA | 444 | 17.3% | 0.10 | 42.1% | **46.8%** | 4.3% | +4.7 |
+| POPE-adv Qwen2-VL | 591 | 12.9% | 0.10 | 77.5% | **79.4%** | 6.0% | +1.9 |
+| POPE-adv LLaVA+VCD | 591 | 19.6% | 0.10 | 45.0% | **47.5%** | 4.7% | +2.5 |
+| POPE-adv LLaVA | 444 | 17.3% | 0.15 | 69.2% | **77.2%** | 9.7% | +8.0 |
+| **AMBER(d) LLaVA** | 228 | 11.4% | 0.10 | 92.1% | 84.5% | — | **−7.5** |
+
+## B4. Mechanism: risk dilution → acceptance headroom
+Strict-gate repairs are *more* accurate than the acceptance gate's marginal items, so
+they lower emitted risk and let λ open further. **Coverage gain is 3–6× the repaired
+mass** (1.4% repaired → +4.7 pp coverage).
+
+## B5. Precondition (from the AMBER negative result)
+Gain tracks the abstention floor μ−α. Isolated by controlled tests: *not* a bad channel
+(detector 95.6% on AMBER, 100% in the repair region) and *not* small n (POPE subsampled
+to 228 still gains +3.2).
+
+| μ−α (α=0.10) | gain |
 |---|---|
-| accuracy | 0.689 |
-| error among accepted @ α=10% | 4.6% (valid ✓) |
-| grounded items | 0 / 700 |
+| ≥ 3 pp | +1.9 … +4.7 |
+| ~1.4 pp (AMBER) | −7.5 |
 
-Conformal **validity generalizes** to a harder, different dataset. The first 700
-MME items are cognition/reasoning tasks (no object-existence questions), so OWLv2
-grounding does not apply — **delineating the scope of the grounding contribution
-to object hallucination**. The guarantee still holds via confidence alone.
+**Use CCRC only when μ is comfortably above α** — checkable a priori.
 
-## 7. Positioning vs recent methods (capability, not head-to-head accuracy)
+## B6. Baselines
+**Detector-only** (emit the detector's answer): CCRC wins 3 of 4 —
+POPE-1500 72.6 vs 55.3, POPE-adv 46.8 vs 13.0, Qwen 79.4 vs 21.8; AMBER **loses**
+84.5 vs 92.6. Note detector accuracy ≈ VLM on POPE (82–83%) yet its selective coverage
+collapses: **accuracy ≠ separable correctness score.**
 
-OPERA (CVPR'24), Attention Lens (CVPR'25), REVERSE (NeurIPS'25) are full-coverage
-**mitigation** methods (no statistical guarantee, no selective tradeoff); ConfLVLM
-(EMNLP'25) is conformal but uses heuristic uncertainty without structured
-grounding. Ours is the only approach combining structured grounding + real-time
-correction + a distribution-free guarantee + selective coverage, and it *composes
-on top of* the mitigation methods (see §5). See `comparison_figure.png`.
+**ConfLVLM scorer head-to-head** (POPE-1500, α=0.10), with honest attribution:
 
-## 8. Ablation — nonconformity combiner (`combiner_ablation.py`)
+| method | coverage | Δ |
+|---|---|---|
+| ConfLVLM-style (CLIP scorer, filter) | 5.6% | — |
+| + VLM confidence | 41.5% | +35.9 |
+| + OWLv2 grounding | 68.2% | +26.7 |
+| **CCRC (+repair)** | **72.6%** | **+4.4** |
 
-Does a higher-capacity combiner beat logistic regression? Two calibration
-protocols, 6 features, target error 10%.
+Of +67 pp total, **+62.6 is the score and only +4.4 is our algorithm.** Caveat:
+ConfLVLM was designed for free-form caption claims, so this understates them.
 
-**Protocol I — combiner trained on the same fold used to calibrate τ (naive):**
+## B7. Ablations
+- **Combiner** (`combiner_ablation.py`): deep/tree combiners do *not* help and can
+  silently break validity under data reuse (GBM 13.3% error at a 10% target). With a
+  proper 3-way split all combiners tie (~73%); logistic chosen deliberately.
+- **Risk bound** (§9): Clopper–Pearson 72.5% > empirical-Bernstein 54.9% > Hoeffding
+  38.3% coverage, all valid. Exact binomial dominates for a binary loss.
 
-| Combiner | cov@10% | test error | valid? |
-|---|---|---|---|
-| Logistic | 74.8% | 8.8% | ✅ |
-| GradBoost | 91.3% | 13.3% | ❌ VIOLATED |
-| RandForest | 88.5% | 12.1% | ❌ VIOLATED |
-| MLP (64,32) | ~28% (unstable) | — | overfits |
+---
 
-**Protocol II — proper 3-way split (train combiner / calibrate τ / test, disjoint):**
+# Prior art / positioning (verified)
 
-| Combiner | cov@10% | test error | valid? |
-|---|---|---|---|
-| Logistic | 72.5% | 8.4% | ✅ |
-| GradBoost | 72.5% | 8.3% | ✅ |
-| RandForest | 75.7% | 8.5% | ✅ |
+- **arXiv 2606.29054** — filtering impossibility (Prop. 3). Motivates CCRC.
+- **arXiv 2606.16667 (BCEA)** — *close prior art.* Same domain/machinery (POPE,
+  LLaVA/Qwen, CP+FST), same goal; **28% → 37% coverage at α=0.10.** But it *re-scores the
+  model's original claim* with zoomed views and explicitly "makes no corrected answer."
+  CCRC's distinct claim is **emitting a different answer**, which *requires* an
+  independent channel (self-certification proved dead). **Complementary, not superseded.**
+- **arXiv 2511.17908** — checked, does *not* contain conformal editing; the earlier lead
+  was a synthesized search summary, not a real result.
+- **ConfLVLM (EMNLP 2025)**, conformal abstention, conformal language modeling — filter or
+  abstain only.
+- **OPERA / REVERSE / Attention Lens** — full-coverage mitigation, no guarantee; our layer
+  composes on top (A5). Dataset inventory: `baseline_datasets.md`.
 
-High-capacity combiners only *appear* better under data reuse, where they overfit
-the calibration set and **break the guarantee** (13.3% > 10%). With a proper split
-all combiners are valid and statistically tied, so **logistic regression is chosen
-deliberately**: equal efficiency, lowest variance, interpretable, robust to the
-data-reuse trap. Capacity is not the bottleneck — grounding-signal quality is; a
-deep combiner would only help if fed rich high-dimensional inputs (raw
-embeddings / hidden states / attention), which needs far more calibration data.
-**Design rule: train the combiner on a fold disjoint from conformal calibration.**
+# Open items
+1. **BCEA race + composition** — running (`colab_exp13_bcea.py`): BCEA vs CCRC vs both.
+2. **Sequential/generative extension** — theory drafted (`SEQUENTIAL.md`); gating
+   falsification experiment (does correcting token *t* raise or lower downstream
+   hallucination?) not yet run.
+3. AMBER generative subset (CHAIR-style) untouched; per-category Mondrian conditional
+   coverage still only on synthetic data (`conformal_sim.py`).
 
-## 9. Ablation — risk upper-bound method (binary loss, POPE, 3-way split)
-
-| Upper bound | cov@10% | test error | valid? |
-|---|---|---|---|
-| **Clopper–Pearson (exact binomial)** | **72.5%** | 8.4% | ✅ |
-| Empirical-Bernstein | 54.9% | 4.6% | ✅ |
-| Hoeffding | 38.3% | 3.2% | ✅ |
-
-The accepted-set error is a Binomial proportion, so the exact interval
-(Clopper–Pearson) is near-optimal; general-bounded-loss concentration bounds
-(Hoeffding, Bernstein, WSR) are looser here and waste coverage. **CP is used for
-the binary experiments.** For graded/continuous factuality losses,
-variance-adaptive bounds (empirical-Bernstein, WSR betting) become preferable.
-Multiplicity across the threshold scan is handled in the Learn-Then-Test /
-fixed-sequence-testing framing (RCPS); CP's conservativeness currently absorbs it.
-
-### Honest caveats
-- POPE samples here are the **adversarial** split (hardest); grounding coverage
-  ~99% of items. Per-category Mondrian conditional coverage is shown on synthetic
-  data (`conformal_sim.py`); a category-balanced real run is future work.
-- Self-consistency used K=3 (coarse); a higher-K baseline would be a stronger
-  ConfLVLM reproduction.
-- Grounding benefit is specific to object-existence hallucination (§6).
+# File index
+| file | purpose |
+|---|---|
+| `ALGORITHM.md` / `SEQUENTIAL.md` | CCRC write-up / sequential theory |
+| `ccrc_v3.py` | **canonical CCRC** |
+| `ccrc_replicate.py` | multi-backbone replication |
+| `ccrc.py`, `ccrc_v2.py`, `ccrc_algorithm.py`, `ccrc_validate.py` | v1/v2 failure record |
+| `conformal_sim.py` | synthetic 3-pillar validation |
+| `local_analysis*.py`, `local_multi_alpha.py`, `local_selfconsistency.py`, `local_backbone_analysis.py` | Part A analyses |
+| `master_comparison.py`, `combiner_ablation.py`, `risk_coverage_vs_conflvlm.py` | comparisons/ablations |
+| `colab_exp*.py` | GPU extraction runs |
+| `exp*.json`, `raw_scores.json`, `owlv2_scores.json` | extracted per-item signals |
+| `*.png` | figures |
