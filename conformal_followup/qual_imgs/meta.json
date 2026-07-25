@@ -1,0 +1,79 @@
+{
+ "282": {
+  "region": "abstain",
+  "question": "Is there a person in the image?",
+  "answer": "yes",
+  "category": "adversarial",
+  "file": "qual_imgs/q282.jpg"
+ },
+ "518": {
+  "region": "repair",
+  "question": "Is there a mouse in the image?",
+  "answer": "yes",
+  "category": "adversarial",
+  "file": "qual_imgs/q518.jpg"
+ },
+ "524": {
+  "region": "accept",
+  "question": "Is there a broccoli in the image?",
+  "answer": "yes",
+  "category": "adversarial",
+  "file": "qual_imgs/q524.jpg"
+ },
+ "538": {
+  "region": "accept",
+  "question": "Is there a toilet in the image?",
+  "answer": "yes",
+  "category": "adversarial",
+  "file": "qual_imgs/q538.jpg"
+ },
+ "664": {
+  "region": "accept",
+  "question": "Is there a sheep in the image?",
+  "answer": "yes",
+  "category": "adversarial",
+  "file": "qual_imgs/q664.jpg"
+ },
+ "1001": {
+  "region": "abstain",
+  "question": "Is there a cup in the image?",
+  "answer": "no",
+  "category": "adversarial",
+  "file": "qual_imgs/q1001.jpg"
+ },
+ "1328": {
+  "region": "repair",
+  "question": "Is there a mouse in the image?",
+  "answer": "yes",
+  "category": "adversarial",
+  "file": "qual_imgs/q1328.jpg"
+ },
+ "1425": {
+  "region": "abstain",
+  "question": "Is there a book in the image?",
+  "answer": "no",
+  "category": "adversarial",
+  "file": "qual_imgs/q1425.jpg"
+ },
+ "1446": {
+  "region": "repair",
+  "question": "Is there a spoon in the image?",
+  "answer": "yes",
+  "category": "adversarial",
+  "file": "qual_imgs/q1446.jpg"
+ },
+ "1399": {
+  "region": "abstain",
+  "question": "Is there a handbag in the image?",
+  "answer": "no",
+  "category": "adversarial",
+  "file": "qual_imgs/q1399.jpg"
+ },
+ "1463": {
+  "region": "abstain",
+  "question": "Is there a truck in the image?",
+  "answer": "no",
+  "category": "adversarial",
+  "file": "qual_imgs/q1463.jpg"
+ }
+}

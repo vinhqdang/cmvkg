@@ -36,22 +36,7 @@ Gains, Preconditions, and a Sequential Failure Mode}
   \name Quang-Vinh Dang \email vinh.dq4@buv.edu.vn \\
   \addr British University Vietnam, Hung Yen, Viet Nam
   \AND
-  \name Anh Dat Le \email datla@uef.edu.vn \\
-  \addr University of Economics and Finance, Ho Chi Minh City, Viet Nam
-  \AND
-  \name Ngoc-Son-An Nguyen \email annns25871@pgr.iuh.edu.vn \\
-  \addr Industrial University of Ho Chi Minh City, Viet Nam
-  \AND
-  \name Thi-Bich-Diem Vo \email misdiem@gmail.com \\
-  \addr GiaoHangNhanh, Ho Chi Minh City, Viet Nam
-  \AND
-  \name Minh Ngoc Dinh \email minh.dinh@maeducation.com \\
-  \addr Millennia Education, Ho Chi Minh City, Viet Nam
-  \AND
-  \name Hoang Viet Vu \email 30066555@st.buv.edu.vn \\
-  \addr British University Vietnam, Hung Yen, Viet Nam
-  \AND
-  \name Phuong Lan Nguyen \email 30066017@st.buv.edu.vn \\
+  \name Phuong-Lan Nguyen \email 30066017@st.buv.edu.vn \\
   \addr British University Vietnam, Hung Yen, Viet Nam
 }
 
@@ -436,6 +421,50 @@ loosens the accepted region grows and the repair region shrinks. Keeping $q$ fix
 makes the family nested and lets a single fixed-sequence test suffice
 (\S\ref{sec:decoupling}).}
 \label{fig:method}
+\end{figure}
+
+\subsection{Worked examples on real data}
+\label{sec:qualitative}
+
+Before turning to aggregates, Figure~\ref{fig:qualitative} shows what the three decisions
+look like on individual POPE images, with the actual channel-1 score, channel-2 detection
+confidence, and resulting action for each. The three columns illustrate the regimes the
+procedure is designed to separate.
+
+In the \textsc{accept} column the model answers a straightforward existence question
+confidently and correctly, the detector agrees, and the item is emitted unchanged; these
+cases carry the bulk of the coverage. The \textsc{repair} column contains the cases that
+motivate the method: LLaVA is asked whether a computer mouse is present, answers
+``no'' with $p=0.21$, and is \emph{wrong} --- the mouse is there. Channel~1 correctly
+assigns a low correctness score ($s=0.18$), which under a filtering policy would produce an
+abstention and no answer at all. The detector, however, localises the object with confidence
+$0.90$, comfortably inside the top evidence decile, so CCRC substitutes the detector's
+answer and the item is emitted \emph{correctly}. This is the dilution effect of
+\S\ref{sec:mechanism} in a single instance: a high-precision repair converts an item that
+filtering would discard into a low-risk emitted item.
+
+The \textsc{abstain} column shows the necessary complement. Here the model is wrong
+\emph{and} the detector is also wrong, with weak evidence in both cases ($m=0.04$ and
+$m=0.03$); the questions ask about a handbag and a truck that are not present, and neither
+channel supplies a certifiable answer. Abstention is the correct action, and no amount of
+substitution would help. The existence of a substantial population of such items is why
+CCRC's gains are bounded by Proposition~\ref{prop:precondition} rather than being able to
+recover the entire abstained mass.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_qualitative.png}
+\caption{Real POPE images with the actual quantities CCRC uses. Each panel reports the
+question, the ground truth, LLaVA's answer with its probability, the detector's answer with
+its confidence and evidence margin, the channel-1 correctness score, and the resulting
+decision. \textbf{Accept} (left): both channels agree and the model is right.
+\textbf{Repair} (centre): the model misses an object that is genuinely present and receives
+a low correctness score, while the detector localises it with high confidence, so the
+answer is substituted and the error is fixed --- items a filtering policy would abstain on.
+\textbf{Abstain} (right): the model is wrong and the detector is also wrong with weak
+evidence, so no certifiable answer exists and the procedure correctly declines. Thresholds
+are the calibrated $Q_s(1-\lambda)$ and the fixed gate $Q_m(1-q)$ from one split.}
+\label{fig:qualitative}
 \end{figure}
 
 \subsection{Validity}

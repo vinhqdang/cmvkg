@@ -1,0 +1,92 @@
+{
+ "tau": 0.8154256684764567,
+ "tm": 0.38284,
+ "picks": {
+  "accept": [
+   {
+    "idx": 664,
+    "s": 0.983,
+    "m": 0.584,
+    "det": 0.734,
+    "p_yes": 0.985,
+    "ans": "yes",
+    "gold": "yes",
+    "det_ans": "yes"
+   },
+   {
+    "idx": 538,
+    "s": 0.983,
+    "m": 0.633,
+    "det": 0.783,
+    "p_yes": 0.98,
+    "ans": "yes",
+    "gold": "yes",
+    "det_ans": "yes"
+   },
+   {
+    "idx": 524,
+    "s": 0.983,
+    "m": 0.561,
+    "det": 0.711,
+    "p_yes": 0.983,
+    "ans": "yes",
+    "gold": "yes",
+    "det_ans": "yes"
+   }
+  ],
+  "repair": [
+   {
+    "idx": 518,
+    "s": 0.18,
+    "m": 0.753,
+    "det": 0.903,
+    "p_yes": 0.207,
+    "ans": "no",
+    "gold": "yes",
+    "det_ans": "yes"
+   },
+   {
+    "idx": 1328,
+    "s": 0.136,
+    "m": 0.732,
+    "det": 0.882,
+    "p_yes": 0.43,
+    "ans": "no",
+    "gold": "yes",
+    "det_ans": "yes"
+   },
+   {
+    "idx": 1446,
+    "s": 0.152,
+    "m": 0.675,
+    "det": 0.825,
+    "p_yes": 0.477,
+    "ans": "no",
+    "gold": "yes",
+    "det_ans": "yes"
+   }
+  ],
+  "abstain": [
+   {
+    "idx": 1399,
+    "s": 0.35,
+    "m": 0.042,
+    "det": 0.192,
+    "p_yes": 0.512,
+    "ans": "yes",
+    "gold": "no",
+    "det_ans": "yes"
+   },
+   {
+    "idx": 1463,
+    "s": 0.355,
+    "m": 0.028,
+    "det": 0.178,
+    "p_yes": 0.516,
+    "ans": "yes",
+    "gold": "no",
+    "det_ans": "yes"
+   }
+  ]
+ }
+}
