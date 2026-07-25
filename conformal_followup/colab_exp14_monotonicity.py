@@ -25,7 +25,7 @@ Output: per-image counts, so the paired test runs on CPU afterwards.
 import json, sys, os, time, subprocess, zipfile, urllib.request, glob, re
 import numpy as np
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 100
-MAXNEW = 64
+MAXNEW = 96
 def log(*a): print(*a, flush=True)
 t0 = time.time()
 for pkg in ["bitsandbytes"]:
@@ -86,14 +86,16 @@ def generate(img, assistant_prefix="", max_new=MAXNEW):
     return tok.decode(out[0, inp["input_ids"].shape[1]:], skip_special_tokens=True)
 
 def mentions(text, truth, hallu):
-    """Return list of (word_index, word, kind) for recognised object words."""
+    """CHAIR-style: a recognised object word is a hallucination iff it is NOT in this
+    image's `truth` list. (Restricting to AMBER's curated `hallu` subset yielded only 4%
+    of images, too few for a paired test.)"""
     ws = re.findall(r"[a-zA-Z]+", text.lower())
-    T, H = {stem(x) for x in truth}, {stem(x) for x in hallu}
+    T = {stem(x) for x in truth}
     out = []
     for i, w in enumerate(ws):
-        s = stem(w)
-        if s in H: out.append((i, w, "hallu"))
-        elif s in T: out.append((i, w, "truth"))
+        st = stem(w)
+        if st not in VSTEM: continue          # not a known object word
+        out.append((i, w, "truth" if st in T else "hallu"))
     return out, ws
 
 results = []
@@ -109,7 +111,7 @@ for c, iid in enumerate(ids):
     idx_w, bad_word, _ = first_h
     # choose the repair: the truth object with the strongest detection evidence
     best, best_s = None, -1
-    for o in truth[:8]:
+    for o in truth[:5]:
         with torch.no_grad():
             oi = op(text=[[f"a photo of a {o}"]], images=img, return_tensors="pt").to(device)
             sc = float(od(**oi).logits.sigmoid().max().item())
@@ -131,7 +133,7 @@ for c, iid in enumerate(ids):
                         len_orig=len(wo), len_rep=len(wr)))
     if len(results) % 10 == 0:
         log(f"  {len(results)} paired cases from {c+1} images (+{time.time()-t0:.0f}s)")
-    if time.time() - t0 > 2400: log("[budget] stopping early"); break
+    if time.time() - t0 > 2500: log("[budget] stopping early"); break
 
 log(f"[done] {len(results)} paired cases")
 log("RAW_JSON " + json.dumps(results))
