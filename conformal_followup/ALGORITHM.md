@@ -289,6 +289,20 @@ Vision-Language Models"** (arXiv 2606.16667) is close prior art and must be cite
 4. **The μ−α precondition** linking the gain to Prop. 3's closed-form abstention floor.
 
 **What CCRC can no longer claim:** being first to escape heavy abstention in VLM
-selective prediction via extra visual evidence — BCEA did that. The two are
-**complementary** (rescue-by-looking-again vs rescue-by-replacing), and a direct
-comparison against BCEA has **not** been run.
+selective prediction via extra visual evidence — BCEA did that.
+
+**Direct comparison, now run** (`bcea_analysis.py`; details in RESULTS.md §B8). With one
+common base score and one mechanism added per arm, on POPE/LLaVA (n=394):
+
+| arm | cov@0.10 | cov@0.15 |
+|---|---|---|
+| base (confidence) | 5.5% | 16.5% |
+| + BCEA acquisition | 5.5% | 24.1% |
+| + our grounding score | 32.1% | 63.2% |
+| + CCRC repair | 34.5% | 71.8% |
+| **composed** | **35.8%** | **74.2%** |
+
+**The mechanisms are complementary: composition beats every single-mechanism arm at both
+α.** Re-reading the image and replacing the answer rescue different claims. We do **not**
+claim to beat BCEA — our reproduction uses crude crops (B=3) and under-delivers versus
+their published +9 pp at α=0.10, so the honest position is that CCRC and BCEA compose.

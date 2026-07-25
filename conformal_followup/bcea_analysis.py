@@ -34,14 +34,20 @@ ok_rep = ((owl >= THR).astype(int) == g).astype(int)
 margin = np.abs(owl - THR)
 mu = 1 - ok_orig.mean()
 
-X_ch1 = np.column_stack([p, conf, dn, np.where(a == 1, dn, 1 - dn)])   # ours (ch.1)
-X_acq = np.column_stack([s_acq, l_full, mm(s_acq)])                    # BCEA score
-X_both = np.column_stack([p, conf, dn, np.where(a == 1, dn, 1 - dn), s_acq, l_full])
+# FAIR DESIGN: hold the BASE score fixed (VLM confidence only) and add ONE mechanism at
+# a time, so each arm isolates a mechanism rather than inheriting the other's features.
+# (An earlier version gave the filter arm our grounding features while BCEA got only its
+#  own acquisition score -- that understates BCEA and is not a valid comparison.)
+BASE  = np.column_stack([p, conf])                                     # VLM confidence
+X_acq = np.column_stack([p, conf, s_acq, l_full])                       # + BCEA acquisition
+X_grd = np.column_stack([p, conf, dn, np.where(a == 1, dn, 1 - dn)])    # + our grounding score
+X_all = np.column_stack([p, conf, dn, np.where(a == 1, dn, 1 - dn), s_acq, l_full])
 
-ARMS = [("FILTER (ch.1, no rescue)",      X_ch1,  None),
-        ("BCEA (re-score, filter)",       X_acq,  None),
-        ("CCRC (replace, ours)",          X_ch1,  0.10),
-        ("COMPOSED (BCEA score + CCRC repair)", X_both, 0.10)]
+ARMS = [("BASE filter (confidence only)",        BASE,  None),
+        ("+ BCEA acquisition (re-score)",        X_acq, None),
+        ("+ our grounding score (filter)",       X_grd, None),
+        ("+ CCRC repair (ours, full)",           X_grd, 0.10),
+        ("COMPOSED (BCEA + grounding + repair)", X_all, 0.10)]
 
 print(f"POPE / LLaVA-1.5-7B   n={n} (grounded)   base risk mu={mu:.3f}   delta={DELTA}")
 print(f"BCEA s_acq range {s_acq.min():.2f}..{s_acq.max():.2f}\n")
@@ -66,7 +72,10 @@ for alpha in [0.10, 0.15]:
         ok = "OK" if rsk <= alpha * 100 + 1 else "BAD"
         print(f"{name:40s}{cov:9.1f}%{rsk:7.1f}%{rep:9.1f}%{ok:>7s}")
     print("-" * 75)
-    b, c = res["BCEA (re-score, filter)"], res["CCRC (replace, ours)"]
-    comp = res["COMPOSED (BCEA score + CCRC repair)"]
-    print(f"BCEA {b:.1f}% vs CCRC {c:.1f}%  ->  winner: {'CCRC' if c>b else 'BCEA'}")
-    print(f"COMPOSED {comp:.1f}%  ->  {'complementary (beats both)' if comp>max(b,c) else 'no additive benefit'}\n")
+    base = res["BASE filter (confidence only)"]
+    b = res["+ BCEA acquisition (re-score)"]; g = res["+ our grounding score (filter)"]
+    c = res["+ CCRC repair (ours, full)"]; comp = res["COMPOSED (BCEA + grounding + repair)"]
+    print(f"mechanism deltas vs BASE {base:.1f}%:  BCEA acquisition {b-base:+.1f}pp | "
+          f"grounding score {g-base:+.1f}pp | grounding+repair {c-base:+.1f}pp")
+    print(f"COMPOSED {comp:.1f}% ({comp-base:+.1f}pp)  ->  "
+          f"{'complementary: beats every single-mechanism arm' if comp>max(b,g,c) else 'no additive benefit over the best single mechanism'}\n")

@@ -179,8 +179,39 @@ ConfLVLM was designed for free-form caption claims, so this understates them.
 - **OPERA / REVERSE / Attention Lens** — full-coverage mitigation, no guarantee; our layer
   composes on top (A5). Dataset inventory: `baseline_datasets.md`.
 
+## B8. BCEA race + composition (`colab_exp13_bcea.py`, `bcea_analysis.py`)
+
+Faithful BCEA reproduction (post-acquisition score over B=3 zoomed views + blank-image
+baseline). **Fair design: one common base score (VLM confidence), one mechanism added per
+arm** — an earlier version gave the filter arm our grounding features while BCEA got only
+its acquisition score, which understated BCEA and was not a valid comparison.
+
+POPE / LLaVA-1.5-7B, n=394 grounded, μ=0.183. All arms valid.
+
+| arm | cov@α=0.10 | Δ vs base | cov@α=0.15 | Δ vs base |
+|---|---|---|---|---|
+| BASE filter (confidence only) | 5.5% | — | 16.5% | — |
+| + **BCEA** acquisition (re-score) | 5.5% | +0.1 | 24.1% | +7.5 |
+| + our grounding score (filter) | 32.1% | +26.6 | 63.2% | +46.7 |
+| + **CCRC** repair (ours, full) | 34.5% | +29.1 | 71.8% | +55.3 |
+| **COMPOSED** (BCEA + grounding + repair) | **35.8%** | **+30.4** | **74.2%** | **+57.7** |
+
+**Headline: the two mechanisms are complementary — composition beats every
+single-mechanism arm at both α.** Re-reading the image (BCEA) and replacing the answer
+from an independent channel (CCRC) rescue *different* claims, so they stack. This is the
+right framing for the paper: BCEA is a collaborator, not a competitor.
+
+Secondary: our grounding score contributes far more than BCEA's acquisition here
+(+26.6/+46.7 vs +0.1/+7.5), and repair adds a consistent +2.5/+8.6 pp on top of it.
+
+**Fidelity caveat (favours BCEA).** Our BCEA arm is likely weaker than the published
+method: our zoomed views are crude (center crop + left/right halves, B=3), whereas their
+acquisition may use more and better-targeted views. Their paper reports +9 pp at α=0.10;
+we reproduce +7.5 pp at α=0.15 but only +0.1 pp at α=0.10. **We therefore do not claim to
+beat BCEA** — only that composition helps and that our grounding score is strong in this
+setup.
+
 # Open items
-1. **BCEA race + composition** — running (`colab_exp13_bcea.py`): BCEA vs CCRC vs both.
 2. **Sequential/generative extension** — theory drafted (`SEQUENTIAL.md`); gating
    falsification experiment (does correcting token *t* raise or lower downstream
    hallucination?) not yet run.
