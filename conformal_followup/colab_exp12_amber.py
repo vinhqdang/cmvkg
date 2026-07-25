@@ -37,18 +37,26 @@ log("[data] fetching AMBER queries + annotations ...")
 queries=fetch_json(RAW+"query/query_discriminative.json")
 annots =fetch_json(RAW+"annotations.json")
 truth={r["id"]:r for r in annots}
+ATTR=("discriminative-attribute-state","discriminative-attribute-number",
+      "discriminative-attribute-action")
 WANT={"existence":("discriminative-hallucination",),
-      "attribute":("discriminative-attribute-state","discriminative-attribute-number",
-                   "discriminative-attribute-action"),
-      "relation":("discriminative-relation",)}[SUBSET]
-picks=[]
+      "attribute":ATTR,
+      "relation":("discriminative-relation",),
+      # standard AMBER(d): all discriminative types combined -> mixed yes/no labels.
+      # NOTE: single-type subsets are label-degenerate (hallucination is all "no",
+      # relation all "yes"), which makes correctness a deterministic function of the
+      # model's own answer. Use "all" for selective-prediction experiments.
+      "all":("discriminative-hallucination",)+ATTR+("discriminative-relation",)}[SUBSET]
+cand=[]
 for q in queries:
     a=truth.get(q["id"])
     if not a or a.get("type") not in WANT: continue
     t=str(a.get("truth","")).lower().strip()
     if t not in ("yes","no"): continue
-    picks.append((q["id"],q["image"],q["query"],1 if t=="yes" else 0,a["type"]))
-    if len(picks)>=N: break
+    cand.append((q["id"],q["image"],q["query"],1 if t=="yes" else 0,a["type"]))
+if SUBSET=="all":                      # shuffle so all types/labels are represented
+    import random; random.Random(0).shuffle(cand)
+picks=cand[:N]
 log(f"[data] {SUBSET}: {len(picks)} items (+{time.time()-t0:.0f}s)")
 
 # ---- 2. images from public HF mirror ----
