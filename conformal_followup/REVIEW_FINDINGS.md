@@ -82,3 +82,32 @@ peer-reviewed versions exist.
 87.8%→10.0% (and its CLIP/BiomedCLIP/LayoutLMv3 scorer breakdown), VCD's diffusion-noised
 contrast, RLHF-V's correctional feedback, conformal factuality as back-off, KnowNo, and
 Farquhar et al. in Nature 630:625–630.
+
+
+---
+
+# Resolution status (all findings addressed)
+
+| finding | resolution |
+|---|---|
+| P0.1 anonymity | Fixed. `\usepackage{tmlr}`, camera-ready author block retained but inert, acknowledgments placeholder removed, OpenReview id neutralised, self-identifying prose rewritten third-person, figure label renamed CCRC. PDF reads "Anonymous authors". Verified: no institutional strings in the text layer. |
+| P0.2 Theorem 2 | Replaced by Proposition 4, a mixture-level budget `c_r <= c_a(alpha-r_a)/(r_r-alpha)`, plus the two measurements (no cheap flip region where correction pays; FST aborts on 65-100% of splits). Claim downgraded to an empirical regularity with a mechanism; all 8 downstream overclaims rewritten. |
+| P0.3 leverage 3-6x | Corrected to 1.9-3.4x in abstract, intro, method and figure title; figure reference lines 1x/2x/3x; AMBER repaired mass 0.0 -> 1.45%. |
+| P0.4 one-directional gate | Disclosed in a new Remark 2, before the experiments, with the arithmetic and the 45/45, 60/60, 60/60, 23/23 counts. |
+| P1.5 monotonicity | Competing explanation reported with both normalisations (share p=0.884, per-word p=0.011); conclusion retained on the grounds that the certified quantity is a count, and said so explicitly. Abstract's "any sequential procedure" -> "context-blind". |
+| P1.6 validity audit | New "How validity is audited" paragraph: mean risk is not the guarantee; reports test-fold exceedance (11-15%) and full-set exceedance (1-4%) vs delta=0.10. `ccrc_v3.py` now flags on exceedance, not mean. Guarantee confirmed sound. |
+| P1.8 two-way splits | All six scripts converted to three-way splits and re-run; tables 3, 4, 13 and three figures updated. This resolved the nine-coverage-values problem: the 71.7/78.9 pair were *oracle* coverages, never calibrated ones. Everything now reconciles on 63.6 -> 73.1. |
+| P1.9 precondition | Prop 3 stripped of the epsilon identity; "predicts" downgraded to "diagnostic" everywhere; Remark 6 gives the counterexample from our own data. |
+| P1.10 Theorem 3 | Non-interference now an explicit hypothesis; interference term added for the general case; two remarks report the measured +0.207 and the base-policy limitation. |
+| P1.11 Prop 2 | Restated as pointwise/population; the step to a more permissive lambda-hat moved to Remark 3 naming both gaps. |
+| Theorem 1 proof | "Exchangeable => binomial" replaced by the Poisson-binomial identification plus Hoeffding (1956) domination, so Clopper-Pearson conservatism is argued rather than assumed. Nesting no longer reads as a validity hypothesis. |
+| Prop 1 | Derivation supplied, with the premise-dependent step marked as the one CCRC exits. |
+| P2 numbers | Backbone count, the 10.2 ceiling, the +1.9 floor, Table 2's monotonicity caption, the nonexistent risk column, "every table", the 95%-confidence promise, the MME/Lemma-1 footnote, AMBER/Qwen accuracy labels, item 518's percentile and the frame description. Table 4's gain restated as +11.9+-21.1 with an explicit note that the interval does not support a significant effect. |
+| P3 notation | Notation table added; s renamed a conformity/correctness score with orientation stated; error count E -> V; gold answer a*; "fourth action" -> third; the two monotonicity properties named separately; Algorithm 1 tests K >= k_min and defines the empty-lambda case. |
+| Figures | Capability matrix gains BCEA and online abstention, corrects ConfLVLM's grounding row, renames columns to what they mean, widens for clipped headers. Risk-coverage caption distinguishes oracle from calibrated coverage and states the baseline is *not* ConfLVLM. |
+| Bibliography | 15 metadata fixes applied and verified against arXiv/ACL/PMLR/CVF/DBLP; five understated venues corrected (ICCV/EMNLP-Findings/ACM-MM/ICML); four entry types fixed; `degf` author list 4 -> 10; the mmhal/sun2024aligning duplicate collapsed onto one key with prose naming MMHal-Bench; opera, mcallava and chen2024halc descriptions corrected (MCA-LLaVA is a positional-encoding method, not a layer intervention). |
+
+Still open, and flagged rather than fixed: Table 12's risk-bound ablation has no
+Hoeffding/empirical-Bernstein implementation in the repo, and the detector-only column of
+Table 7 plus rows 1-2 of Table 8 are sourced only to `ALGORITHM.md`. These need either code
+or removal before submission. `cmvkgguard` still needs a DOI.

@@ -1,4 +1,4 @@
-\begin{thebibliography}{86}
+\begin{thebibliography}{85}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -484,26 +484,15 @@ Mauricio Sadinle, Jing Lei, and Larry Wasserman.
 \newblock \emph{Journal of the American Statistical Association}, 114\penalty0
   (525):\penalty0 223--234, 2019.
 
-\bibitem[Sun et~al.(2024{\natexlab{a}})Sun, Shen, Cao, Liu, Li, Shen, Gan, Gui,
-  Wang, Yang, Keutzer, and Darrell]{mmhal}
+\bibitem[Sun et~al.(2024)Sun, Shen, Cao, Liu, Li, Shen, Gan, Gui, Wang, Yang,
+  Keutzer, and Darrell]{sun2024aligning}
 Zhiqing Sun, Sheng Shen, Shengcao Cao, Haotian Liu, Chunyuan Li, Yikang Shen,
   Chuang Gan, Liangyan Gui, Yu-Xiong Wang, Yiming Yang, Kurt Keutzer, and
   Trevor Darrell.
 \newblock Aligning large multimodal models with factually augmented {RLHF}.
 \newblock In \emph{Findings of the Association for Computational Linguistics:
-  ACL 2024}, pp.\  13088--13110, Bangkok, Thailand, 2024{\natexlab{a}}.
-  Association for Computational Linguistics.
-\newblock URL \url{https://aclanthology.org/2024.findings-acl.775/}.
-
-\bibitem[Sun et~al.(2024{\natexlab{b}})Sun, Shen, Cao, Liu, Li, Shen, Gan, Gui,
-  Wang, Yang, Keutzer, and Darrell]{sun2024aligning}
-Zhiqing Sun, Sheng Shen, Shengcao Cao, Haotian Liu, Chunyuan Li, Yikang Shen,
-  Chuang Gan, Liangyan Gui, Yu-Xiong Wang, Yiming Yang, Kurt Keutzer, and
-  Trevor Darrell.
-\newblock Aligning large multimodal models with factually augmented {RLHF}.
-\newblock In \emph{Findings of the Association for Computational Linguistics:
-  ACL 2024}, pp.\  13088--13110, Bangkok, Thailand, 2024{\natexlab{b}}.
-  Association for Computational Linguistics.
+  ACL 2024}, pp.\  13088--13110, Bangkok, Thailand, 2024. Association for
+  Computational Linguistics.
 \newblock URL \url{https://aclanthology.org/2024.findings-acl.775/}.
 
 \bibitem[Tibshirani et~al.(2019)Tibshirani, Barber, Cand{\`e}s, and

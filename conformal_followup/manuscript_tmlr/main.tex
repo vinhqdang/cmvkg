@@ -66,9 +66,10 @@ strong, abstain otherwise, and certify the error rate of everything emitted at l
 $\alpha$ with confidence $1-\delta$.
 
 We prove validity for CCRC, characterise its behaviour, and evaluate it across five
-benchmarks, two backbones and a mitigation decoder. Four findings organise the paper.
+benchmarks, two backbones and a mitigation decoder. Four findings organise the paper, and \S\ref{sec:intro} lists the five contributions they
+support.
 First, the correctness \emph{score} matters more than the procedure: a detection-grounded
-score improves certified coverage over model-internal uncertainty by $10.8$--$32.1$ points,
+score improves certified coverage over model-internal uncertainty by $11.9$--$32.1$ points,
 and we decompose our total margin over a published CLIP-based scorer to show that $62.6$ of
 $67$ points come from the score rather than from our algorithm. Second, repairs cannot be
 self-certified --- we prove that certifying a substitution with the complement of the score
@@ -93,11 +94,11 @@ signals, and all negative results are released.
 
 \subsection{A small failure, and three unsatisfying options}
 
-Image 518 of the POPE benchmark is an office desk. On it, in plain view and occupying a
-respectable fraction of the frame, is a computer mouse. We ask LLaVA-1.5-7B: \emph{``Is
+Image 518 of the POPE benchmark is an office desk. At its lower right, small but unoccluded and
+plainly visible, is a computer mouse. We ask LLaVA-1.5-7B: \emph{``Is
 there a mouse in the image?''} The model answers \textbf{no}, and it is not especially
 confident about it --- the probability mass on \texttt{yes} is $0.207$. Our calibrated
-correctness score for this item is $s=0.18$, in the bottom fifth of the distribution. An
+correctness score for this item is $s=0.18$, at roughly the $0.2$nd percentile of the score distribution. An
 open-vocabulary detector, asked independently whether it can localise ``a photo of a
 mouse'' in the same pixels, returns a confidence of $0.903$ with a margin of $0.753$ over
 its own negative-class baseline. The object is there. The detector sees it. The model
@@ -142,10 +143,12 @@ and rarely cite each other.
 
 \paragraph{One literature makes the model wrong less often.}
 This is by far the larger body of work, and it is inventive. It modifies decoding to
-penalise the attention patterns associated with over-trusting the language prior
+penalise the attention patterns associated with neglecting the image in favour of the
+language prior
 \citep{opera}; contrasts logits from clean and corrupted views of the image
 \citep{vcd,degf}; localises the failure to particular layers and heads and intervenes
-surgically \citep{attnlens,only,mcallava,maskcd,causalgating}; injects the output of a
+surgically \citep{attnlens,only,maskcd,causalgating}, or corrects the positional prior that
+biases where the model looks \citep{mcallava}; injects the output of a
 vision expert during generation \citep{marine}; verifies and rewrites after the fact
 \citep{woodpecker,lure,reverse}; or grounds the model in retrieved external knowledge
 \citep{mkgrag,rule}. The measured effects are substantial and the methods are cheap. But
@@ -421,8 +424,8 @@ captions by the fraction of mentioned objects absent from MS-COCO ground truth, 
 the standard generative metric despite its restriction to a closed vocabulary. AMBER
 \citep{amber} provides an LLM-free benchmark with per-image lists of present and
 hallucinated objects across generative and discriminative splits, and annotates attribute
-and relation types as well as existence. MMHalBench \citep{mmhal} evaluates diverse
-hallucination types in question answering using a strong judge model. MME \citep{mme}
+and relation types as well as existence. MMHal-Bench --- introduced by \citet{sun2024aligning} alongside Fact-RLHF --- evaluates
+diverse hallucination types in question answering using a strong judge model. MME \citep{mme}
 measures broad perception and cognition across fourteen subtasks, only some of which are
 grounding-checkable. HallusionBench \citep{hallusionbench} targets visual illusions,
 charts, and reasoning traps, and is hard enough that strong models approach chance --- a
@@ -438,14 +441,15 @@ degeneracy is easy to miss.
 
 \paragraph{Mitigation by decoding.}
 The largest and most active family modifies the decoding distribution at inference time,
-with no retraining. OPERA \citep{opera} identifies an ``attention sink'' pattern
-characteristic of over-trust in the language prior, penalises it in the beam score, and
-retrospectively reallocates attention. Visual contrastive decoding \citep{vcd} contrasts
+with no retraining. OPERA \citep{opera} identifies a columnar attention pattern over a few
+\emph{summary} tokens, at which knowledge aggregates and image tokens are neglected,
+penalises it in the beam score, and rolls back to re-allocate \emph{token selection} when
+the pattern is detected. Visual contrastive decoding \citep{vcd} contrasts
 logits computed from the clean image against logits from a diffusion-corrupted version,
 subtracting the component of the distribution that survives visual degradation --- i.e.\ the
-component driven by the prior. Instruction-contrastive and focal-contrast variants use
-other perturbations of the input \citep{chen2024halc}, and \citet{favero2024} formalise the
-contrast as an information-grounding objective. DeGF \citep{degf} closes a generative loop:
+component driven by the prior. Other variants change what is contrasted: HALC \citep{chen2024halc} contrasts
+adaptively selected fine-grained fields of view rather than a globally corrupted image, and
+\citet{favero2024} formalise the contrast as an information-grounding objective. DeGF \citep{degf} closes a generative loop:
 it synthesises an image from the candidate caption and diffs it against the input. MARINE
 \citep{marine} injects object-level guidance from an external vision expert into the
 decoding step, which is the closest decoding-time analogue of our evidence channel --- with
@@ -464,9 +468,12 @@ which is how we discovered the need to decouple the repair gate.
 \paragraph{Mitigation by attention-level and mechanistic intervention.}
 A related line localises hallucination to specific components and intervenes there.
 Attention-lens style analyses trace hallucinated tokens to identifiable heads and layers
-\citep{attnlens,only}, and interventions range from masking \citep{maskcd} through
-layer-selective contrastive readout \citep{mcallava} to causal gating of the information
-paths implicated \citep{causalgating}. These give the most detailed available picture of
+\citep{attnlens,only}, and interventions range from masking image heads
+\citep{maskcd} to causal gating of the information paths implicated \citep{causalgating}. A
+distinct line attacks the positional prior instead: MCA-LLaVA \citep{mcallava} replaces
+RoPE's one-dimensional long-term decay with a two-dimensional Manhattan-distance spatial
+decay, removing the bias that makes instruction tokens over-attend to bottom-right image
+tokens. These give the most detailed available picture of
 \emph{where} the failure lives. They are orthogonal to our concern, which is not where the
 error comes from but what the emitted set's risk is once it exists; we cite them because
 they are the strongest current evidence that hallucination is a structured, localisable
@@ -1389,18 +1396,23 @@ risk--coverage curve (lower better). Realised test risk was $\le\alpha$ in every
 \toprule
 Score & AURC $\downarrow$ & cov@$10\%$ $\uparrow$ & AUROC $\uparrow$\\
 \midrule
-Raw confidence                      & 0.0775 & 62.1\% & 0.767\\
-Learned, confidence only            & 0.0681 & 65.2\% & 0.786\\
-\quad + CLIP grounding \citep{clip} & 0.0632 & 67.5\% & 0.800\\
-\quad + detection grounding \citep{owlv2} & \textbf{0.0546} & \textbf{73.6\%} & \textbf{0.835}\\
-\quad + both                        & 0.0538 & 74.9\% & 0.838\\
+Raw confidence                      & 0.0798 & 62.0\% & 0.762\\
+Learned, confidence only            & 0.0701 & 63.6\% & 0.782\\
+\quad + CLIP grounding \citep{clip} & 0.0650 & 66.0\% & 0.796\\
+\quad + detection grounding \citep{owlv2} & \textbf{0.0566} & \textbf{73.1\%} & \textbf{0.829}\\
+\quad + both                        & 0.0559 & 74.1\% & 0.831\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Against a baseline given \emph{both} confidence and multi-sample self-consistency --- the
 scoring philosophy of \citet{conflvlm} --- detection grounding still adds
-$10.2\pm8.6$ points on the adversarial split (Table~\ref{tab:selfcons}).
+$11.9\pm21.1$ points on the adversarial split (Table~\ref{tab:selfcons}) --- a mean gain in
+the same direction, but with a standard deviation that swamps it. We flag this rather than
+report it as support: with $n=450$ a three-way split leaves a $150$-item calibration fold,
+which is genuinely underpowered for a Clopper--Pearson bound at $\delta=0.10$, and the wide
+interval reflects that rather than an absence of grounding signal. The POPE-1500 result
+($+9.6\pm4.7$) is the one we would rely on.
 
 \begin{table}[t]
 \centering
@@ -1411,18 +1423,18 @@ split ($K=3$ samples, LLaVA-1.5, $n=450$).}
 \toprule
 Score & AURC $\downarrow$ & cov@$10\%$ $\uparrow$\\
 \midrule
-Self-consistency only & 0.135 & 0.0\%\\
-Confidence $+$ self-consistency & 0.077 & 61.8\%\\
-\quad $+$ detection grounding (ours) & \textbf{0.059} & \textbf{72.0\%}\\
+Self-consistency only & 0.147 & 0.0\%\\
+Confidence $+$ self-consistency & 0.082 & 45.8\%\\
+\quad $+$ detection grounding (ours) & \textbf{0.063} & \textbf{57.7\%}\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Two regularities follow. The advantage of grounding \emph{grows as the guarantee tightens}:
-at $\alpha=0.05$ it nearly doubles usable coverage ($30.0\%\to52.5\%$), while at
+at $\alpha=0.05$ it nearly doubles usable coverage ($26.4\%\to47.1\%$), while at
 $\alpha=0.20$ both scores certify almost everything (Figure~\ref{fig:covalpha}). And the
 advantage tracks how much the base model hallucinates: on the more accurate Qwen2-VL-2B the
-same addition is worth $1.9$ points rather than $10.2$. Grounding is most valuable exactly
+same addition is worth $2.0$ points rather than $11.9$, both with intervals that include zero. Grounding is most valuable exactly
 where selective prediction is most expensive.
 
 \begin{figure}[t]
@@ -1593,9 +1605,16 @@ CLIP-similarity scorer \citep{conflvlm}, filtering & 5.6\%  & ---\\
 \centering
 \includegraphics[width=0.72\textwidth]{risk_coverage.png}
 \caption{Risk--coverage curves on POPE. The grounded score (blue) lies below the
-internal-uncertainty baseline at every coverage level, i.e.\ lower error for the same
-coverage and more coverage for the same error target. Shaded bands are one standard
-deviation over $20$ splits; the dashed line marks $\alpha=0.10$.}
+confidence-only baseline (LLaVA's own logits, no external evidence) at every coverage level
+short of full coverage, where both necessarily meet the base risk: lower error for the same
+coverage, and more coverage for the same error target. Shaded bands are one standard
+deviation over $20$ three-way splits; the dashed line marks $\alpha=0.10$. The legend
+reports two quantities that should not be confused: \emph{oracle} coverage read off the
+test-fold curve ($71.2\%\to76.6\%$), and conformally \emph{calibrated} coverage
+($63.6\%\to73.1\%$), the latter being what the tables report. Note that this baseline is not
+ConfLVLM: ConfLVLM's scorer is CLIP image--text similarity, which appears here as the
+``$+$ CLIP grounding'' arm of Figure~\ref{fig:comparison} and as a separate row of
+Table~\ref{tab:score}.}
 \label{fig:riskcov}
 \end{figure}
 
@@ -1989,8 +2008,8 @@ version of Figure~\ref{fig:covalpha}.
 \toprule
 Score & $\alpha=0.05$ & $0.10$ & $0.15$ & $0.20$\\
 \midrule
-Confidence only & 30.0\% & 65.2\% & 84.6\% & 99.1\%\\
-$+$ detection grounding & \textbf{52.5\%} & \textbf{73.6\%} & \textbf{89.7\%} & \textbf{99.6\%}\\
+Confidence only & 26.4\% & 63.6\% & 85.5\% & 98.0\%\\
+$+$ detection grounding & \textbf{47.1\%} & \textbf{73.1\%} & \textbf{88.5\%} & \textbf{98.2\%}\\
 \bottomrule
 \end{tabular}
 \end{table}

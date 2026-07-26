@@ -66,7 +66,7 @@ COL={"Confidence only":"#9aa3b2","+ CLIP grounding":"#e0a458","+ OWLv2 grounding
 plt.rcParams.update({"font.family":"DejaVu Sans","font.size":11,"text.color":INK,
                      "axes.edgecolor":"#c9cfd8","axes.labelcolor":INK,
                      "xtick.color":MUT,"ytick.color":MUT})
-fig=plt.figure(figsize=(14.5,6.2),dpi=150)
+fig=plt.figure(figsize=(15.2,6.8),dpi=150)
 gs=GridSpec(1,2,width_ratios=[1.0,1.25],wspace=.32)
 
 # Panel A
@@ -91,15 +91,18 @@ for s in ["top","right"]: axA.spines[s].set_visible(False)
 # Panel B — capability matrix
 axB=fig.add_subplot(gs[1]);axB.axis("off")
 methods=["OPERA  (CVPR'24)","Attention Lens  (CVPR'25)","REVERSE  (NeurIPS'25)",
-         "ConfLVLM  (EMNLP'25)","Ours  (CCRC)"]
-caps=["Training-\nfree","Visual/KG\ngrounding","Real-time\ncorrection",
+         "ConfLVLM  (EMNLP'25)","Online abstention  (2025)","BCEA  (2026, concurrent)",
+         "Ours  (CCRC)"]
+caps=["Training-\nfree","External\nvisual evidence","Changes the\nanswer",
       "Statistical\nguarantee","Selective\ncoverage"]
 M=np.array([
- [1,0,1,0,0],      # OPERA
- [1,0.5,1,0,0],    # Attention Lens
- [0,0.5,1,0,0.5],  # REVERSE (needs finetuning; rejection sampling ~ partial selective)
- [1,0,0,1,1],      # ConfLVLM
- [1,1,1,1,1],      # Ours
+ [1,0,1,0,0],      # OPERA            (decoding-time; no external evidence)
+ [1,0,1,0,0],      # Attention Lens   (internal attention only)
+ [0,0.5,1,0,0.5],  # REVERSE          (needs finetuning; rejection sampling ~ partial)
+ [1,1,0,1,1],      # ConfLVLM         (CLIP/BiomedCLIP scorer IS external evidence)
+ [1,0,0,1,1],      # Online abstention (internal signals; abstain only)
+ [1,1,0,1,1],      # BCEA             (acquires zoomed views; does NOT change the answer)
+ [1,1,1,1,1],      # Ours             (external detector; substitutes the answer)
 ])
 nR,nC=M.shape
 for i in range(nR):
@@ -111,12 +114,12 @@ for i in range(nR):
         axB.text(j+.5,nR-1-i+.5,sym,ha="center",va="center",
                  color="white" if v else "#9aa3b2",fontsize=15,fontweight="bold")
 for j,cap in enumerate(caps):
-    axB.text(j+.5,nR+.18,cap,ha="center",va="bottom",fontsize=8.6,color=INK,
-             fontweight="bold",linespacing=.95)
+    axB.text(j+.5,nR+.18,cap,ha="center",va="bottom",fontsize=8.0,color=INK,
+             fontweight="bold",linespacing=1.05)
 for i,mth in enumerate(methods):
     fw="bold" if "Ours" in mth else "normal"
-    axB.text(-.2,nR-1-i+.5,mth,ha="right",va="center",fontsize=9.3,color=INK,fontweight=fw)
-axB.set_xlim(-3.4,nC+.1);axB.set_ylim(-0.7,nR+1.15)
+    axB.text(-.15,nR-1-i+.5,mth,ha="right",va="center",fontsize=9.3,color=INK,fontweight=fw)
+axB.set_xlim(-4.1,nC+.1);axB.set_ylim(-0.7,nR+1.15)
 axB.set_title("B · Capability vs recent methods",fontweight="bold",loc="left",
               fontsize=12,pad=12,x=0)
 axB.text(-3.4,-0.55,"✓ full    ~ partial    – none        Mitigation methods "
