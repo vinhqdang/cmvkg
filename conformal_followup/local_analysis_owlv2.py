@@ -2,93 +2,127 @@
 Stronger-grounding analysis: does a detection-based grounding signal (OWLv2)
 beat weak full-image CLIP similarity for conformal selective prediction?
 
+Feeds Table 3 (tab:score) of the manuscript.
+
 Reads raw_scores.json (LLaVA confidence + CLIP grounding) and owlv2_scores.json
 (OWLv2 detection grounding), verified item-aligned. Compares learned combiners
-over 20 random THREE-WAY DISJOINT splits (fit combiner / calibrate tau / test).
-CPU-only.
+over PAIRED random THREE-WAY DISJOINT splits (fit combiner / calibrate lambda /
+test). CPU-only.
 
-Audit statistic: the RCPS guarantee is Pr[Risk <= alpha] >= 1-delta, so besides the
-mean realised risk we report the FRACTION of splits whose realised risk exceeds
-alpha, to be compared against delta=0.10:
+PROTOCOL (canonical, see canonical_fst.py). This script previously selected the
+threshold by an exhaustive max-over-thresholds search over every distinct
+calibration score, keeping the highest-coverage passing one. That has no prefix
+rule, no k_min start and no multiplicity correction, and it inflates
+population-risk exceedance (see protocol_audit.py). It now uses the canonical
+ascending-lambda fixed sequence: stop at the first non-rejection, return the last
+passing index.
+
+REPORTING. Every gain is reported with its per-split standard deviation, a 95% CI
+for the mean, and a two-sided paired p-value. Abort rate (fraction of splits on
+which the fixed sequence certifies nothing and coverage is 0%) is reported for
+every arm. The validity audit is the FRACTION of splits with realised risk above
+alpha, never the mean risk:
   exc(te)  = exceedance on the held-out test fold (unbiased but noisy, n_te=n/3)
-  exc(all) = exceedance when the selected policy is scored on all n items
-             (lower noise proxy; slightly optimistic since fit/cal folds are included)
+  exc(all) = exceedance when the selected policy is re-scored on all n items
+             (low-noise proxy for the population risk of the selected policy)
 """
-import json, os, numpy as np
-from scipy.stats import beta
+import json, os, numpy as np, warnings; warnings.filterwarnings("ignore")
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+import canonical_fst as F
 
 _here = os.path.dirname(os.path.abspath(__file__))
 r = json.load(open(os.path.join(_here, "raw_scores.json")))
-# owlv2_scores.json lives beside the raw file (scratch during dev, repo after commit)
-owl_path = os.path.join(_here, "owlv2_scores.json")
-if not os.path.exists(owl_path):
-    owl_path = "/tmp/claude-0/-home-user-cmvkg/a1d38ea3-395b-5cee-88b0-bee647582f36/scratchpad/owlv2_scores.json"
-o = json.load(open(owl_path))
+o = json.load(open(os.path.join(_here, "owlv2_scores.json")))
 assert o["gold"] == r["gold"], "misaligned!"
 
-p_yes=np.array(r["p_yes"]); clip=np.array(r["ground"]); answer=np.array(r["answer"])
-correct=np.array(r["correct"]); det=np.array(o["ground_det"]); n=len(correct)
-conf=np.abs(p_yes-0.5)*2
+p_yes = np.array(r["p_yes"]); clip = np.array(r["ground"]); answer = np.array(r["answer"])
+correct = np.array(r["correct"]); det = np.array(o["ground_det"]); n = len(correct)
+conf = np.abs(p_yes - 0.5) * 2
+
+
 def mm(x):
-    rng=x.max()-x.min(); return (x-x.min())/rng if rng>0 else x*0
-clipn=mm(clip); detn=mm(det)
-clip_agree=np.where(answer==1, clipn, 1-clipn)
-det_agree =np.where(answer==1, detn , 1-detn)
+    rng = x.max() - x.min(); return (x - x.min()) / rng if rng > 0 else x * 0
 
-FEATS={
- "learned_conf":        np.column_stack([conf,p_yes]),
- "learned_conf+CLIP":   np.column_stack([conf,p_yes,clipn,clip_agree]),
- "learned_conf+OWLv2":  np.column_stack([conf,p_yes,detn,det_agree]),
- "learned_conf+both":   np.column_stack([conf,p_yes,clipn,clip_agree,detn,det_agree]),
+
+clipn = mm(clip); detn = mm(det)
+clip_agree = np.where(answer == 1, clipn, 1 - clipn)
+det_agree = np.where(answer == 1, detn, 1 - detn)
+
+FEATS = {
+    "learned_conf":       np.column_stack([conf, p_yes]),
+    "learned_conf+CLIP":  np.column_stack([conf, p_yes, clipn, clip_agree]),
+    "learned_conf+OWLv2": np.column_stack([conf, p_yes, detn, det_agree]),
+    "learned_conf+both":  np.column_stack([conf, p_yes, clipn, clip_agree, detn, det_agree]),
 }
-ALPHA,DELTA=0.10,0.10
-def cp_upper(e,k,d):
-    if k==0: return 1.0
-    return 1.0 if e==k else float(beta.ppf(1-d,e+1,k-e))
-def rcps(sc,cc,st,ct,s_all,c_all):
-    """Returns (coverage on test, realised risk on test, realised risk on all items)."""
-    tau,best=None,-1
-    for t in np.unique(sc):
-        m=sc>=t; k=int(m.sum())
-        if k==0: continue
-        e=int((1-cc[m]).sum())
-        if cp_upper(e,k,DELTA)<=ALPHA and k>best: best,tau=k,float(t)
-    if tau is None: return 0.0,0.0,0.0
-    m=st>=tau; k=int(m.sum())
-    cov,err=(k/len(st),float((1-ct[m]).mean())) if k else (0.0,0.0)
-    ma=s_all>=tau; ka=int(ma.sum())
-    err_all=float((1-c_all[ma]).mean()) if ka else 0.0
-    return cov,err,err_all
-def aurc(s,c):
-    c=c[np.argsort(-s)]; return float((np.cumsum(1-c)/np.arange(1,len(c)+1)).mean())
+ARMS = ["raw_conf"] + list(FEATS)
+ALPHA, DELTA, REPS = 0.10, F.DELTA, F.REPS
 
-rng=np.random.default_rng(0); agg={}
-for _ in range(20):
-    idx=rng.permutation(n); t3=n//3; tr,cal,te=idx[:t3],idx[t3:2*t3],idx[2*t3:]
-    cov,err,err_all=rcps(conf[cal],correct[cal],conf[te],correct[te],conf,correct)
-    agg.setdefault("raw_conf",[]).append((aurc(conf[te],correct[te]),cov,err,roc_auc_score(correct[te],conf[te]),err_all))
-    for name,X in FEATS.items():
-        clf=LogisticRegression(max_iter=1000).fit(X[tr],correct[tr])
-        pc=clf.predict_proba(X)[:,1]
-        cov,err,err_all=rcps(pc[cal],correct[cal],pc[te],correct[te],pc,correct)
-        agg.setdefault(name,[]).append((aurc(pc[te],correct[te]),cov,err,roc_auc_score(correct[te],pc[te]),err_all))
 
-print(f"POPE n={n}  VLM acc={correct.mean():.3f}  (20 three-way disjoint splits, mean±std)\n")
-print(f"{'score':22s}{'AURC↓':>13s}{'cov@10%↑':>13s}{'err@10%':>11s}{'AUROC↑':>12s}{'exc(te)':>9s}{'exc(all)':>10s}")
-for name in ["raw_conf","learned_conf","learned_conf+CLIP","learned_conf+OWLv2","learned_conf+both"]:
-    a=np.array(agg[name]); m,s=a.mean(0),a.std(0)
-    xt=float((a[:,2]>ALPHA+1e-12).mean()); xa=float((a[:,4]>ALPHA+1e-12).mean())
-    print(f"{name:22s}{m[0]:.4f}±{s[0]:.3f}{m[1]:.3f}±{s[1]:.3f}{m[2]:.3f}±{s[2]:.3f}{m[3]:.4f}±{s[3]:.3f}{xt:8.2f} {xa:9.2f}")
-print(f"\nExceedance = fraction of the 20 splits with realised risk > alpha={ALPHA:.2f}; "
-      f"guarantee requires <= delta={DELTA:.2f}.")
-print("  exc(te)=test fold (n_te=%d, unbiased/noisy)   exc(all)=all %d items (low-noise proxy)"
-      % (n-2*(n//3), n))
+def deploy(lam, s_cal, s_te, ok_te, s_all, ok_all):
+    """Returns (coverage on test, risk on test or None, risk on all items or None)."""
+    if lam is None: return 0.0, None, None
+    thr = np.quantile(s_cal, 1 - lam)
+    m = s_te >= thr; k = int(m.sum())
+    cov = k / len(s_te)
+    rte = float((1 - ok_te[m]).mean()) if k else None
+    ma = s_all >= thr
+    ral = float((1 - ok_all[ma]).mean()) if ma.sum() else None
+    return cov, rte, ral
 
-base=np.array(agg["learned_conf"])
-print("\nPaired grounding gains vs learned_conf (same splits):")
-for name in ["learned_conf+CLIP","learned_conf+OWLv2","learned_conf+both"]:
-    a=np.array(agg[name])
-    dcov=(a[:,1]-base[:,1]); daurc=(base[:,0]-a[:,0])
-    print(f"  {name:20s} Δcov@10%={dcov.mean():+.4f}±{dcov.std():.4f}   ΔAURC={daurc.mean():+.4f}±{daurc.std():.4f}")
+
+def aurc(s, c):
+    c = c[np.argsort(-s)]
+    return float((np.cumsum(1 - c) / np.arange(1, len(c) + 1)).mean())
+
+
+agg = {k: dict(aurc=[], cov=[], auroc=[], rte=[], ral=[], lam=[]) for k in ARMS}
+for tr, cal, te in F.SPLITS(n, REPS):
+    if len(np.unique(correct[tr])) < 2: continue
+    for name in ARMS:
+        if name == "raw_conf":
+            s = conf                                  # no fit; score is given
+        else:
+            s = LogisticRegression(max_iter=1000).fit(
+                FEATS[name][tr], correct[tr]).predict_proba(FEATS[name])[:, 1]
+        lam = F.fst(s[cal], correct[cal], ALPHA)
+        cov, rte, ral = deploy(lam, s[cal], s[te], correct[te], s, correct)
+        A = agg[name]
+        A["lam"].append(lam); A["cov"].append(cov)
+        A["rte"].append(rte); A["ral"].append(ral)
+        A["aurc"].append(aurc(s[te], correct[te]))
+        A["auroc"].append(roc_auc_score(correct[te], s[te]))
+
+print(f"POPE n={n}  VLM acc={correct.mean():.3f}  ({REPS} paired three-way disjoint "
+      f"splits, mean+-sd over splits)\n")
+print(f"{'score':22s}{'AURC v':>14s}{'cov@10% ^':>15s}{'AUROC ^':>14s}"
+      f"{'abort':>8s}{'exc(te)':>9s}{'exc(all)':>10s}")
+for name in ARMS:
+    A = agg[name]
+    au = np.array(A["aurc"]); cv = np.array(A["cov"]) * 100; ar = np.array(A["auroc"])
+    print(f"{name:22s}{au.mean():.4f}+-{au.std(ddof=1):.3f}"
+          f"{cv.mean():8.1f}+-{cv.std(ddof=1):4.1f}%"
+          f"{ar.mean():9.4f}+-{ar.std(ddof=1):.3f}"
+          f"{F.abort_rate(A['lam'])*100:7.1f}%"
+          f"{F.exceedance(A['rte'],ALPHA)*100:8.1f}%{F.exceedance(A['ral'],ALPHA)*100:9.1f}%")
+
+print(f"\nValidity audit: exceedance = fraction of splits with realised risk > "
+      f"alpha={ALPHA:.2f}; the guarantee requires this <= delta={DELTA:.2f}.")
+print(f"  exc(te)=test fold (n_te={n-2*(n//3)}, unbiased/noisy)   "
+      f"exc(all)=all {n} items (low-noise proxy)")
+print("  Mean realised risk is NOT the guarantee and is deliberately not the audit "
+      "statistic.")
+print("  abort = fraction of splits certifying nothing (coverage 0%, included in the mean).")
+
+print(f"\nPaired grounding gains vs learned_conf (identical splits, two-sided tests):")
+print(F.Gain.header(24))
+base = agg["learned_conf"]
+for name in ["learned_conf+CLIP", "learned_conf+OWLv2", "learned_conf+both"]:
+    A = agg[name]
+    print(F.gain_stats(np.array(base["cov"]) * 100, np.array(A["cov"]) * 100,
+                       f"{name}  cov pp").line(26))
+    print(F.gain_stats(np.array(A["aurc"]) * 1000, np.array(base["aurc"]) * 1000,
+                       f"{name}  AURC x1e-3").line(26))
+print("\np-values are two-sided and conditional on this dataset: they test whether the")
+print("mean gain over the split distribution differs from zero, not whether the gain")
+print("would replicate on new items.")

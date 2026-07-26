@@ -1,90 +1,100 @@
 """
-Faithful ConfLVLM head-to-head on POPE-adversarial (hardest split), LLaVA-1.5-7B.
-Data: exp7_pope.json (real self-consistency over K=3 samples + OWLv2 grounding).
+Self-consistency baseline head-to-head on POPE-adversarial (hardest split),
+LLaVA-1.5-7B. Data: exp7_pope.json (real self-consistency over K=3 samples +
+OWLv2 grounding).
 
-Baseline (ConfLVLM-faithful): learned combiner over model-INTERNAL signals only,
-including self-consistency  [p_yes, conf, sc_yesfrac, sc_conf].
+Feeds Table 4 (tab:selfcons) of the manuscript.
+
+Baseline: a learned combiner over model-INTERNAL signals only, including
+self-consistency [p_yes, conf, sc_yesfrac, sc_conf]. This is the scoring
+PHILOSOPHY of ConfLVLM, not ConfLVLM: ConfLVLM's scorer is CLIP image-text
+similarity, which appears as a separate arm in local_analysis_owlv2.py. Labelled
+here as "internal (conf+self-consistency)" for that reason.
 Ours: internal + OWLv2 structured grounding.
-Reports risk-coverage (AURC, cov@10%) over 20 THREE-WAY DISJOINT splits
-(fit combiner / calibrate tau / test) + pure self-consistency ref.
 
-Audit statistic: the guarantee is Pr[Risk <= alpha] >= 1-delta, so besides the mean
-realised risk we report the FRACTION of splits with realised risk > alpha, vs
-delta=0.10.  exc(te)=held-out test fold (unbiased, noisy);  exc(all)=selected policy
-scored on all n items (low-noise proxy, slightly optimistic).
+PROTOCOL (canonical, see canonical_fst.py). Previously an exhaustive
+max-over-thresholds search; now the canonical ascending-lambda fixed sequence
+(stop at first non-rejection, return last passing index) on PAIRED three-way
+disjoint splits.
+
+CAVEAT that matters here: n=444 grounded items leaves a 148-item calibration
+fold, and k_min=22 at alpha=delta=0.10. This is a genuinely underpowered cell;
+the abort rate and the per-split sd below are the honest measure of that, and
+they are large. Do not read the mean gain without them.
 """
-import json, os, numpy as np
-from scipy.stats import beta
+import json, os, numpy as np, warnings; warnings.filterwarnings("ignore")
 from sklearn.linear_model import LogisticRegression
+import canonical_fst as F
 
-_here=os.path.dirname(os.path.abspath(__file__))
-d=json.load(open(os.path.join(_here,"exp7_pope.json")))
-p_yes=np.array(d["p_yes"]);answer=np.array(d["answer"]);correct=np.array(d["correct"])
-sc=np.array(d["sc_yesfrac"]);owl=np.array(d["owl"]);n=len(correct)
-conf=np.abs(p_yes-.5)*2; sc_conf=np.abs(sc-.5)*2
+_here = os.path.dirname(os.path.abspath(__file__))
+d = json.load(open(os.path.join(_here, "exp7_pope.json")))
+p_yes = np.array(d["p_yes"]); answer = np.array(d["answer"]); correct = np.array(d["correct"])
+sc = np.array(d["sc_yesfrac"]); owl = np.array(d["owl"]); n = len(correct)
+conf = np.abs(p_yes - .5) * 2; sc_conf = np.abs(sc - .5) * 2
 # ungrounded (-1) -> neutral median of grounded
-g=owl.copy(); med=np.median(g[g>=0]); g[g<0]=med
-mm=lambda x:(x-x.min())/(x.max()-x.min()+1e-9)
-gn=mm(g); g_ag=np.where(answer==1,gn,1-gn)
+g = owl.copy(); med = np.median(g[g >= 0]); g[g < 0] = med
+mm = lambda x: (x - x.min()) / (x.max() - x.min() + 1e-9)
+gn = mm(g); g_ag = np.where(answer == 1, gn, 1 - gn)
 
-SCORES={
- "self-consistency only":sc_conf,                                   # literal ConfLVLM signal
- "internal (conf+self-cons) [ConfLVLM-faithful]":np.column_stack([p_yes,conf,sc,sc_conf]),
- "internal + grounding (ours)":np.column_stack([p_yes,conf,sc,sc_conf,gn,g_ag]),
+SCORES = {
+    "self-consistency only": sc_conf,                    # the literal single signal
+    "internal (conf+self-cons)": np.column_stack([p_yes, conf, sc, sc_conf]),
+    "internal + grounding (ours)": np.column_stack([p_yes, conf, sc, sc_conf, gn, g_ag]),
 }
-GRID=np.linspace(.02,1,99)
-def rc(s,c):
-    c=c[np.argsort(-s)];cov=np.arange(1,len(c)+1)/len(c)
-    return np.interp(GRID,cov,np.cumsum(1-c)/np.arange(1,len(c)+1))
-def cp_upper(e,k,dl):
-    if k==0: return 1.0
-    return 1.0 if e==k else float(beta.ppf(1-dl,e+1,k-e))
-ALPHA=.10; DELTA=.10
-def cov_at(s,c_cal,s_te,c_te,s_all,c_all,alpha=ALPHA,dl=DELTA):
-    """Returns (coverage on test, realised risk on test, realised risk on all items)."""
-    tau,best=None,-1
-    for t in np.unique(s):
-        m=s>=t;k=int(m.sum())
-        if k==0: continue
-        e=int((1-c_cal[m]).sum())
-        if cp_upper(e,k,dl)<=alpha and k>best: best,tau=k,float(t)
-    if tau is None: return 0.0,0.0,0.0
-    m=s_te>=tau;k=int(m.sum())
-    cov,err=(k/len(s_te),float((1-c_te[m]).mean())) if k else (0.0,0.0)
-    ma=s_all>=tau;ka=int(ma.sum())
-    return cov,err,(float((1-c_all[ma]).mean()) if ka else 0.0)
+ALPHA, DELTA, REPS = .10, F.DELTA, F.REPS
+GRID = np.linspace(.02, 1, 99)
 
-rng=np.random.default_rng(0)
-agg={k:{"aurc":[],"cov":[],"risk":[],"risk_all":[]} for k in SCORES}
-for _ in range(20):
-    idx=rng.permutation(n);t3=n//3;tr,cal,te=idx[:t3],idx[t3:2*t3],idx[2*t3:]
-    for name,X in SCORES.items():
-        if X.ndim==1:
-            s_all=X
-        else:
-            clf=LogisticRegression(max_iter=1000).fit(X[tr],correct[tr])
-            s_all=clf.predict_proba(X)[:,1]
-        sc_cal,sc_te=s_all[cal],s_all[te]
-        agg[name]["aurc"].append(rc(sc_te,correct[te]).mean())
-        cv,rk,rka=cov_at(sc_cal,correct[cal],sc_te,correct[te],s_all,correct)
-        agg[name]["cov"].append(cv);agg[name]["risk"].append(rk);agg[name]["risk_all"].append(rka)
+
+def rc(s, c):
+    c = c[np.argsort(-s)]; cov = np.arange(1, len(c) + 1) / len(c)
+    return np.interp(GRID, cov, np.cumsum(1 - c) / np.arange(1, len(c) + 1))
+
+
+agg = {k: dict(aurc=[], cov=[], rte=[], ral=[], lam=[]) for k in SCORES}
+for tr, cal, te in F.SPLITS(n, REPS):
+    if len(np.unique(correct[tr])) < 2: continue
+    for name, X in SCORES.items():
+        s = X if X.ndim == 1 else LogisticRegression(max_iter=1000).fit(
+            X[tr], correct[tr]).predict_proba(X)[:, 1]
+        A = agg[name]
+        A["aurc"].append(rc(s[te], correct[te]).mean())
+        lam = F.fst(s[cal], correct[cal], ALPHA)
+        A["lam"].append(lam)
+        if lam is None:
+            A["cov"].append(0.0); A["rte"].append(None); A["ral"].append(None); continue
+        thr = np.quantile(s[cal], 1 - lam)
+        m = s[te] >= thr; k = int(m.sum())
+        A["cov"].append(k / len(te))
+        A["rte"].append(float((1 - correct[te][m]).mean()) if k else None)
+        ma = s >= thr
+        A["ral"].append(float((1 - correct[ma]).mean()) if ma.sum() else None)
 
 print(f"POPE-adversarial (hardest split)  n={n}  LLaVA acc={correct.mean():.3f}  "
-      f"(20 three-way disjoint splits)\n")
-print(f"{'score':48s}{'AURC↓':>13s}{'cov@10%↑':>13s}{'risk@10%':>10s}{'exc(te)':>9s}{'exc(all)':>10s}")
+      f"({REPS} paired three-way disjoint splits)\n")
+print(f"{'score':30s}{'AURC v':>14s}{'cov@10% ^':>15s}"
+      f"{'abort':>8s}{'exc(te)':>9s}{'exc(all)':>10s}")
 for name in SCORES:
-    a=np.array(agg[name]['aurc']);c=np.array(agg[name]['cov'])
-    rk=np.array(agg[name]['risk']);rka=np.array(agg[name]['risk_all'])
-    print(f"{name:48s}{a.mean():.4f}±{a.std():.3f}{c.mean()*100:6.1f}±{c.std()*100:.1f}"
-          f"{rk.mean():9.3f}{(rk>ALPHA+1e-12).mean():8.2f} {(rka>ALPHA+1e-12).mean():9.2f}")
-print(f"\nExceedance = fraction of the 20 splits with realised risk > alpha={ALPHA:.2f}; "
-      f"guarantee requires <= delta={DELTA:.2f}.")
-print("  exc(te)=test fold (n_te=%d, unbiased/noisy)   exc(all)=all %d items (low-noise proxy)"
-      % (n-2*(n//3), n))
-base=np.array(agg["internal (conf+self-cons) [ConfLVLM-faithful]"]["cov"])
-ours=np.array(agg["internal + grounding (ours)"]["cov"])
-ba=np.array(agg["internal (conf+self-cons) [ConfLVLM-faithful]"]["aurc"])
-oa=np.array(agg["internal + grounding (ours)"]["aurc"])
-print(f"\nGrounding gain over ConfLVLM-faithful internal (paired): "
-      f"Δcov@10%={(ours-base).mean()*100:+.1f}±{(ours-base).std()*100:.1f}pp  "
-      f"ΔAURC={(ba-oa).mean():+.4f}±{(ba-oa).std():.4f}")
+    A = agg[name]
+    a = np.array(A["aurc"]); c = np.array(A["cov"]) * 100
+    print(f"{name:30s}{a.mean():.4f}+-{a.std(ddof=1):.3f}"
+          f"{c.mean():8.1f}+-{c.std(ddof=1):4.1f}%"
+          f"{F.abort_rate(A['lam'])*100:7.1f}%"
+          f"{F.exceedance(A['rte'],ALPHA)*100:8.1f}%{F.exceedance(A['ral'],ALPHA)*100:9.1f}%")
+
+print(f"\nValidity audit: exceedance = fraction of splits with realised risk > "
+      f"alpha={ALPHA:.2f}, vs delta={DELTA:.2f}.")
+print(f"  exc(te)=test fold (n_te={n-2*(n//3)}, unbiased/noisy)   "
+      f"exc(all)=all {n} items (low-noise proxy).  Mean risk is NOT the guarantee.")
+print("  abort = fraction of splits certifying nothing (coverage 0%, in the mean).")
+
+print(f"\nPaired gains (identical splits, two-sided tests)")
+print(F.Gain.header(34))
+b = agg["internal (conf+self-cons)"]
+o = agg["internal + grounding (ours)"]
+print(F.gain_stats(np.array(b["cov"]) * 100, np.array(o["cov"]) * 100,
+                   "grounding gain, cov@10% (pp)").line(34))
+print(F.gain_stats(np.array(o["aurc"]) * 1000, np.array(b["aurc"]) * 1000,
+                   "grounding gain, AURC x1e-3").line(34))
+print(f"\nn={n} leaves a {n//3}-item calibration fold against k_min="
+      f"{F.kmin_for(F.cp_upper, ALPHA, DELTA)}. The per-split sd above is the honest")
+print("uncertainty on this cell; the mean alone overstates what the data supports.")

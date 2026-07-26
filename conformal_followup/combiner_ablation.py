@@ -1,50 +1,111 @@
 """
 Combiner ablation: does a higher-capacity model beat logistic regression as the
-conformal nonconformity combiner? And does it stay VALID?
+conformal score combiner? And does it stay VALID?
+
+Feeds Table 11 (tab:combiner) of the manuscript.
 
 Key finding: high-capacity models (GBM/RF/MLP) look better only when the combiner
-is trained on the SAME data used to calibrate the conformal threshold -- they
-overfit, inflate calibration scores, and BREAK the error guarantee on test.
-With a proper 3-way split (train combiner / calibrate tau / test, disjoint) all
-combiners are valid and give ~equal efficiency, so logistic regression is the
-right choice (equal efficiency, lowest variance, no overfit, interpretable).
+is trained on the SAME data used to calibrate the threshold -- they overfit,
+inflate calibration scores, and BREAK the guarantee on test. With a proper
+three-way split all combiners are valid and roughly tied, so logistic regression
+is the right choice (equal efficiency, lowest variance, no overfit,
+interpretable).
+
+PROTOCOL (canonical, see canonical_fst.py). Previously an exhaustive
+max-over-thresholds search; now the canonical ascending-lambda fixed sequence
+(stop at first non-rejection, return last passing index). Both protocols below
+use PAIRED splits, so every combiner sees identical folds within a repetition and
+combiners can be compared pairwise.
+
+IMPORTANT for reading this table: the naive protocol's violation must be read off
+the EXCEEDANCE column, not the mean risk. Mean risk <= alpha neither implies nor
+is implied by Pr[Risk <= alpha] >= 1-delta, and the naive arm's failure is a tail
+failure. Abort rates are reported because a combiner that collapses (the MLP) does
+so partly by aborting, which a coverage mean alone conceals.
 
 Real POPE / LLaVA-1.5-7B, 6 features [conf, p_yes, CLIP, CLIP_agree, OWL, OWL_agree].
 """
 import json, os, numpy as np, warnings; warnings.filterwarnings("ignore")
-from scipy.stats import beta
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
-_here=os.path.dirname(os.path.abspath(__file__))
-r=json.load(open(os.path.join(_here,"raw_scores.json")));o=json.load(open(os.path.join(_here,"owlv2_scores.json")))
-p=np.array(r["p_yes"]);a=np.array(r["answer"]);c=np.array(r["correct"]);det=np.array(o["ground_det"]);clip=np.array(r["ground"])
-n=len(c);conf=np.abs(p-.5)*2;mm=lambda x:(x-x.min())/(x.max()-x.min()+1e-9)
-dn=mm(det);cn=mm(clip);dag=np.where(a==1,dn,1-dn);cag=np.where(a==1,cn,1-cn)
-X=np.column_stack([conf,p,cn,cag,dn,dag]); ALPHA,DELTA=.10,.10
-def cpu(e,k,dl):return 1.0 if k==0 or e==k else float(beta.ppf(1-dl,e+1,k-e))
-def cov_err(s_cal,c_cal,s_te,c_te):
-    tau,b=None,-1
-    for t in np.unique(s_cal):
-        m=s_cal>=t;k=int(m.sum())
-        if k and cpu(int((1-c_cal[m]).sum()),k,DELTA)<=ALPHA and k>b:b,tau=k,float(t)
-    if tau is None: return 0,0
-    m=s_te>=tau;k=int(m.sum());return k/len(s_te),((1-c_te[m]).mean() if k else 0)
-mk={"Logistic":lambda:LogisticRegression(max_iter=1000),
-    "GradBoost":lambda:GradientBoostingClassifier(n_estimators=100,max_depth=3),
-    "RandForest":lambda:RandomForestClassifier(n_estimators=200,max_depth=5),
-    "MLP(64,32)":lambda:MLPClassifier(hidden_layer_sizes=(64,32),max_iter=800,early_stopping=True)}
-for proto in ["I: reuse (train==calibrate)","II: 3-way split (disjoint)"]:
-    rng=np.random.default_rng(0);R={k:{"c":[],"e":[]} for k in mk}
-    for _ in range(30):
-        idx=rng.permutation(n)
-        if proto.startswith("I:"): h=n//2;tr=cal=idx[:h];te=idx[h:]
-        else: t=n//3;tr=idx[:t];cal=idx[t:2*t];te=idx[2*t:]
-        for name,f in mk.items():
-            clf=f().fit(X[tr],c[tr]);pc=clf.predict_proba(X)[:,1]
-            cv,er=cov_err(pc[cal],c[cal],pc[te],c[te]);R[name]["c"].append(cv);R[name]["e"].append(er)
-    print(f"\n=== Protocol {proto}  (target error {ALPHA:.0%}) ===")
-    print(f"{'combiner':12s}{'cov@10%':>11s}{'test err':>11s}{'valid?':>10s}")
-    for k in mk:
-        cv=np.array(R[k]['c'])*100;er=np.array(R[k]['e'])*100
-        print(f"{k:12s}{cv.mean():7.1f}%   {er.mean():6.1f}%   {'OK' if er.mean()<=ALPHA*100+1 else 'VIOLATED':>9s}")
+import canonical_fst as F
+
+_here = os.path.dirname(os.path.abspath(__file__))
+r = json.load(open(os.path.join(_here, "raw_scores.json")))
+o = json.load(open(os.path.join(_here, "owlv2_scores.json")))
+p = np.array(r["p_yes"]); a = np.array(r["answer"]); c = np.array(r["correct"])
+det = np.array(o["ground_det"]); clip = np.array(r["ground"])
+n = len(c); conf = np.abs(p - .5) * 2
+mm = lambda x: (x - x.min()) / (x.max() - x.min() + 1e-9)
+dn = mm(det); cn = mm(clip)
+dag = np.where(a == 1, dn, 1 - dn); cag = np.where(a == 1, cn, 1 - cn)
+X = np.column_stack([conf, p, cn, cag, dn, dag])
+ALPHA, DELTA, REPS = .10, F.DELTA, F.REPS
+
+MK = {"Logistic":   lambda: LogisticRegression(max_iter=1000),
+      "GradBoost":  lambda: GradientBoostingClassifier(n_estimators=100, max_depth=3),
+      "RandForest": lambda: RandomForestClassifier(n_estimators=200, max_depth=5, n_jobs=-1),
+      "MLP(64,32)": lambda: MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=800,
+                                          early_stopping=True)}
+ALL = np.arange(n)
+OUT = {}
+for proto in ["I: reuse (fit == calibrate)", "II: three-way split (disjoint)"]:
+    R = {k: dict(cov=[], rte=[], ral=[], lam=[]) for k in MK}
+    for tr, cal, te in F.SPLITS(n, REPS):
+        if proto.startswith("I:"):
+            # the naive protocol: fit and calibrate on the SAME half
+            h = np.concatenate([tr, cal]); tr_, cal_ = h, h
+        else:
+            tr_, cal_ = tr, cal
+        for name, mk in MK.items():
+            s = mk().fit(X[tr_], c[tr_]).predict_proba(X)[:, 1]
+            lam = F.fst(s[cal_], c[cal_], ALPHA)
+            A = R[name]; A["lam"].append(lam)
+            if lam is None:
+                A["cov"].append(0.0); A["rte"].append(None); A["ral"].append(None); continue
+            thr = np.quantile(s[cal_], 1 - lam)
+            m = s[te] >= thr; k = int(m.sum())
+            A["cov"].append(k / len(te))
+            A["rte"].append(float((1 - c[te][m]).mean()) if k else None)
+            ma = s >= thr
+            A["ral"].append(float((1 - c[ma]).mean()) if ma.sum() else None)
+    OUT[proto] = R
+    print(f"\n=== Protocol {proto}   (alpha={ALPHA:.0%}, delta={DELTA:.0%}, "
+          f"{REPS} paired reps) ===")
+    print(f"{'combiner':12s}{'cov@10%':>16s}{'abort':>8s}"
+          f"{'exc(te)':>9s}{'exc(all)':>10s}{'verdict':>12s}")
+    for k in MK:
+        A = R[k]; cv = np.array(A["cov"]) * 100
+        xa = F.exceedance(A["ral"], ALPHA)
+        print(f"{k:12s}{cv.mean():9.1f}+-{cv.std(ddof=1):4.1f}%"
+              f"{F.abort_rate(A['lam'])*100:7.1f}%"
+              f"{F.exceedance(A['rte'],ALPHA)*100:8.1f}%{xa*100:9.1f}%"
+              f"{('VIOLATED' if xa > DELTA + 1e-12 else 'OK'):>12s}")
+
+print(f"\nValidity verdict is set on exc(all) > delta={DELTA:.2f}: the fraction of splits")
+print("whose realised population risk exceeds alpha. Mean realised risk is NOT the")
+print("guarantee, and under protocol I the mean can look acceptable while the tail fails.")
+print("exc(te)=held-out test fold (n_te=%d, unbiased/noisy); exc(all)=all %d items."
+      % (n - 2 * (n // 3), n))
+print("abort = fraction of splits certifying nothing (coverage 0%, included in the mean).")
+print("Protocol I fits and calibrates on the SAME 2n/3 items and tests on the held-out")
+print("third, so the two protocols share the test fold and are directly comparable.")
+
+print(f"\nPaired differences vs Logistic within each protocol (two-sided tests)")
+print(F.Gain.header(38))
+for proto, R in OUT.items():
+    base = np.array(R["Logistic"]["cov"]) * 100
+    for k in MK:
+        if k == "Logistic": continue
+        print(F.gain_stats(base, np.array(R[k]["cov"]) * 100,
+                           f"{proto.split(':')[0]} {k} - Logistic").line(38))
+print(f"\nPaired cost of the three-way split, per combiner (protocol II - protocol I)")
+print(F.Gain.header(38))
+for k in MK:
+    print(F.gain_stats(np.array(OUT["I: reuse (fit == calibrate)"][k]["cov"]) * 100,
+                       np.array(OUT["II: three-way split (disjoint)"][k]["cov"]) * 100,
+                       f"{k}: split - reuse").line(38))
+print("\nA negative number here is the coverage PRICE of validity, not a regression:")
+print("protocol I's extra coverage is exactly what the exceedance column shows to be")
+print("unearned for the high-capacity combiners.")

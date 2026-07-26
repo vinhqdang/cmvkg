@@ -24,7 +24,11 @@ import ccrc_v3 as C
 
 _here = os.path.dirname(os.path.abspath(__file__))
 J = lambda f: json.load(open(os.path.join(_here, f)))
-DELTA, REPS = 0.10, 60
+# REPS raised 60 -> 400. At 60 reps the Monte-Carlo SE on these coverage figures is
+# 0.8-4.2 pp, so the tenths of a point they were quoted to were noise. The PROTOCOL
+# below is unchanged -- this file was already canonical and is a reference for the
+# port of the other scripts (see canonical_fst.py).
+DELTA, REPS = 0.10, 400
 mm = lambda x: (x - x.min()) / (x.max() - x.min() + 1e-9)
 
 
@@ -304,8 +308,8 @@ def block6():
     print(f"  {'n':>6s}{'conf-only':>11s}{'+grounding':>12s}{'gain':>8s}")
     for n in (228, 400, 700, N):
         rng = np.random.default_rng(0); sub = rng.permutation(N)[:n]
-        c1, _, _, _ = eval_learned(F["conf"][sub], ok[sub], 0.10, reps=40)
-        c2, _, _, _ = eval_learned(F["conf_det"][sub], ok[sub], 0.10, reps=40)
+        c1, _, _, _ = eval_learned(F["conf"][sub], ok[sub], 0.10, reps=REPS)
+        c2, _, _, _ = eval_learned(F["conf_det"][sub], ok[sub], 0.10, reps=REPS)
         print(f"  {n:6d}{c1:10.1f}%{c2:11.1f}%{c2-c1:+7.1f}")
 
 

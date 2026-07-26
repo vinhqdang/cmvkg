@@ -9,6 +9,7 @@ import json, os, numpy as np
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, FancyArrowPatch
+from scipy.stats import wilcoxon, ttest_rel
 
 _here = os.path.dirname(os.path.abspath(__file__))
 INK, MUT, IND, OK, BAD, AMB = "#1a1f2b", "#5b6577", "#4b57c8", "#1f7d5c", "#c8384f", "#d9a441"
@@ -43,73 +44,107 @@ fig.tight_layout(); fig.savefig(os.path.join(_here, "fig_method.png"),
 print("fig_method.png")
 
 # ---------------------------------------------------------------- fig 2: monotonicity
+# LAYOUT FIX: panel A's single-line title was ~3.9in of text over a ~3.6in axes at
+# fontsize 11 with loc="left", so it ran into panel B's title. Both titles are now
+# two lines at a smaller size over a wider figure with explicit wspace, and the
+# p-value is computed from the data instead of being hardcoded.
 d = json.load(open(os.path.join(_here, "exp14_monotonicity.json")))
 ho = np.array([x["n_hallu_orig"] for x in d], float)
 hr = np.array([x["n_hallu_rep"] for x in d], float)
 diff = hr - ho; n = len(d)
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(9.6, 3.9), dpi=200,
-                             gridspec_kw={"width_ratios": [1, 1.15]})
+p_wil = float(wilcoxon(hr, ho, alternative="two-sided").pvalue)
+p_tt = float(ttest_rel(hr, ho).pvalue)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(10.4, 4.3), dpi=200,
+                             gridspec_kw={"width_ratios": [1, 1.15], "wspace": .30})
 m = [ho.mean(), hr.mean()]
 se = [ho.std(ddof=1) / np.sqrt(n), hr.std(ddof=1) / np.sqrt(n)]
 a1.bar([0, 1], m, yerr=se, capsize=6, width=.55,
        color=[MUT, BAD], edgecolor="white", lw=1.5)
 a1.set_xticks([0, 1]); a1.set_xticklabels(["keep\nhallucination", "repair\n(substitute)"])
 a1.set_ylabel("downstream hallucinated mentions")
-a1.set_title(f"A · Continuation quality after intervention (n={n})",
-             fontweight="bold", loc="left", fontsize=11)
+a1.set_title("A · Continuation quality after intervention\n"
+             f"     ({n} matched-prefix cases)",
+             fontweight="bold", loc="left", fontsize=10.5)
+a1.set_ylim(0, max(m) * 1.28)
 a1.grid(alpha=.2, axis="y")
-for i, v in enumerate(m): a1.text(i, v + se[i] + .04, f"{v:.3f}", ha="center", fontweight="bold")
+for i, v in enumerate(m):
+    a1.text(i, v + se[i] + .05, f"{v:.3f}", ha="center", fontweight="bold")
 for s in ["top", "right"]: a1.spines[s].set_visible(False)
 
 bins = np.arange(diff.min() - .5, diff.max() + 1.5, 1.0)
 a2.hist(diff, bins=bins, color=IND, alpha=.75, edgecolor="white")
 a2.axvline(0, color=MUT, lw=1.2, ls="--")
 a2.axvline(diff.mean(), color=BAD, lw=2.2)
-a2.text(diff.mean() + .08, a2.get_ylim()[1] * .88,
-        f"mean {diff.mean():+.3f}\np={0.025:.3f}", color=BAD, fontsize=9.5, fontweight="bold")
+a2.set_ylim(0, a2.get_ylim()[1] * 1.18)
+a2.annotate(f"mean {diff.mean():+.3f}\nWilcoxon p={p_wil:.3f}\npaired t p={p_tt:.3f}",
+            xy=(diff.mean(), a2.get_ylim()[1] * .96), xytext=(10, 0),
+            textcoords="offset points", color=BAD, fontsize=9.0,
+            fontweight="bold", va="top", ha="left", linespacing=1.3)
 a2.set_xlabel("paired difference (repaired − original)")
 a2.set_ylabel("cases")
-a2.set_title("B · Repair makes the continuation worse", fontweight="bold", loc="left", fontsize=11)
+a2.set_title("B · Repair makes the continuation worse\n"
+             "     (absolute hallucinated mentions)",
+             fontweight="bold", loc="left", fontsize=10.5)
 a2.grid(alpha=.2, axis="y")
 for s in ["top", "right"]: a2.spines[s].set_visible(False)
-fig.tight_layout(); fig.savefig(os.path.join(_here, "fig_monotonicity.png"),
-                                bbox_inches="tight", facecolor="white")
-print("fig_monotonicity.png")
+fig.savefig(os.path.join(_here, "fig_monotonicity.png"),
+            bbox_inches="tight", facecolor="white")
+print(f"fig_monotonicity.png   (mean {diff.mean():+.4f}, Wilcoxon p={p_wil:.4f}, "
+      f"paired t p={p_tt:.4f}, n={n})")
 
 # ------------------------------------------------- fig 3: precondition & leverage
-settings = [("POPE-adv LLaVA", 17.3, 4.7, 1.4), ("POPE-1500 LLaVA", 18.1, 4.4, 1.8),
-            ("POPE-adv VCD", 19.6, 2.5, 0.9), ("POPE-adv Qwen", 12.9, 1.9, 1.0),
-            ("AMBER(d)", 11.4, -7.5, 1.45)]
+# Numbers refreshed to the CANONICAL protocol at alpha=0.10 (ccrc_gains_stats.py,
+# 400 paired splits): (name, mu %, certified coverage gain pp, repaired mass %,
+# dilution-only part of the gain pp).
+# The old hardcoded values were from the leaky max-over-thresholds rule at 60 reps
+# and every one of them was more favourable than the data supports.
+settings = [("POPE-adv LLaVA", 17.3, 3.19, 1.74, 1.84),
+            ("POPE-1500 LLaVA", 18.1, 3.18, 1.82, 0.86),
+            ("POPE-adv VCD", 19.6, 2.15, 0.97, 1.08),
+            ("POPE-adv Qwen", 12.9, 1.60, 1.02, 1.01),
+            ("AMBER(d)", 11.4, -10.20, 1.97, 0.20)]
 alpha = 10.0
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(9.8, 3.9), dpi=200)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(10.4, 4.3), dpi=200,
+                             gridspec_kw={"wspace": .28})
 x = [s[1] - alpha for s in settings]; y = [s[2] for s in settings]
 cols = [IND if v > 0 else BAD for v in y]
 a1.axhline(0, color=MUT, lw=1)
 a1.scatter(x, y, s=110, c=cols, edgecolor="white", zorder=3, lw=1.5)
-for (nm, mu, g, rp), xi, yi in zip(settings, x, y):
+for (nm, mu, g, rp, dil), xi, yi in zip(settings, x, y):
     a1.annotate(nm, (xi, yi), textcoords="offset points",
                 xytext=(8, 6 if yi > 0 else -14), fontsize=8.6, color=MUT)
 a1.set_xlabel(r"abstention floor headroom  $\mu-\alpha$  (points)")
 a1.set_ylabel("certified coverage gain (pp)")
-a1.set_title(r"A · Gain tracks headroom $\mu-\alpha$", fontweight="bold", loc="left", fontsize=11)
+a1.set_title(r"A · Gain against headroom $\mu-\alpha$" "\n"
+             r"     (a diagnostic, not a prediction)",
+             fontweight="bold", loc="left", fontsize=10.5)
 a1.grid(alpha=.2); a1.set_xlim(0, 11)
 for s in ["top", "right"]: a1.spines[s].set_visible(False)
 
+# Panel B: the gain SPLIT into the repaired items themselves (which are emitted
+# automatically, whether or not lambda-hat moves) and the part attributable to
+# dilution (lambda-hat actually moving). Only the second is leverage.
 msk = [s for s in settings if s[2] > 0]
-rp = [s[3] for s in msk]; gg = [s[2] for s in msk]
-a2.scatter(rp, gg, s=110, color=IND, edgecolor="white", lw=1.5, zorder=3)
-lim = np.linspace(0, 2.1, 10)
-for k, ls in [(1, ":"), (2, "--"), (3, "-.")]:
-    a2.plot(lim, k * lim, ls=ls, color=MUT, lw=1, alpha=.8)
-    a2.text(2.05, k * 2.05, f"{k}×", fontsize=8.5, color=MUT, va="center")
-for (nm, mu, g, r_) in msk:
-    a2.annotate(nm, (r_, g), textcoords="offset points", xytext=(8, -4),
-                fontsize=8.6, color=MUT)
-a2.set_xlabel("repaired mass (% of items)")
-a2.set_ylabel("certified coverage gain (pp)")
-a2.set_title("B · Leverage: gain is 1.9–3.4× the repaired mass",
-             fontweight="bold", loc="left", fontsize=11)
-a2.set_xlim(0, 2.3); a2.set_ylim(0, 8); a2.grid(alpha=.2)
+rp = np.array([s[3] for s in msk]); gg = np.array([s[2] for s in msk])
+dl = np.array([s[4] for s in msk])
+mult = gg / rp
+a2.bar(np.arange(len(msk)) - .17, rp, width=.32, color=MUT, alpha=.55,
+       edgecolor="white", label="(i) repaired items emitted")
+a2.bar(np.arange(len(msk)) + .17, dl, width=.32, color=IND,
+       edgecolor="white", label="(ii) dilution ($\\hat\\lambda$ moves)")
+for i, (nm, mu, g, r_, d_) in enumerate(msk):
+    a2.text(i, max(r_, d_) + .12, f"{mult[i]:.2f}×", ha="center", fontsize=8.6,
+            color=INK, fontweight="bold")
+a2.set_xticks(np.arange(len(msk)))
+a2.set_xticklabels([s[0].replace("POPE-adv ", "").replace("POPE-1500 ", "POPE-1500\n")
+                    for s in msk], fontsize=8.4)
+a2.set_ylabel("contribution to the gain (pp)")
+a2.set_ylim(0, max(rp.max(), dl.max()) * 1.32)
+a2.set_title(f"B · Leverage decomposed: {mult.min():.1f}–{mult.max():.1f}× overall,\n"
+             f"     of which dilution only +{dl.min():.2f} to +{dl.max():.2f} pp",
+             fontweight="bold", loc="left", fontsize=10.5)
+a2.grid(alpha=.2, axis="y")
+a2.legend(frameon=False, fontsize=8.4, loc="upper left")
 for s in ["top", "right"]: a2.spines[s].set_visible(False)
 fig.tight_layout(); fig.savefig(os.path.join(_here, "fig_precondition.png"),
                                 bbox_inches="tight", facecolor="white")
