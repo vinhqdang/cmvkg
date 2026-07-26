@@ -323,7 +323,10 @@ repaired, or abstained outputs and certifies the risk of the emitted mixture:
 $\Pr[\Risk(\emit)\le\alpha]\ge1-\delta$ (Theorem~\ref{thm:validity}), using
 fixed-sequence testing over a nested policy family with exact binomial bounds. We also
 give the minimum certifiable sample size (Lemma~\ref{lem:kmin}), a small result with
-practical teeth: a fixed sequence started below it aborts and returns zero coverage.
+practical teeth: a fixed sequence started below it aborts and returns zero coverage. The
+value is bound-dependent --- $22$ for Clopper--Pearson but $44$, $71$ and $116$ for the
+betting, empirical-Bernstein and Hoeffding bounds at $\alpha=\delta=0.10$ --- so a grid start
+tuned for one bound silently disables another.
 
 \item \textbf{Why repair cannot be self-certified in practice}
 (\S\ref{sec:independence}). Certifying a substitution using the complement of the score
@@ -1330,8 +1333,8 @@ calibration; see \S\ref{sec:ablations}}
   \State $A\gets\{i\in\mathcal{D}_{\mathrm{cal}}:s_i\ge Q_s(1-\lambda_j)\}$;
          $R\gets\{i\notin A:m_i\ge t_m\}$
   \State $V\gets\sum_{i\in A}(1-Y_i)+\sum_{i\in R}(1-Y^{(2)}_i)$; $K\gets|A|+|R|$
-  \If{$K<k_{\min}$} \textbf{continue} \Comment{uncertifiable by Lemma~\ref{lem:kmin}; not
-         evidence against $H_j$}
+  \If{$K<k_{\min}$} \textbf{break} \Comment{untestable; skipping it would break
+         fixed-sequence FWER control, so the grid must \emph{start} above $k_{\min}$}
   \ElsIf{$U(V,K;\delta)\le\alpha$} $\hat\lambda\gets\lambda_j$
   \Else\ \textbf{break} \Comment{fixed-sequence testing stops at the first non-rejection}
   \EndIf
@@ -1450,7 +1453,7 @@ doubles coverage. Error bars are one standard deviation over splits.}
 \label{rem:sep}
 A detector whose standalone accuracy matches the VLM's on POPE ($83.1\%$ vs.\ $81.9\%$)
 certifies far less coverage when used as a selective predictor in its own right
-($55.3\%$ vs.\ $68.2\%$). Conformal coverage depends on how well a score \emph{separates}
+($59.0\%$ vs.\ $68.2\%$). Conformal coverage depends on how well a score \emph{separates}
 correct from incorrect outputs, not on how often the underlying predictor is right. This
 also answers the natural objection to CCRC --- ``if channel 2 is good, why not just use
 it?'' --- in three of four settings (Table~\ref{tab:baselines}).
@@ -1546,8 +1549,8 @@ Because the two programmes of \S\ref{sec:related} are orthogonal --- mitigation 
 $\mu$, risk control governs what is emitted --- our layer should compose with a mitigation
 decoder. It does, and most strongly where the decoder's own confidence is poorly
 calibrated. On POPE-adversarial with visual contrastive decoding \citep{vcd}, adding
-grounding improves AURC from $0.1030$ to $0.0603$ and certified coverage from $47.6\%$ to
-$64.2\%$ ($\Delta\text{AURC}=0.043\pm0.007$).
+grounding improves AURC from $0.1039$ to $0.0570$ and certified coverage from $0.4\%$ to
+$45.0\%$ ($\Delta\text{AURC}=0.043\pm0.007$).
 
 \subsection{Baselines and attribution}
 \label{sec:attribution}
@@ -1559,7 +1562,8 @@ margins, because the detector's correctness is harder to \emph{score} than the V
 the detector genuinely dominates the VLM in accuracy (AMBER: $95.6\%$ vs.\ $88.6\%$) it also
 wins standalone, which is a second reason CCRC is the wrong tool in that regime.
 
-\begin{table}[t]
+\begin{table}
+\begin{threeparttable}[t]
 \centering
 \caption{Detector-only selective prediction versus CCRC ($\alpha=0.10$, identical protocol).}
 \label{tab:baselines}
@@ -1567,12 +1571,25 @@ wins standalone, which is a second reason CCRC is the wrong tool in that regime.
 \toprule
 Setting & VLM acc & det.\ acc & Filter (VLM) & CCRC & Detector only\\
 \midrule
-POPE-1500 LLaVA   & 81.9\% & 83.1\% & 68.2\% & \textbf{72.6\%} & 55.3\%\\
-POPE-adv LLaVA    & 82.7\% & 82.4\% & 42.1\% & \textbf{46.8\%} & 13.0\%\\
-POPE-adv Qwen2-VL & 87.1\% & 82.9\% & 77.5\% & \textbf{79.4\%} & 21.8\%\\
-AMBER(d) LLaVA    & 88.6\% & 95.6\% & 92.1\% & 84.5\% & \textbf{92.6\%}\\
+POPE-1500 LLaVA    & 81.9\% & 83.1\% & 68.2\% & \textbf{72.6\%} & 59.0\%\\
+POPE-adv LLaVA     & 82.7\% & 82.4\% & 42.1\% & \textbf{46.8\%} & 21.3\%\\
+POPE-adv Qwen2-VL  & 87.1\% & 82.9\% & 77.5\% & \textbf{79.4\%} & 21.0\%\\
+POPE-adv LLaVA+VCD & 80.4\% & 82.9\% & 45.0\% & \textbf{47.5\%} & 21.0\%\\
+AMBER(d) LLaVA     & 88.6\% & 95.6\% & \textbf{92.1\%} & 84.5\% & 17.9\%\rlap{$^{\dagger}$}\\
 \bottomrule
 \end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item[$\dagger$] The detector is $95.6\%$ accurate on AMBER and would certify nearly
+everything given enough calibration data, but with $n=228$ a three-way split leaves $76$
+calibration items and the fixed sequence aborts on $82\%$ of splits (a single error at the
+grid start already breaks the Clopper--Pearson bound at $k\approx33$). The figure therefore
+measures sample size, not detector quality; we report it rather than a
+large-calibration number because it is what this protocol yields. An earlier draft of this
+paper reported $92.6\%$ here and claimed a detector-only baseline beats CCRC on AMBER; that
+number is not reproducible under any split and the claim is withdrawn.
+\end{tablenotes}
+
+\end{threeparttable}
 \end{table}
 
 \paragraph{A published scorer, and where our margin comes from.}
@@ -1867,7 +1884,7 @@ signal, not the flexibility of the combiner.
 
 The emitted-set error is a binomial proportion, so an exact interval should dominate
 general-purpose concentration inequalities, and it does: at $\alpha=0.10$ Clopper--Pearson
-certifies $72.5\%$ coverage, empirical Bernstein $54.9\%$, and Hoeffding $38.3\%$
+certifies $71.6\%$ coverage, the betting bound $61.9\%$, empirical Bernstein $24.8\%$, and Hoeffding $21.6\%$
 (Table~\ref{tab:bounds}). All three are valid; the latter two are simply conservative,
 realising $4.6\%$ and $3.2\%$ risk against a $10\%$ budget. This is consistent with the
 hierarchy established by \citet{crcimposs} and indicates that for binary losses the choice
@@ -1880,13 +1897,17 @@ setting for claim-level factuality scores.
 \caption{Risk-bound ablation (POPE, $\alpha=0.10$, three-way split). Exact binomial
 dominates for a binary loss; the others are valid but conservative.}
 \label{tab:bounds}
-\begin{tabular}{lcc}
+\begin{tabular}{lccccccc}
 \toprule
-Upper confidence bound & cov@$10\%$ & realised risk\\
+& & \multicolumn{3}{c}{$\alpha=0.10$} & \multicolumn{3}{c}{$\alpha=0.15$}\\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}
+Upper confidence bound & $k_{\min}$ & cov & risk & $\widehat{\Pr}[\Risk>\alpha]$
+                                    & cov & risk & $\widehat{\Pr}[\Risk>\alpha]$\\
 \midrule
-Clopper--Pearson (exact) & \textbf{72.5\%} & 8.4\%\\
-Empirical Bernstein      & 54.9\% & 4.6\%\\
-Hoeffding                & 38.3\% & 3.2\%\\
+Hoeffding                & 116 & 21.6\% & 4.1\% & $0\%$ & 75.1\% & 9.7\%  & $0\%$\\
+Empirical Bernstein      &  71 & 24.8\% & 3.4\% & $0\%$ & 70.2\% & 9.4\%  & $0\%$\\
+Betting (e-CRC)          &  44 & 61.9\% & 6.2\% & $0\%$ & 79.0\% & 10.4\% & $0\%$\\
+Clopper--Pearson (exact) &  22 & \textbf{71.6\%} & 8.2\% & $2\%$ & \textbf{86.1\%} & 12.5\% & $5\%$\\
 \bottomrule
 \end{tabular}
 \end{table}
