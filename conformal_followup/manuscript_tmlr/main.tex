@@ -600,35 +600,80 @@ independence, not their accuracy, that makes them usable as channel~2.
 \label{sec:rel:position}
 
 \paragraph{The impossibility bound.}
-\citet{crcimposs} ask when conformal risk control can certify structured LLM outputs at
-all. They prove the abstention floor $(\mu-\alpha)/(1-\alpha)$ that our whole design is a
-response to, establish a hierarchy of bound tightness (Hoeffding $\subseteq$ empirical
-Bernstein $\subseteq$ e-value CRC), and validate adaptive conformal inference under
-distribution shift. They do not consider editing the output; the emit-or-abstain action
-space is an assumption of the theorem rather than a target of the analysis. Our
-contribution stands in a specific relation to theirs: we do not weaken or contradict their
-bound --- it is correct, and we re-derive it in our notation in
-Proposition~\ref{prop:floor} --- we exit its premise, and then pay for the exit by re-deriving
+\citet{crcimposs} asks when conformal risk control can certify structured LLM outputs at
+all, and the paper is best read as three results with one practical moral. First, the
+impossibility result: when the base risk exceeds the target, any distribution-free method
+must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of examples. Because $\mu$ and $\alpha$
+are both known before calibration, this doubles as a \emph{closed-form feasibility test} ---
+one can determine whether CRC will work at all without running it. Second, a certification
+hierarchy across Hoeffding, empirical Bernstein, and a betting-based e-CRC bound, with the
+Hoeffding-to-Bernstein step supplying the largest single gain ($+37\%$ certified
+configurations) and e-CRC earning its keep only when calibration data is scarce ($10\%$
+certification at $20\%$ of the data against $0\%$ for Hoeffding). Third, a validation of
+adaptive conformal inference under cross-dataset shift, cutting risk-target violations from
+$71\%$ to $21\%$, with the residual failures concentrated exactly where the impossibility
+bound predicts they must be. The empirical scope is substantial --- six open-weight models
+from 3B to 72B parameters, eight datasets, four tasks, six nonconformity scores --- and its
+verdict is blunt: hard NER, QA and classification configurations are simply uncertifiable
+at $\alpha=0.10$.
+
+Two things about this paper matter for us. The first is what it does \emph{not} study: the
+setting is text-only structured generation (named-entity recognition, JSON extraction,
+question answering, classification), so the multimodal case, where an independent
+perceptual channel is available in a way it is not for pure text, is outside its scope. The
+second is the remedy it recommends. Faced with infeasibility at $\alpha=0.10$, the
+prescription is to \emph{relax the target}: at $\alpha=0.30$--$0.40$ certification becomes
+practical ($47\%$ of NER, $40\%$ of QA, $60\%$ of classification configurations). That is a
+sound recommendation and, for many deployments, the right one. It is also an admission
+about the shape of the problem, and it is the fork this paper takes differently. We do not
+weaken or contradict the bound --- it is correct, and we re-derive it in our own notation in
+Proposition~\ref{prop:floor}. We exit its premise, and then pay for the exit by re-deriving
 validity for the mixture (Theorem~\ref{thm:validity}) and by discovering the constraints
-that substitution imposes (Theorems~\ref{thm:independence} and~\ref{thm:coupling}).
+that substitution imposes (Theorems~\ref{thm:independence} and~\ref{thm:coupling}). The
+same author's pipeline-level conformal work \citep{pasc} composes stage-wise guarantees and
+is subject to the same premise at every stage.
+
+\paragraph{Three responses to one bound.}
+It is worth naming the alternatives explicitly, because the contribution of this paper is
+best understood as a choice among them. Given a base risk $\mu$ above the target $\alpha$,
+the floor $(\mu-\alpha)/(1-\alpha)$ can be answered in exactly three ways.
+\textbf{(i)~Relax the target.} Accept a weaker promise until it becomes feasible; this is
+the recommendation of \citet{crcimposs}, and at $\alpha=0.30$--$0.40$ it works.
+\textbf{(ii)~Lower $\mu$, or sharpen the score.} Every mitigation method in
+\S\ref{sec:rel:hallu} does the former; \citet{bcea} does the latter, by spending a budget
+to look again before deciding. Both stay inside the premise and both shrink the floor
+without removing it. \textbf{(iii)~Change the action space.} Emit something the model did
+not say. This is the only response for which the theorem stops applying, and it is the one
+we take --- at the cost of having to re-derive the guarantee and of inheriting two new
+constraints that (i) and (ii) do not face.
 
 \paragraph{Budgeted conformal evidence acquisition.}
 \citet{bcea} is concurrent, close, and worth describing carefully because a reader who
-skims both papers may reasonably ask what is left. Their observation is the same as ours:
-conformal filtering on VLMs abstains far too much to be useful. Their remedy is to
-\emph{acquire more evidence} for borderline claims --- zoomed crops of the relevant image
-region --- form a post-acquisition score, and re-threshold, restoring validity by
-calibrating on post-acquisition scores rather than pre-acquisition ones. Their setting
-(POPE/COCO, LLaVA and Qwen backbones), their machinery (Clopper--Pearson $p$-values with
-fixed-sequence testing), and their motivation coincide with ours, and they report certified
-coverage rising from $28\%$ to $37\%$ at $\alpha=0.10$.
+skims both papers may reasonably ask what is left. Their diagnosis is the same as ours, and they
+state it more sharply than we do: to hold the hallucination rate below $5\%$ on a balanced
+object-existence benchmark, a state-of-the-art conformal filter must abstain on more than
+$80\%$ of claims. Their remedy is to replace the binary answer/abstain decision with a
+\emph{three-way} choice --- answer, abstain, or acquire additional visual evidence by
+re-examining the image (zooming, cropping, or applying a claim-specific intervention)
+under a bounded budget --- then form a post-acquisition score and re-threshold, restoring
+validity by calibrating on post-acquisition rather than pre-acquisition scores. Their
+setting (POPE/COCO, LLaVA and Qwen backbones), their machinery (Clopper--Pearson $p$-values
+with fixed-sequence testing), and their motivation coincide with ours, and in the regime we
+reproduce they report certified coverage rising from roughly $28\%$ to $37\%$ at
+$\alpha=0.10$.
 
-The distinction is precise. BCEA changes \emph{how confident it is} about the model's
-claim; we change \emph{what claim is emitted}. In their own framing there is no corrected
-answer: an item that survives acquisition is emitted as the model wrote it, and an item
-that does not is abstained. This means BCEA remains inside the premise of
-\citet{crcimposs} --- it moves items across the threshold by improving the score, which the
-bound permits, and it is therefore still subject to the floor. CCRC leaves the premise.
+The distinction is precise, and it survives the fact that both papers describe a
+``three-way choice''. Their third action is \emph{acquire}: spend budget to look again, and
+then answer or abstain on the strength of a better-informed score. Ours is \emph{repair}:
+emit a different answer. BCEA changes \emph{how confident it is} about the model's claim; we
+change \emph{what claim is emitted}. In their own framing there is no corrected answer --- an
+item that survives acquisition is emitted as the model wrote it, and an item that does not
+is abstained. This means BCEA remains inside the premise of \citet{crcimposs}: it moves
+items across the threshold by improving the score, which the bound explicitly permits,
+which is why it reduces the floor's bite without escaping the floor. It is, in the taxonomy
+below, the ``better score'' response rather than the ``relax $\alpha$''
+response. CCRC is the third response --- change the action space --- and it is the only one
+of the three for which the bound stops applying.
 The practical consequence is that the two rescue different populations: BCEA rescues
 claims where a closer look resolves genuine ambiguity, and CCRC rescues claims where the
 model is confidently or unconfidently wrong and an independent channel is right. We

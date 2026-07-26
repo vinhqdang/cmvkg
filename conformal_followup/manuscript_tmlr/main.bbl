@@ -28,106 +28,6 @@ Anastasios~N. Angelopoulos, Stephen Bates, Adam Fisch, Lihua Lei, and Tal
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2024.
 
-\bibitem[Anonymous(2025{\natexlab{a}})]{attnlens}
-Anonymous.
-\newblock Devils in middle layers of large vision-language models:
-  Interpreting, detecting and mitigating object hallucinations via attention
-  lens.
-\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
-  Recognition (CVPR)}, 2025{\natexlab{a}}.
-\newblock URL \url{https://arxiv.org/abs/2411.16724}.
-
-\bibitem[Anonymous(2025{\natexlab{b}})]{conflvlm}
-Anonymous.
-\newblock Towards statistical factuality guarantee for large vision-language
-  models.
-\newblock In \emph{Proceedings of the 2025 Conference on Empirical Methods in
-  Natural Language Processing (EMNLP)}, Suzhou, China, 2025{\natexlab{b}}.
-  Association for Computational Linguistics.
-\newblock URL \url{https://aclanthology.org/2025.emnlp-main.576/}.
-
-\bibitem[Anonymous(2025{\natexlab{c}})]{cover}
-Anonymous.
-\newblock {CoVeR}: Conformal calibration for versatile and reliable
-  autoregressive next-token prediction.
-\newblock \emph{arXiv preprint arXiv:2509.04733}, 2025{\natexlab{c}}.
-
-\bibitem[Anonymous(2025{\natexlab{d}})]{maskcd}
-Anonymous.
-\newblock {MaskCD}: Mitigating {LVLM} hallucinations by image head masked
-  contrastive decoding.
-\newblock \emph{arXiv preprint arXiv:2510.02790}, 2025{\natexlab{d}}.
-
-\bibitem[Anonymous(2025{\natexlab{e}})]{mcallava}
-Anonymous.
-\newblock {MCA-LLaVA}: Manhattan causal attention for reducing hallucination in
-  large vision-language models.
-\newblock \emph{arXiv preprint arXiv:2507.09184}, 2025{\natexlab{e}}.
-
-\bibitem[Anonymous(2025{\natexlab{f}})]{onlineabstention}
-Anonymous.
-\newblock Online conformal abstention for factuality control under partial
-  feedback.
-\newblock \emph{arXiv preprint arXiv:2506.14067}, 2025{\natexlab{f}}.
-
-\bibitem[Anonymous(2025{\natexlab{g}})]{only}
-Anonymous.
-\newblock {ONLY}: One-layer intervention sufficiently mitigates hallucinations
-  in large vision-language models.
-\newblock \emph{arXiv preprint arXiv:2507.00898}, 2025{\natexlab{g}}.
-
-\bibitem[Anonymous(2025{\natexlab{h}})]{reverse}
-Anonymous.
-\newblock Generate, but verify: Reducing hallucination in vision-language
-  models with retrospective resampling.
-\newblock In \emph{Advances in Neural Information Processing Systems
-  (NeurIPS)}, 2025{\natexlab{h}}.
-\newblock URL \url{https://reverse-vlm.github.io/}.
-
-\bibitem[Anonymous(2025{\natexlab{i}})]{tamingvar}
-Anonymous.
-\newblock Taming variability: Randomized and bootstrapped conformal risk
-  control for {LLM}s.
-\newblock \emph{arXiv preprint arXiv:2509.23007}, 2025{\natexlab{i}}.
-
-\bibitem[Anonymous(2025{\natexlab{j}})]{tecp}
-Anonymous.
-\newblock Token-entropy conformal prediction for {LLM}s.
-\newblock \emph{Mathematics}, 13\penalty0 (20):\penalty0 3351,
-  2025{\natexlab{j}}.
-
-\bibitem[Anonymous(2026{\natexlab{a}})]{bcea}
-Anonymous.
-\newblock Look again before you abstain: Budgeted conformal evidence
-  acquisition for reliable vision-language models.
-\newblock \emph{arXiv preprint arXiv:2606.16667}, 2026{\natexlab{a}}.
-\newblock URL \url{https://arxiv.org/abs/2606.16667}.
-
-\bibitem[Anonymous(2026{\natexlab{b}})]{causalgating}
-Anonymous.
-\newblock Mitigating hallucinations in large vision-language models via causal
-  route gating.
-\newblock \emph{arXiv preprint arXiv:2605.24024}, 2026{\natexlab{b}}.
-
-\bibitem[Anonymous(2026{\natexlab{c}})]{crcimposs}
-Anonymous.
-\newblock When can conformal risk control certify {LLM} outputs? bounds,
-  impossibility, and adaptation for structured generation.
-\newblock \emph{arXiv preprint arXiv:2606.29054}, 2026{\natexlab{c}}.
-\newblock URL \url{https://arxiv.org/abs/2606.29054}.
-
-\bibitem[Anonymous(2026{\natexlab{d}})]{pasc}
-Anonymous.
-\newblock {PASC}: Pipeline-aware conformal prediction with joint coverage
-  guarantees for multi-stage {NLP} and {LLM} pipelines.
-\newblock \emph{arXiv preprint arXiv:2605.18812}, 2026{\natexlab{d}}.
-
-\bibitem[Anonymous(2026{\natexlab{e}})]{twoaxes}
-Anonymous.
-\newblock Two axes of {LLM} abstention: Answer correctness and question
-  answerability.
-\newblock \emph{arXiv preprint arXiv:2607.08456}, 2026{\natexlab{e}}.
-
 \bibitem[Bai et~al.(2024)Bai, Wang, Xiao, He, Han, Zhang, and
   Shou]{bai2024survey}
 Zechen Bai, Pichao Wang, Tianjun Xiao, Tong He, Zongbo Han, Zheng Zhang, and
@@ -172,6 +72,12 @@ Lingjiao Chen, Matei Zaharia, and James Zou.
 \newblock In \emph{Transactions on Machine Learning Research},
   2024{\natexlab{a}}.
 
+\bibitem[Chen et~al.(2025)Chen, Wang, Liu, Jing, and Tao]{cover}
+Yuzhu Chen, Yingjie Wang, Shunyu Liu, Yongcheng Jing, and Dacheng Tao.
+\newblock {CoVeR}: Conformal calibration for versatile and reliable
+  autoregressive next-token prediction.
+\newblock \emph{arXiv preprint arXiv:2509.04733}, 2025.
+
 \bibitem[Chen et~al.(2024{\natexlab{b}})Chen, Zhao, Luo, Yao, Li, and
   Zhou]{chen2024halc}
 Zhaorun Chen, Zhuokai Zhao, Hongyin Luo, Huaxiu Yao, Bo~Li, and Jiawei Zhou.
@@ -179,6 +85,12 @@ Zhaorun Chen, Zhuokai Zhao, Hongyin Luo, Huaxiu Yao, Bo~Li, and Jiawei Zhou.
   decoding.
 \newblock In \emph{International Conference on Machine Learning (ICML)},
   2024{\natexlab{b}}.
+
+\bibitem[Cheng et~al.(2026)Cheng, Chen, Zhang, and Shen]{causalgating}
+Zhe Cheng, Wenyu Chen, Fode Zhang, and Dehuan Shen.
+\newblock Mitigating hallucinations in large vision-language models via causal
+  route gating.
+\newblock \emph{arXiv preprint arXiv:2605.24024}, 2026.
 
 \bibitem[Chow(1970)]{chow1970}
 C.~K. Chow.
@@ -211,6 +123,12 @@ Quang-Vinh Dang, Ngoc-Son-An Nguyen, Thi-Bich-Diem Vo, Minh~Ngoc Dinh, Anh~Dat
   dynamic knowledge graph verification.
 \newblock \emph{Discover Artificial Intelligence}, 2026.
 \newblock In press.
+
+\bibitem[Deng \& Yang(2025)Deng and Yang]{maskcd}
+Jingyuan Deng and Yujiu Yang.
+\newblock {MaskCD}: Mitigating {LVLM} hallucinations by image head masked
+  contrastive decoding.
+\newblock \emph{arXiv preprint arXiv:2510.02790}, 2025.
 
 \bibitem[Ding et~al.(2023)Ding, Angelopoulos, Bates, Jordan, and
   Tibshirani]{ding2023}
@@ -322,11 +240,33 @@ Ziwei Ji, Nayeon Lee, Rita Frieske, Tiezheng Yu, Dan Su, Yan Xu, Etsuko Ishii,
 \newblock Survey of hallucination in natural language generation.
 \newblock \emph{ACM Computing Surveys}, 55\penalty0 (12):\penalty0 1--38, 2023.
 
+\bibitem[Jiang et~al.(2025)Jiang, Chen, Zhu, Luo, Shen, and Yang]{attnlens}
+Zhangqi Jiang, Junkai Chen, Beier Zhu, Tingjin Luo, Yankun Shen, and Xu~Yang.
+\newblock Devils in middle layers of large vision-language models:
+  Interpreting, detecting and mitigating object hallucinations via attention
+  lens.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2025.
+\newblock URL \url{https://arxiv.org/abs/2411.16724}.
+
 \bibitem[Kadavath et~al.(2022)Kadavath, Conerly, Askell, Henighan,
   et~al.]{kadavath2022}
 Saurav Kadavath, Tom Conerly, Amanda Askell, Tom Henighan, et~al.
 \newblock Language models (mostly) know what they know.
 \newblock \emph{arXiv preprint arXiv:2207.05221}, 2022.
+
+\bibitem[Kotte(2026{\natexlab{a}})]{crcimposs}
+Varun Kotte.
+\newblock When can conformal risk control certify {LLM} outputs? bounds,
+  impossibility, and adaptation for structured generation.
+\newblock \emph{arXiv preprint arXiv:2606.29054}, 2026{\natexlab{a}}.
+\newblock URL \url{https://arxiv.org/abs/2606.29054}.
+
+\bibitem[Kotte(2026{\natexlab{b}})]{pasc}
+Varun Kotte.
+\newblock {PASC}: Pipeline-aware conformal prediction with joint coverage
+  guarantees for multi-stage {NLP} and {LLM} pipelines.
+\newblock \emph{arXiv preprint arXiv:2605.18812}, 2026{\natexlab{b}}.
 
 \bibitem[Kuhn et~al.(2023)Kuhn, Gal, and Farquhar]{kuhn2023}
 Lorenz Kuhn, Yarin Gal, and Sebastian Farquhar.
@@ -357,6 +297,12 @@ Junlin Lee, Yequan Wang, Jing Li, and Min Zhang.
   for Computational Linguistics (ACL)}, pp.\  2052--2065, Bangkok, Thailand,
   2024.
 
+\bibitem[Lee et~al.(2025)Lee, Jung, and Park]{onlineabstention}
+Minjae Lee, Yoonjae Jung, and Sangdon Park.
+\newblock Online conformal abstention for factuality control under adversarial
+  bandit feedback.
+\newblock \emph{arXiv preprint arXiv:2506.14067}, 2025.
+
 \bibitem[Lei et~al.(2018)Lei, G'Sell, Rinaldo, Tibshirani, and
   Wasserman]{lei2018}
 Jing Lei, Max G'Sell, Alessandro Rinaldo, Ryan~J. Tibshirani, and Larry
@@ -379,6 +325,16 @@ Yifan Li, Yifan Du, Kun Zhou, Jinpeng Wang, Wayne~Xin Zhao, and Ji-Rong Wen.
 \newblock In \emph{Proceedings of the 2023 Conference on Empirical Methods in
   Natural Language Processing (EMNLP)}, pp.\  292--305, Singapore, 2023.
   Association for Computational Linguistics.
+
+\bibitem[Li et~al.(2025)Li, Yan, Jackson, Cui, Li, Zhang, and Malin]{conflvlm}
+Zhuohang Li, Chao Yan, Nicholas~J. Jackson, Wendi Cui, Bo~Li, Jiaxin Zhang, and
+  Bradley~A. Malin.
+\newblock Towards statistical factuality guarantee for large vision--language
+  models.
+\newblock In \emph{Proceedings of the 2025 Conference on Empirical Methods in
+  Natural Language Processing (EMNLP)}, Suzhou, China, 2025. Association for
+  Computational Linguistics.
+\newblock URL \url{https://aclanthology.org/2025.emnlp-main.576/}.
 
 \bibitem[Lin et~al.(2022)Lin, Hilton, and Evans]{lin2022}
 Stephanie Lin, Jacob Hilton, and Owain Evans.
@@ -433,6 +389,13 @@ Christopher Mohri and Tatsunori Hashimoto.
 \newblock Language models with conformal factuality guarantees.
 \newblock In \emph{International Conference on Machine Learning (ICML)}, 2024.
 \newblock arXiv:2402.10978.
+
+\bibitem[Pang et~al.(2025)Pang, Huang, Lin, Wang, Aue, and Priebe]{tamingvar}
+Lingyou Pang, Lei Huang, Jianyu Lin, Tianyu Wang, Alexander Aue, and Carey~E.
+  Priebe.
+\newblock Taming variability: Randomized and bootstrapped conformal risk
+  control for {LLM}s.
+\newblock \emph{arXiv preprint arXiv:2509.23007}, 2025.
 
 \bibitem[Papadopoulos et~al.(2002)Papadopoulos, Proedrou, Vovk, and
   Gammerman]{papadopoulos2002}
@@ -538,6 +501,20 @@ Vladimir Vovk, Alexander Gammerman, and Glenn Shafer.
 \newblock \emph{Algorithmic Learning in a Random World}.
 \newblock Springer, New York, 2005.
 
+\bibitem[Wagner(2026)]{twoaxes}
+Benedikt~J. Wagner.
+\newblock Two axes of {LLM} abstention: Answer correctness and question
+  answerability.
+\newblock \emph{arXiv preprint arXiv:2607.08456}, 2026.
+
+\bibitem[Wan et~al.(2025)Wan, Zhang, Yong, Ma, Stepputtis, Morency, Ramanan,
+  Sycara, and Xie]{only}
+Zifu Wan, Ce~Zhang, Silong Yong, Martin~Q. Ma, Simon Stepputtis, Louis-Philippe
+  Morency, Deva Ramanan, Katia Sycara, and Yaqi Xie.
+\newblock {ONLY}: One-layer intervention sufficiently mitigates hallucinations
+  in large vision-language models.
+\newblock \emph{arXiv preprint arXiv:2507.00898}, 2025.
+
 \bibitem[Wang et~al.(2023{\natexlab{a}})Wang, Wang, Xu, Zhang, Gu, Jia, Yan,
   Zhang, and Sang]{amber}
 Junyang Wang, Yuhang Wang, Guohai Xu, Jing Zhang, Yukai Gu, Haitao Jia, Ming
@@ -571,6 +548,15 @@ Ian Waudby-Smith and Aaditya Ramdas.
 \newblock \emph{Journal of the Royal Statistical Society Series B}, 86\penalty0
   (1):\penalty0 1--27, 2024.
 
+\bibitem[Wu et~al.(2025)Wu, Lee, Ge, Gonzalez, Darrell, and Chan]{reverse}
+Tsung-Han Wu, Heekyung Lee, Jiaxin Ge, Joseph~E. Gonzalez, Trevor Darrell, and
+  David~M. Chan.
+\newblock Generate, but verify: Reducing hallucination in vision-language
+  models with retrospective resampling.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2025.
+\newblock URL \url{https://reverse-vlm.github.io/}.
+
 \bibitem[Xia et~al.(2024)Xia, Zhu, Li, Zhu, Li, Li, Zhang, and Yao]{rule}
 Peng Xia, Kangyu Zhu, Haoran Li, Hongtu Zhu, Yun Li, Gang Li, Linjun Zhang, and
   Huaxiu Yao.
@@ -579,6 +565,18 @@ Peng Xia, Kangyu Zhu, Haoran Li, Hongtu Zhu, Yun Li, Gang Li, Linjun Zhang, and
 \newblock In \emph{Proceedings of the 2024 Conference on Empirical Methods in
   Natural Language Processing (EMNLP)}, pp.\  1081--1093, Miami, Florida, USA,
   2024.
+
+\bibitem[Xu \& Lu(2025)Xu and Lu]{tecp}
+Beining Xu and Yongming Lu.
+\newblock Token-entropy conformal prediction for {LLM}s.
+\newblock \emph{Mathematics}, 13\penalty0 (20):\penalty0 3351, 2025.
+
+\bibitem[Xu et~al.(2026)Xu, Wu, Zeng, Paisley, and Zhao]{bcea}
+Jian Xu, Yanning Wu, Delu Zeng, John Paisley, and Qibin Zhao.
+\newblock Look again before you abstain: Budgeted conformal evidence
+  acquisition for reliable vision--language models.
+\newblock \emph{arXiv preprint arXiv:2606.16667}, 2026.
+\newblock URL \url{https://arxiv.org/abs/2606.16667}.
 
 \bibitem[Yin et~al.(2024)Yin, Fu, Zhao, Xu, Wang, Sui, Shen, Li, Sun, and
   Chen]{woodpecker}
@@ -604,12 +602,21 @@ Ce~Zhang, Simon Stepputtis, Katia Sycara, and Yaqi Xie.
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2025.
 
-\bibitem[Zhao et~al.(2025)Zhao, Deng, Zhang, and Gu]{marine}
+\bibitem[Zhao et~al.(2025{\natexlab{a}})Zhao, Deng, Zhang, and Gu]{marine}
 Linxi Zhao, Yihe Deng, Weitong Zhang, and Quanquan Gu.
 \newblock Mitigating object hallucination in large vision-language models via
   classifier-free guidance.
-\newblock In \emph{International Conference on Machine Learning (ICML)}, 2025.
+\newblock In \emph{International Conference on Machine Learning (ICML)},
+  2025{\natexlab{a}}.
 \newblock Spotlight.
+
+\bibitem[Zhao et~al.(2025{\natexlab{b}})Zhao, Zhang, Li, Xing, Yuan, Tang, Fan,
+  Chen, Zhang, and Wang]{mcallava}
+Qiyan Zhao, Xiaofeng Zhang, Yiheng Li, Yun Xing, Xiaosong Yuan, Feilong Tang,
+  Sinan Fan, Xuhang Chen, Xuyao Zhang, and Dahan Wang.
+\newblock {MCA-LLaVA}: Manhattan causal attention for reducing hallucination in
+  large vision-language models.
+\newblock \emph{arXiv preprint arXiv:2507.09184}, 2025{\natexlab{b}}.
 
 \bibitem[Zhou et~al.(2024)Zhou, Cui, Yoon, Zhang, Deng, Finn, Bansal, and
   Yao]{lure}
