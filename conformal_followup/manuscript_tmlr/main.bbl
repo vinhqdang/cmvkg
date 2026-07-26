@@ -1,4 +1,4 @@
-\begin{thebibliography}{85}
+\begin{thebibliography}{86}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -62,15 +62,16 @@ Peter~L. Bartlett and Marten~H. Wegkamp.
 Stephen Bates, Anastasios~N. Angelopoulos, Lihua Lei, Jitendra Malik, and
   Michael~I. Jordan.
 \newblock Distribution-free, risk-controlling prediction sets.
-\newblock \emph{Journal of the ACM}, 68\penalty0 (6):\penalty0 1--34, 2021.
+\newblock \emph{Journal of the ACM}, 68\penalty0 (6):\penalty0 43:1--43:34,
+  2021.
 
 \bibitem[Chen et~al.(2024{\natexlab{a}})Chen, Zaharia, and
   Zou]{chen2023frugalgpt}
 Lingjiao Chen, Matei Zaharia, and James Zou.
 \newblock Frugalgpt: How to use large language models while reducing cost and
   improving performance.
-\newblock In \emph{Transactions on Machine Learning Research},
-  2024{\natexlab{a}}.
+\newblock \emph{Transactions on Machine Learning Research}, 2024{\natexlab{a}}.
+\newblock URL \url{https://arxiv.org/abs/2305.05176}.
 
 \bibitem[Chen et~al.(2025)Chen, Wang, Liu, Jing, and Tao]{cover}
 Yuzhu Chen, Yingjie Wang, Shunyu Liu, Yongcheng Jing, and Dacheng Tao.
@@ -90,7 +91,9 @@ Zhaorun Chen, Zhuokai Zhao, Hongyin Luo, Huaxiu Yao, Bo~Li, and Jiawei Zhou.
 Zhe Cheng, Wenyu Chen, Fode Zhang, and Dehuan Shen.
 \newblock Mitigating hallucinations in large vision-language models via causal
   route gating.
-\newblock \emph{arXiv preprint arXiv:2605.24024}, 2026.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2026.
+\newblock URL \url{https://arxiv.org/abs/2605.24024}.
+\newblock Spotlight.
 
 \bibitem[Chow(1970)]{chow1970}
 C.~K. Chow.
@@ -128,7 +131,10 @@ Quang-Vinh Dang, Ngoc-Son-An Nguyen, Thi-Bich-Diem Vo, Minh~Ngoc Dinh, Anh~Dat
 Jingyuan Deng and Yujiu Yang.
 \newblock {MaskCD}: Mitigating {LVLM} hallucinations by image head masked
   contrastive decoding.
-\newblock \emph{arXiv preprint arXiv:2510.02790}, 2025.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  EMNLP 2025}, pp.\  18854--18866. Association for Computational Linguistics,
+  2025.
+\newblock URL \url{https://arxiv.org/abs/2510.02790}.
 
 \bibitem[Ding et~al.(2023)Ding, Angelopoulos, Bates, Jordan, and
   Tibshirani]{ding2023}
@@ -169,12 +175,14 @@ Alessandro Favero, Luca Zancato, Matthew Trager, Siddharth Choudhary,
   Recognition (CVPR)}, 2024.
 
 \bibitem[Fu et~al.(2023)Fu, Chen, Shen, Qin, Zhang, Lin, Yang, Zheng, Li, Sun,
-  Wu, and Ji]{mme}
+  Wu, Ji, Shan, and He]{mme}
 Chaoyou Fu, Peixian Chen, Yunhang Shen, Yulei Qin, Mengdan Zhang, Xu~Lin,
-  Jinrui Yang, Xiawu Zheng, Ke~Li, Xing Sun, Yunsheng Wu, and Rongrong Ji.
+  Jinrui Yang, Xiawu Zheng, Ke~Li, Xing Sun, Yunsheng Wu, Rongrong Ji, Caifeng
+  Shan, and Ran He.
 \newblock {MME}: A comprehensive evaluation benchmark for multimodal large
   language models.
 \newblock \emph{arXiv preprint arXiv:2306.13394}, 2023.
+\newblock URL \url{https://arxiv.org/abs/2306.13394}.
 
 \bibitem[Geifman \& El-Yaniv(2019)Geifman and El-Yaniv]{geifman2019}
 Yonatan Geifman and Ran El-Yaniv.
@@ -217,6 +225,12 @@ Neha Gupta, Harikrishna Narasimhan, Wittawat Jitkrittum, Ankit~Singh Rawat,
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2024.
 
+\bibitem[Hoeffding(1956)]{hoeffding1956}
+Wassily Hoeffding.
+\newblock On the distribution of the number of successes in independent trials.
+\newblock \emph{Annals of Mathematical Statistics}, 27\penalty0 (3):\penalty0
+  713--721, 1956.
+
 \bibitem[Huang et~al.(2024)Huang, Dong, Zhang, Wang, He, Wang, Lin, Zhang, and
   Yu]{opera}
 Qidong Huang, Xiaoyi Dong, Pan Zhang, Bin Wang, Conghui He, Jiaqi Wang, Dahua
@@ -238,7 +252,8 @@ Drew~A. Hudson and Christopher~D. Manning.
 Ziwei Ji, Nayeon Lee, Rita Frieske, Tiezheng Yu, Dan Su, Yan Xu, Etsuko Ishii,
   Yejin Bang, Andrea Madotto, and Pascale Fung.
 \newblock Survey of hallucination in natural language generation.
-\newblock \emph{ACM Computing Surveys}, 55\penalty0 (12):\penalty0 1--38, 2023.
+\newblock \emph{ACM Computing Surveys}, 55\penalty0 (12):\penalty0
+  248:1--248:38, 2023.
 
 \bibitem[Jiang et~al.(2025)Jiang, Chen, Zhu, Luo, Shen, and Yang]{attnlens}
 Zhangqi Jiang, Junkai Chen, Beier Zhu, Tingjin Luo, Yankun Shen, and Xu~Yang.
@@ -281,8 +296,10 @@ Bhawesh Kumar, Charlie Lu, Gauri Gupta, Anil Palepu, David Bellamy, Ramesh
   Raskar, and Andrew Beam.
 \newblock Conformal prediction with large language models for multi-choice
   question answering.
-\newblock In \emph{ICML Workshop on Structured Probabilistic Inference and
-  Generative Modeling}, 2023.
+\newblock In \emph{ICML 2023 Workshop on Neural Conversational AI: What's Left
+  to {TEACH} (Trustworthy, Enhanced, Adaptable, Capable and Human-centric)
+  Chatbots?}, 2023.
+\newblock URL \url{https://arxiv.org/abs/2305.18404}.
 
 \bibitem[Le~Goues et~al.(2019)Le~Goues, Pradel, and Roychoudhury]{legoues2019}
 Claire Le~Goues, Michael Pradel, and Abhik Roychoudhury.
@@ -294,8 +311,9 @@ Claire Le~Goues, Michael Pradel, and Abhik Roychoudhury.
 Junlin Lee, Yequan Wang, Jing Li, and Min Zhang.
 \newblock Multimodal reasoning with multimodal knowledge graph.
 \newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association
-  for Computational Linguistics (ACL)}, pp.\  2052--2065, Bangkok, Thailand,
+  for Computational Linguistics (ACL)}, pp.\  10767--10782, Bangkok, Thailand,
   2024.
+\newblock URL \url{https://aclanthology.org/2024.acl-long.579/}.
 
 \bibitem[Lee et~al.(2025)Lee, Jung, and Park]{onlineabstention}
 Minjae Lee, Yoonjae Jung, and Sangdon Park.
@@ -379,7 +397,7 @@ Potsawee Manakul, Adian Liusie, and Mark J.~F. Gales.
   Processing (EMNLP)}, 2023.
 
 \bibitem[Minderer et~al.(2023)Minderer, Gritsenko, and Houlsby]{owlv2}
-Matthias Minderer, Alexey Gritsenko, and Neil Houlsby.
+Matthias Minderer, Alexey~A. Gritsenko, and Neil Houlsby.
 \newblock Scaling open-vocabulary object detection.
 \newblock In \emph{Advances in Neural Information Processing Systems
   (NeurIPS)}, 2023.
@@ -408,7 +426,10 @@ Harris Papadopoulos, Kostas Proedrou, Volodya Vovk, and Alex Gammerman.
 Drew Prinster, Samuel Stanton, Anqi Liu, and Suchi Saria.
 \newblock Conformal validity guarantees exist for any data distribution (and
   how to find them).
-\newblock \emph{arXiv preprint arXiv:2405.06627}, 2024.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine
+  Learning (ICML)}, volume 235 of \emph{Proceedings of Machine Learning
+  Research}, pp.\  41086--41118. PMLR, 2024.
+\newblock URL \url{https://arxiv.org/abs/2405.06627}.
 
 \bibitem[Quach et~al.(2024)Quach, Fisch, Schuster, Yala, Sohn, Jaakkola, and
   Barzilay]{conformallm}
@@ -464,37 +485,41 @@ Mauricio Sadinle, Jing Lei, and Larry Wasserman.
   (525):\penalty0 223--234, 2019.
 
 \bibitem[Sun et~al.(2024{\natexlab{a}})Sun, Shen, Cao, Liu, Li, Shen, Gan, Gui,
-  Wang, Yang, Keutzer, and Darrell]{sun2024aligning}
-Zhiqing Sun, Sheng Shen, Shengcao Cao, Haotian Liu, Chunyuan Li, Yikang Shen,
-  Chuang Gan, Liang-Yan Gui, Yu-Xiong Wang, Yiming Yang, Kurt Keutzer, and
-  Trevor Darrell.
-\newblock Aligning large multimodal models with factually augmented {RLHF}.
-\newblock In \emph{Findings of the Association for Computational Linguistics
-  (ACL)}, Bangkok, Thailand, 2024{\natexlab{a}}.
-
-\bibitem[Sun et~al.(2024{\natexlab{b}})Sun, Shen, Cao, Liu, Li, Shen, Gan, Gui,
   Wang, Yang, Keutzer, and Darrell]{mmhal}
 Zhiqing Sun, Sheng Shen, Shengcao Cao, Haotian Liu, Chunyuan Li, Yikang Shen,
   Chuang Gan, Liangyan Gui, Yu-Xiong Wang, Yiming Yang, Kurt Keutzer, and
   Trevor Darrell.
 \newblock Aligning large multimodal models with factually augmented {RLHF}.
-\newblock In \emph{Findings of the Association for Computational Linguistics
-  (ACL)}, pp.\  13088--13110, Bangkok, Thailand, 2024{\natexlab{b}}.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  ACL 2024}, pp.\  13088--13110, Bangkok, Thailand, 2024{\natexlab{a}}.
+  Association for Computational Linguistics.
+\newblock URL \url{https://aclanthology.org/2024.findings-acl.775/}.
+
+\bibitem[Sun et~al.(2024{\natexlab{b}})Sun, Shen, Cao, Liu, Li, Shen, Gan, Gui,
+  Wang, Yang, Keutzer, and Darrell]{sun2024aligning}
+Zhiqing Sun, Sheng Shen, Shengcao Cao, Haotian Liu, Chunyuan Li, Yikang Shen,
+  Chuang Gan, Liangyan Gui, Yu-Xiong Wang, Yiming Yang, Kurt Keutzer, and
+  Trevor Darrell.
+\newblock Aligning large multimodal models with factually augmented {RLHF}.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  ACL 2024}, pp.\  13088--13110, Bangkok, Thailand, 2024{\natexlab{b}}.
+  Association for Computational Linguistics.
+\newblock URL \url{https://aclanthology.org/2024.findings-acl.775/}.
 
 \bibitem[Tibshirani et~al.(2019)Tibshirani, Barber, Cand{\`e}s, and
   Ramdas]{tibshirani2019}
 Ryan~J. Tibshirani, Rina~Foygel Barber, Emmanuel~J. Cand{\`e}s, and Aaditya
   Ramdas.
 \newblock Conformal prediction under covariate shift.
-\newblock \emph{Advances in Neural Information Processing Systems (NeurIPS)},
-  2019.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, pp.\  2526--2536, 2019.
 
 \bibitem[Vovk et~al.(2003)Vovk, Lindsay, Nouretdinov, and
   Gammerman]{vovk2003mondrian}
 Vladimir Vovk, David Lindsay, Ilia Nouretdinov, and Alex Gammerman.
 \newblock Mondrian confidence machine.
-\newblock In \emph{Technical Report, Royal Holloway University of London},
-  2003.
+\newblock On-line Compression Modelling project, Working Paper~4, Royal
+  Holloway, University of London, March 2003.
 
 \bibitem[Vovk et~al.(2005)Vovk, Gammerman, and Shafer]{vovk2005}
 Vladimir Vovk, Alexander Gammerman, and Glenn Shafer.
@@ -513,15 +538,18 @@ Zifu Wan, Ce~Zhang, Silong Yong, Martin~Q. Ma, Simon Stepputtis, Louis-Philippe
   Morency, Deva Ramanan, Katia Sycara, and Yaqi Xie.
 \newblock {ONLY}: One-layer intervention sufficiently mitigates hallucinations
   in large vision-language models.
-\newblock \emph{arXiv preprint arXiv:2507.00898}, 2025.
+\newblock In \emph{IEEE/CVF International Conference on Computer Vision
+  (ICCV)}, pp.\  3225--3234, 2025.
+\newblock URL \url{https://arxiv.org/abs/2507.00898}.
 
-\bibitem[Wang et~al.(2023{\natexlab{a}})Wang, Wang, Xu, Zhang, Gu, Jia, Yan,
-  Zhang, and Sang]{amber}
-Junyang Wang, Yuhang Wang, Guohai Xu, Jing Zhang, Yukai Gu, Haitao Jia, Ming
-  Yan, Ji~Zhang, and Jitao Sang.
-\newblock An {LLM}-free multi-dimensional benchmark for {MLLM}s hallucination
-  evaluation.
-\newblock In \emph{arXiv preprint arXiv:2311.07397}, 2023{\natexlab{a}}.
+\bibitem[Wang et~al.(2023{\natexlab{a}})Wang, Wang, Xu, Zhang, Gu, Jia, Wang,
+  Xu, Yan, Zhang, and Sang]{amber}
+Junyang Wang, Yuhang Wang, Guohai Xu, Jing Zhang, Yukai Gu, Haitao Jia, Jiaqi
+  Wang, Haiyang Xu, Ming Yan, Ji~Zhang, and Jitao Sang.
+\newblock {AMBER}: An {LLM}-free multi-dimensional benchmark for {MLLM}s
+  hallucination evaluation.
+\newblock \emph{arXiv preprint arXiv:2311.07397}, 2023{\natexlab{a}}.
+\newblock URL \url{https://arxiv.org/abs/2311.07397}.
 
 \bibitem[Wang et~al.(2024)Wang, Bai, Tan, Wang, Fan, Bai, Chen, Liu, Wang, Ge,
   Fan, Dang, Du, Ren, Men, Liu, Zhou, Zhou, and Lin]{qwenvl}
@@ -568,8 +596,9 @@ Peng Xia, Kangyu Zhu, Haoran Li, Hongtu Zhu, Yun Li, Gang Li, Linjun Zhang, and
 
 \bibitem[Xu \& Lu(2025)Xu and Lu]{tecp}
 Beining Xu and Yongming Lu.
-\newblock Token-entropy conformal prediction for {LLM}s.
+\newblock {TECP}: Token-entropy conformal prediction for {LLM}s.
 \newblock \emph{Mathematics}, 13\penalty0 (20):\penalty0 3351, 2025.
+\newblock URL \url{https://doi.org/10.3390/math13203351}.
 
 \bibitem[Xu et~al.(2026)Xu, Wu, Zeng, Paisley, and Zhao]{bcea}
 Jian Xu, Yanning Wu, Delu Zeng, John Paisley, and Qibin Zhao.
@@ -584,7 +613,9 @@ Shukang Yin, Chaoyou Fu, Sirui Zhao, Tong Xu, Hao Wang, Dianbo Sui, Yunhang
   Shen, Ke~Li, Xing Sun, and Enhong Chen.
 \newblock Woodpecker: Hallucination correction for multimodal large language
   models.
-\newblock In \emph{Science China Information Sciences}, 2024.
+\newblock \emph{Science China Information Sciences}, 67\penalty0 (12):\penalty0
+  220105:1--220105:13, 2024.
+\newblock URL \url{https://doi.org/10.1007/s11432-024-4251-x}.
 
 \bibitem[Yu et~al.(2024)Yu, Yao, Zhang, He, Han, Cui, Hu, Liu, Zheng, Sun, and
   Chua]{yu2024rlhfv}
@@ -595,19 +626,24 @@ Tianyu Yu, Yuan Yao, Haoye Zhang, Taiwen He, Yifeng Han, Ganqu Cui, Jinyi Hu,
 \newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
   Recognition (CVPR)}, 2024.
 
-\bibitem[Zhang et~al.(2025)Zhang, Stepputtis, Sycara, and Xie]{degf}
-Ce~Zhang, Simon Stepputtis, Katia Sycara, and Yaqi Xie.
+\bibitem[Zhang et~al.(2025)Zhang, Wan, Kan, Ma, Stepputtis, Ramanan,
+  Salakhutdinov, Morency, Sycara, and Xie]{degf}
+Ce~Zhang, Zifu Wan, Zhehan Kan, Martin~Q. Ma, Simon Stepputtis, Deva Ramanan,
+  Russ Salakhutdinov, Louis-Philippe Morency, Katia Sycara, and Yaqi Xie.
 \newblock Self-correcting decoding with generative feedback for mitigating
   hallucinations in large vision-language models.
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2025.
+\newblock URL \url{https://arxiv.org/abs/2502.06130}.
 
 \bibitem[Zhao et~al.(2025{\natexlab{a}})Zhao, Deng, Zhang, and Gu]{marine}
 Linxi Zhao, Yihe Deng, Weitong Zhang, and Quanquan Gu.
 \newblock Mitigating object hallucination in large vision-language models via
-  classifier-free guidance.
-\newblock In \emph{International Conference on Machine Learning (ICML)},
-  2025{\natexlab{a}}.
+  image-grounded guidance.
+\newblock In \emph{Proceedings of the 42nd International Conference on Machine
+  Learning (ICML)}, volume 267 of \emph{Proceedings of Machine Learning
+  Research}, pp.\  77461--77486. PMLR, 2025{\natexlab{a}}.
+\newblock URL \url{https://proceedings.mlr.press/v267/zhao25j.html}.
 \newblock Spotlight.
 
 \bibitem[Zhao et~al.(2025{\natexlab{b}})Zhao, Zhang, Li, Xing, Yuan, Tang, Fan,
@@ -616,7 +652,10 @@ Qiyan Zhao, Xiaofeng Zhang, Yiheng Li, Yun Xing, Xiaosong Yuan, Feilong Tang,
   Sinan Fan, Xuhang Chen, Xuyao Zhang, and Dahan Wang.
 \newblock {MCA-LLaVA}: Manhattan causal attention for reducing hallucination in
   large vision-language models.
-\newblock \emph{arXiv preprint arXiv:2507.09184}, 2025{\natexlab{b}}.
+\newblock In \emph{Proceedings of the 33rd ACM International Conference on
+  Multimedia (ACM MM)}. Association for Computing Machinery,
+  2025{\natexlab{b}}.
+\newblock URL \url{https://arxiv.org/abs/2507.09184}.
 
 \bibitem[Zhou et~al.(2024)Zhou, Cui, Yoon, Zhang, Deng, Finn, Bansal, and
   Yao]{lure}

@@ -67,6 +67,13 @@ def deploy(lam, s_te, m_te, s_ref, m_ref, ok_o, ok_r, q):
     if k == 0: return 0.0, 0.0, 0.0
     return k / len(s_te), e / k, int(rep.sum()) / len(s_te)
 
+def realised_risk(lam, s, m, s_ref, m_ref, ok_o, ok_r, q):
+    """Realised risk of the selected policy on an arbitrary evaluation set."""
+    if lam is None: return 0.0
+    acc, rep = policy(lam, s, m, s_ref, m_ref, q)
+    e, k = counts(acc, rep, ok_o, ok_r)
+    return e / k if k else 0.0
+
 # ------------------------------------------------------------------ data
 def build(p_yes, answer, gold, owl):
     p = np.asarray(p_yes, float); a = np.asarray(answer, int)
@@ -95,11 +102,12 @@ def run(alpha, reps=60, qs=(None, 0.10, 0.25, 0.50)):
     hdr = f"{'setting':20s}{'n':>5s}{'mu':>7s}" + "".join(
         f"{('filter' if q is None else f'q={q:g}'):>15s}" for q in qs)
     print(hdr); print("-" * len(hdr))
+    audit = []
     for name, (X, ok_o, ok_r, mg) in settings():
         n = len(ok_o); row = f"{name:20s}{n:5d}{(1-ok_o.mean())*100:6.1f}%"
         base = None
         for q in qs:
-            rng = np.random.default_rng(0); C, R = [], []
+            rng = np.random.default_rng(0); C, R, RA = [], [], []
             for _ in range(reps):
                 idx = rng.permutation(n); t = n // 3
                 tr, cal, te = idx[:t], idx[t:2*t], idx[2*t:]
@@ -109,11 +117,28 @@ def run(alpha, reps=60, qs=(None, 0.10, 0.25, 0.50)):
                 lam = calibrate(s[cal], mg[cal], ok_o[cal], ok_r[cal], alpha, DELTA, q)
                 cv, rk, _ = deploy(lam, s[te], mg[te], s[cal], mg[cal], ok_o[te], ok_r[te], q)
                 C.append(cv); R.append(rk)
+                RA.append(realised_risk(lam, s, mg, s[cal], mg[cal], ok_o, ok_r, q))
             cov = np.mean(C) * 100 if C else 0.0; rsk = np.mean(R) * 100 if R else 0.0
-            flag = "!" if rsk > alpha * 100 + 1 else ""
+            R = np.array(R); RA = np.array(RA)
+            # audit statistic: Pr[Risk > alpha] must be <= delta, NOT mean risk <= alpha
+            xt = float((R > alpha + 1e-12).mean()) if len(R) else 0.0
+            xa = float((RA > alpha + 1e-12).mean()) if len(RA) else 0.0
+            audit.append((name, n, q, cov, rsk, xt, xa))
+            flag = "!" if xa > DELTA + 1e-12 else ""
             if q is None: base = cov; row += f"{cov:12.1f}%{flag:>3s}"
             else:         row += f"{cov:8.1f}%{cov-base:+5.1f}{flag:1s}"
         print(row)
+    print()
+    print(f"--- validity audit: Pr[Risk > alpha] must be <= delta={DELTA:.2f} "
+          f"(mean risk is NOT the guarantee) ---")
+    print(f"{'setting':20s}{'arm':>8s}{'meanRisk':>10s}{'exc(te)':>9s}{'exc(all)':>10s}"
+          f"{'verdict':>10s}")
+    for name, n, q, cov, rsk, xt, xa in audit:
+        arm = "filter" if q is None else f"q={q:g}"
+        print(f"{name:20s}{arm:>8s}{rsk:9.1f}%{xt:9.2f}{xa:10.2f}"
+              f"{('VIOLATED' if xa > DELTA + 1e-12 else 'OK'):>10s}")
+    print("  exc(te)=held-out test fold (unbiased, noisy: n_te=n/3)   "
+          "exc(all)=policy re-scored on all n items (low-noise proxy)")
     print()
 
 if __name__ == "__main__":

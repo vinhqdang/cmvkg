@@ -5,7 +5,13 @@ Data: exp7_pope.json (real self-consistency over K=3 samples + OWLv2 grounding).
 Baseline (ConfLVLM-faithful): learned combiner over model-INTERNAL signals only,
 including self-consistency  [p_yes, conf, sc_yesfrac, sc_conf].
 Ours: internal + OWLv2 structured grounding.
-Reports risk-coverage (AURC, cov@10%) over 20 splits + pure self-consistency ref.
+Reports risk-coverage (AURC, cov@10%) over 20 THREE-WAY DISJOINT splits
+(fit combiner / calibrate tau / test) + pure self-consistency ref.
+
+Audit statistic: the guarantee is Pr[Risk <= alpha] >= 1-delta, so besides the mean
+realised risk we report the FRACTION of splits with realised risk > alpha, vs
+delta=0.10.  exc(te)=held-out test fold (unbiased, noisy);  exc(all)=selected policy
+scored on all n items (low-noise proxy, slightly optimistic).
 """
 import json, os, numpy as np
 from scipy.stats import beta
@@ -33,34 +39,48 @@ def rc(s,c):
 def cp_upper(e,k,dl):
     if k==0: return 1.0
     return 1.0 if e==k else float(beta.ppf(1-dl,e+1,k-e))
-def cov_at(s,c_cal,s_te,c_te,alpha=.10,dl=.10):
+ALPHA=.10; DELTA=.10
+def cov_at(s,c_cal,s_te,c_te,s_all,c_all,alpha=ALPHA,dl=DELTA):
+    """Returns (coverage on test, realised risk on test, realised risk on all items)."""
     tau,best=None,-1
     for t in np.unique(s):
         m=s>=t;k=int(m.sum())
         if k==0: continue
         e=int((1-c_cal[m]).sum())
         if cp_upper(e,k,dl)<=alpha and k>best: best,tau=k,float(t)
-    if tau is None: return 0.0
-    m=s_te>=tau;return int(m.sum())/len(s_te)
+    if tau is None: return 0.0,0.0,0.0
+    m=s_te>=tau;k=int(m.sum())
+    cov,err=(k/len(s_te),float((1-c_te[m]).mean())) if k else (0.0,0.0)
+    ma=s_all>=tau;ka=int(ma.sum())
+    return cov,err,(float((1-c_all[ma]).mean()) if ka else 0.0)
 
 rng=np.random.default_rng(0)
-agg={k:{"aurc":[],"cov":[]} for k in SCORES}
+agg={k:{"aurc":[],"cov":[],"risk":[],"risk_all":[]} for k in SCORES}
 for _ in range(20):
-    idx=rng.permutation(n);h=n//2;cal,te=idx[:h],idx[h:]
+    idx=rng.permutation(n);t3=n//3;tr,cal,te=idx[:t3],idx[t3:2*t3],idx[2*t3:]
     for name,X in SCORES.items():
         if X.ndim==1:
-            sc_cal,sc_te=X[cal],X[te]
+            s_all=X
         else:
-            clf=LogisticRegression(max_iter=1000).fit(X[cal],correct[cal])
-            pc=clf.predict_proba(X)[:,1]; sc_cal,sc_te=pc[cal],pc[te]
+            clf=LogisticRegression(max_iter=1000).fit(X[tr],correct[tr])
+            s_all=clf.predict_proba(X)[:,1]
+        sc_cal,sc_te=s_all[cal],s_all[te]
         agg[name]["aurc"].append(rc(sc_te,correct[te]).mean())
-        agg[name]["cov"].append(cov_at(sc_cal,correct[cal],sc_te,correct[te]))
+        cv,rk,rka=cov_at(sc_cal,correct[cal],sc_te,correct[te],s_all,correct)
+        agg[name]["cov"].append(cv);agg[name]["risk"].append(rk);agg[name]["risk_all"].append(rka)
 
-print(f"POPE-adversarial (hardest split)  n={n}  LLaVA acc={correct.mean():.3f}  (20 splits)\n")
-print(f"{'score':48s}{'AURC↓':>13s}{'cov@10%↑':>13s}")
+print(f"POPE-adversarial (hardest split)  n={n}  LLaVA acc={correct.mean():.3f}  "
+      f"(20 three-way disjoint splits)\n")
+print(f"{'score':48s}{'AURC↓':>13s}{'cov@10%↑':>13s}{'risk@10%':>10s}{'exc(te)':>9s}{'exc(all)':>10s}")
 for name in SCORES:
     a=np.array(agg[name]['aurc']);c=np.array(agg[name]['cov'])
-    print(f"{name:48s}{a.mean():.4f}±{a.std():.3f}{c.mean()*100:6.1f}±{c.std()*100:.1f}")
+    rk=np.array(agg[name]['risk']);rka=np.array(agg[name]['risk_all'])
+    print(f"{name:48s}{a.mean():.4f}±{a.std():.3f}{c.mean()*100:6.1f}±{c.std()*100:.1f}"
+          f"{rk.mean():9.3f}{(rk>ALPHA+1e-12).mean():8.2f} {(rka>ALPHA+1e-12).mean():9.2f}")
+print(f"\nExceedance = fraction of the 20 splits with realised risk > alpha={ALPHA:.2f}; "
+      f"guarantee requires <= delta={DELTA:.2f}.")
+print("  exc(te)=test fold (n_te=%d, unbiased/noisy)   exc(all)=all %d items (low-noise proxy)"
+      % (n-2*(n//3), n))
 base=np.array(agg["internal (conf+self-cons) [ConfLVLM-faithful]"]["cov"])
 ours=np.array(agg["internal + grounding (ours)"]["cov"])
 ba=np.array(agg["internal (conf+self-cons) [ConfLVLM-faithful]"]["aurc"])

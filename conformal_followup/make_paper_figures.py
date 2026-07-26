@@ -79,7 +79,7 @@ print("fig_monotonicity.png")
 # ------------------------------------------------- fig 3: precondition & leverage
 settings = [("POPE-adv LLaVA", 17.3, 4.7, 1.4), ("POPE-1500 LLaVA", 18.1, 4.4, 1.8),
             ("POPE-adv VCD", 19.6, 2.5, 0.9), ("POPE-adv Qwen", 12.9, 1.9, 1.0),
-            ("AMBER(d)", 11.4, -7.5, 0.0)]
+            ("AMBER(d)", 11.4, -7.5, 1.45)]
 alpha = 10.0
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(9.8, 3.9), dpi=200)
 x = [s[1] - alpha for s in settings]; y = [s[2] for s in settings]
@@ -99,7 +99,7 @@ msk = [s for s in settings if s[2] > 0]
 rp = [s[3] for s in msk]; gg = [s[2] for s in msk]
 a2.scatter(rp, gg, s=110, color=IND, edgecolor="white", lw=1.5, zorder=3)
 lim = np.linspace(0, 2.1, 10)
-for k, ls in [(1, ":"), (3, "--"), (6, "-.")]:
+for k, ls in [(1, ":"), (2, "--"), (3, "-.")]:
     a2.plot(lim, k * lim, ls=ls, color=MUT, lw=1, alpha=.8)
     a2.text(2.05, k * 2.05, f"{k}×", fontsize=8.5, color=MUT, va="center")
 for (nm, mu, g, r_) in msk:
@@ -107,7 +107,7 @@ for (nm, mu, g, r_) in msk:
                 fontsize=8.6, color=MUT)
 a2.set_xlabel("repaired mass (% of items)")
 a2.set_ylabel("certified coverage gain (pp)")
-a2.set_title("B · Leverage: gain is 3–6× the repaired mass",
+a2.set_title("B · Leverage: gain is 1.9–3.4× the repaired mass",
              fontweight="bold", loc="left", fontsize=11)
 a2.set_xlim(0, 2.3); a2.set_ylim(0, 8); a2.grid(alpha=.2)
 for s in ["top", "right"]: a2.spines[s].set_visible(False)

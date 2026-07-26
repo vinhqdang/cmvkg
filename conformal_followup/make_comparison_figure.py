@@ -1,7 +1,12 @@
 """
 Comparison figure: our conformal + structured grounding vs other methods.
-Panel A: risk-coverage curves (real, POPE/LLaVA-1.5-7B, 20 splits) for confidence
-         vs +CLIP vs +OWLv2 structured grounding.
+Panel A: risk-coverage curves (real, POPE/LLaVA-1.5-7B, 20 THREE-WAY DISJOINT splits
+         -- combiner fit on a train fold, threshold calibrated on a second fold,
+         curve measured on a third held-out fold) for confidence vs +CLIP vs +OWLv2
+         structured grounding.
+         The cov@10% shown in panel A is the ORACLE coverage read off the test-fold
+         curve, not the conformally calibrated coverage of the tables; both are
+         printed to stdout, kept separate.
 Panel B: capability matrix across recent hallucination methods (factual, sourced
          from each paper) -- the honest positioning vs full-coverage mitigation
          methods that our selective+guaranteed approach composes with.
@@ -10,6 +15,7 @@ import json, os, numpy as np
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from scipy.stats import beta
 from sklearn.linear_model import LogisticRegression
 
 _here=os.path.dirname(os.path.abspath(__file__))
@@ -27,13 +33,32 @@ GRID=np.linspace(.02,1,99)
 def rc(s,c):
     c=c[np.argsort(-s)];cov=np.arange(1,len(c)+1)/len(c)
     return np.interp(GRID,cov,np.cumsum(1-c)/np.arange(1,len(c)+1))
+ALPHA,DELTA=.10,.10
+def cp_upper(e,k,d):
+    if k==0: return 1.0
+    return 1.0 if e==k else float(beta.ppf(1-d,e+1,k-e))
+def rcps(sc,cc,st,ct,s_all,c_all,alpha=ALPHA,dl=DELTA):
+    """Calibrated arm: (coverage on test, realised risk on test, realised risk on all)."""
+    tau,best=None,-1
+    for t in np.unique(sc):
+        m=sc>=t;kk=int(m.sum())
+        if kk and cp_upper(int((1-cc[m]).sum()),kk,dl)<=alpha and kk>best: best,tau=kk,float(t)
+    if tau is None: return 0.0,0.0,0.0
+    m=st>=tau;kk=int(m.sum())
+    cv,er=(kk/len(st),float((1-ct[m]).mean())) if kk else (0.0,0.0)
+    ma=s_all>=tau;ka=int(ma.sum())
+    return cv,er,(float((1-c_all[ma]).mean()) if ka else 0.0)
+
 rng=np.random.default_rng(0);curves={k:[] for k in SC};cov10={k:[] for k in SC}
+covC={k:[] for k in SC};rskC={k:[] for k in SC};rskA={k:[] for k in SC}
 for _ in range(20):
-    idx=rng.permutation(n);h=n//2;cal,te=idx[:h],idx[h:]
+    idx=rng.permutation(n);t3=n//3;tr,cal,te=idx[:t3],idx[t3:2*t3],idx[2*t3:]
     for k,X in SC.items():
-        clf=LogisticRegression(max_iter=1000).fit(X[cal],correct[cal])
+        clf=LogisticRegression(max_iter=1000).fit(X[tr],correct[tr])
         pc=clf.predict_proba(X)[:,1];curve=rc(pc[te],correct[te]);curves[k].append(curve)
         b=GRID[curve<=.10];cov10[k].append(b.max() if len(b) else 0)
+        cv,er,era=rcps(pc[cal],correct[cal],pc[te],correct[te],pc,correct)
+        covC[k].append(cv);rskC[k].append(er);rskA[k].append(era)
 
 # ---------- figure ----------
 INK="#1a1f2b";MUT="#5b6577";GRID_C="#e4e7ec"
@@ -50,12 +75,14 @@ for k in SC:
     A=np.array(curves[k]);m=A.mean(0);sd=A.std(0)
     axA.fill_between(GRID,m-sd,m+sd,color=COL[k],alpha=.13,lw=0)
     axA.plot(GRID,m,color=COL[k],lw=2.8 if "ours" in k else 2.0,
-             label=f"{k}  (cov@10%={np.mean(cov10[k])*100:.0f}%)")
+             label=f"{k}  (oracle cov@10%={np.mean(cov10[k])*100:.0f}%, "
+                   f"calibrated {np.mean(covC[k])*100:.0f}%)")
 axA.axhline(.10,ls="--",lw=1.2,color="#c8384f")
 axA.text(.03,.107,"target risk = 10%",color="#c8384f",fontsize=9.5)
 axA.set_xlabel("Coverage — fraction of questions answered")
 axA.set_ylabel("Risk — error rate among answered")
-axA.set_title("A · Selective risk–coverage · POPE / LLaVA-1.5-7B",
+axA.set_title("A · Selective risk–coverage · POPE / LLaVA-1.5-7B\n"
+              "     20 three-way disjoint splits (fit / calibrate / test)",
               fontweight="bold",loc="left",fontsize=12,pad=12)
 axA.set_xlim(0,1);axA.set_ylim(0,.30);axA.grid(alpha=.2)
 axA.legend(loc="upper left",frameon=False,fontsize=9.7)
@@ -64,7 +91,7 @@ for s in ["top","right"]: axA.spines[s].set_visible(False)
 # Panel B — capability matrix
 axB=fig.add_subplot(gs[1]);axB.axis("off")
 methods=["OPERA  (CVPR'24)","Attention Lens  (CVPR'25)","REVERSE  (NeurIPS'25)",
-         "ConfLVLM  (EMNLP'25)","Ours  (CMVKG-conformal)"]
+         "ConfLVLM  (EMNLP'25)","Ours  (CCRC)"]
 caps=["Training-\nfree","Visual/KG\ngrounding","Real-time\ncorrection",
       "Statistical\nguarantee","Selective\ncoverage"]
 M=np.array([
@@ -100,3 +127,18 @@ axB.text(-3.4,-0.55,"✓ full    ~ partial    – none        Mitigation methods
 fig.tight_layout()
 out=os.path.join(_here,"comparison_figure.png");fig.savefig(out,bbox_inches="tight",facecolor="white")
 print("saved",out)
+
+print(f"\nPanel A numbers, 20 three-way disjoint splits (POPE n={n}):")
+print(f"{'score':28s}{'AURC':>9s}{'oracleCov':>11s}{'calibCov':>10s}{'risk':>8s}"
+      f"{'exc(te)':>9s}{'exc(all)':>10s}")
+for k in SC:
+    A=np.array(curves[k]);o10=np.array(cov10[k])*100;cv=np.array(covC[k])*100
+    rr=np.array(rskC[k]);ra=np.array(rskA[k])
+    print(f"{k:28s}{A.mean(1).mean():9.4f}{o10.mean():10.1f}%{cv.mean():9.1f}%"
+          f"{rr.mean()*100:7.1f}%{(rr>ALPHA+1e-12).mean():8.2f} {(ra>ALPHA+1e-12).mean():9.2f}")
+print(f"Exceedance = fraction of 20 splits with realised risk > alpha={ALPHA:.2f} "
+      f"(guarantee requires <= delta={DELTA:.2f});")
+print(f"  exc(te)=test fold n_te={n-2*(n//3)} (unbiased/noisy)   "
+      f"exc(all)=all {n} items (low-noise proxy)")
+print("  oracleCov = coverage read off the test-fold risk-coverage curve (NOT calibrated);")
+print("  calibCov  = conformally calibrated coverage (CP bound at delta), comparable to tables.")
