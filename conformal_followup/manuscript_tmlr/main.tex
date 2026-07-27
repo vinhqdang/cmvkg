@@ -70,22 +70,24 @@ answer supplied by an \emph{independent} evidence channel where that channel's e
 strong, abstain otherwise, and certify the error rate of everything emitted at level
 $\alpha$ with confidence $1-\delta$.
 
-We prove validity for CCRC, characterise its behaviour, and evaluate it across five
+We prove validity for CCRC over a policy family indexed by pre-specified score \emph{values}
+(the rank-indexed variant we implement is validated empirically rather than proved), characterise
+its behaviour, and evaluate it across five
 benchmarks, two backbones and a mitigation decoder, under a single protocol: a three-way
 disjoint split, fixed-sequence testing, exact binomial bounds, and $\ge400$ paired splits
 with intervals and two-sided paired tests on every contrast. Five findings organise the
 paper, and \S\ref{sec:intro} lists the contributions they support.
 First, the correctness \emph{score} matters more than the procedure: a detection-grounded
 score improves certified coverage over model-internal uncertainty by $3.1$--$45.6$ points,
-and we decompose our total margin over a published CLIP-based scorer to show that $66.0$ of
-$68.1$ points come from the score and $2.1$ from our algorithm --- the $2.1$ is the number we
+and we decompose our total margin over a published CLIP-based scorer to show that $64.5$ of
+$66.8$ points come from the score and $2.3$ from our algorithm --- the $2.3$ is the number we
 ask a reader to trust. Second, self-certified repair is bounded rather than impossible: we
 give a mixture-level budget showing that substituting the complement of the score that
 flagged an item can occupy only as much mass as the accepted region's slack, and measure
 that on the settings where correction pays no region cheap enough exists, so certified
 coverage collapses by $6.6$--$49.3$ points. Third, where CCRC helps, the gain decomposes into
 a part that is automatic --- the $1.0$--$2.0\%$ of repaired items are themselves emitted --- and
-a genuine \emph{dilution} bonus that fires only on the $12$--$28\%$ of splits where the
+a genuine \emph{dilution} bonus that fires only on the $12$--$29\%$ of splits where the
 calibrated threshold actually moves and is worth $+0.2$ to $+1.8$ points. Certified coverage
 rises by $+0.4$ to $+7.6$ points in four settings, with every interval excluding zero, and
 falls by $10.2$ points on the fifth; the loss is an abort phenomenon of the sequential test
@@ -183,7 +185,7 @@ own answers.
 \subsection{The price of a guarantee, and why it is not a tuning problem}
 
 Before asking that, it is worth being precise about how expensive abstention is, because
-the size of the number is what makes the fourth action interesting rather than merely
+the size of the number is what makes the third action interesting rather than merely
 tidy.
 
 \citet{crcimposs} give the answer in closed form. If the base risk of the underlying model
@@ -216,8 +218,8 @@ to. The floor is therefore the right reason to look at the \emph{action space}: 
 part of the bill no amount of engineering will retire, and it is why the substitution action
 is worth introducing at all. It is not a claim that removing it recovers the other
 $40$ points. That is exactly why the honest accounting in \S\ref{sec:attribution} attributes
-$66.0$ points to the correctness score and $2.1$ to our own mechanism, and why we report the
-$2.1$.
+$64.5$ points to the correctness score and $2.3$ to our own mechanism, and why we report the
+$2.3$.
 
 This is also the point at which the natural engineering instinct --- \emph{find a better
 score} --- runs into the theorem. A better score moves you toward the floor faster. It cannot
@@ -257,7 +259,7 @@ acceptance threshold move down, admitting a larger population of ordinary accept
 are careful about how much of the measured gain that mechanism actually explains
 (\S\ref{sec:mechanism}): the $1.0$--$2.0\%$ of repaired items are emitted whether or not the
 threshold moves, which is arithmetic rather than leverage, and the threshold is
-\emph{unchanged} on $72$--$88\%$ of splits. The dilution term proper is worth $+0.2$ to
+\emph{unchanged} on $71$--$88\%$ of splits. The dilution term proper is worth $+0.2$ to
 $+1.8$ points. So the mechanism is real, measured, and secondary; the headline is that a
 small mass of near-certain repairs can be emitted essentially free.
 
@@ -301,11 +303,11 @@ mechanism that defeats self-repair (\S\ref{sec:kminfail}). Upside is bounded, do
 and what binds is the test's behaviour at small emitted counts rather than headroom.
 
 \paragraph{Most of our headline margin is not our algorithm.}
-Compared against a published conformal VLM scorer we gain $68.1$ points of certified coverage
-on one setting. Decomposed, $66.0$ of those points come from the correctness score --- a boring
-combination of logit and grounding features --- and $2.1$ from the certified-correction
-mechanism itself (\S\ref{sec:attribution}). We would rather a reader trust the $2.1$ than be
-sold the $68$.
+Compared against a published conformal VLM scorer we gain $66.8$ points of certified coverage
+on one setting. Decomposed, $64.5$ of those points come from the correctness score --- a boring
+combination of logit and grounding features --- and $2.3$ from the certified-correction
+mechanism itself (\S\ref{sec:attribution}). We would rather a reader trust the $2.3$ than be
+sold the $67$.
 
 \paragraph{The obvious remedy for our one-directional gate remedies nothing.}
 Our evidence channel can only argue that an object is \emph{present}, so as evaluated CCRC
@@ -364,7 +366,7 @@ regularity with a mechanism, not a theorem.
 set's average risk, relaxing the binding constraint and permitting a more permissive
 acceptance threshold (Proposition~\ref{prop:dilution}). We then decompose the realised gain
 and find that most of it is not that mechanism: the repaired $1.0$--$2.0\%$ is emitted
-automatically, the calibrated threshold is unchanged on $72$--$88\%$ of splits, and the
+automatically, the calibrated threshold is unchanged on $71$--$88\%$ of splits, and the
 dilution term proper is $+0.2$ to $+1.8$ points. Proposition~\ref{prop:precondition} bounds
 the achievable gain by the abstained mass, which is true but, we now show, has \emph{no
 confirming instance} in our data: the headroom diagnostic built on it is demoted to
@@ -392,8 +394,8 @@ the coupling bound that survives (Theorem~\ref{thm:coupling}) and a power analys
 what the experiment can and cannot establish.
 
 \item \textbf{Honest attribution and positioning} (\S\ref{sec:attribution}). We decompose
-our margin over a published scorer and report that $66.0$ of $68.1$ points are the score and
-$2.1$ the procedure. We reproduce the closest concurrent method \citep{bcea} and find the two
+our margin over a published scorer and report that $64.5$ of $66.8$ points are the score and
+$2.3$ the procedure. We reproduce the closest concurrent method \citep{bcea} and find the two
 mechanisms compose rather than compete.
 \end{enumerate}
 
@@ -853,7 +855,7 @@ right reason to look at the \emph{action space} and the wrong reason to expect l
 doing so: it is the part of the bill that no score and no sample size can retire, which is why
 substitution is worth introducing, but retiring it recovers a fraction of what is being paid.
 Second, the honest ordering of magnitudes in this paper is score $\gg$ power $>$ action space:
-$66.0$ points from the correctness score against $2.1$ from certified correction
+$64.5$ points from the correctness score against $2.3$ from certified correction
 (\S\ref{sec:attribution}), and a failure mode driven purely by calibration-fold size
 (\S\ref{sec:kminfail}) that costs more than our mechanism gains. We report the $2.1$.
 
@@ -1073,15 +1075,26 @@ Algorithm~\ref{alg:ccrc} does.
 
 We nonetheless report measurements from the rank-indexed implementation throughout, because it
 is what our scripts run and what a practitioner without a pre-specified value grid would write.
-Two pieces of evidence bound the exposure. First, a synthetic study in which the true risk is
-known: over four score shapes (well-separated logistic, weakly separated, heavy-tailed, and a
-deliberately miscalibrated monotone transform) $\times$ four calibration sizes
-($100$, $250$, $500$, $1500$), the realised exceedance $\Pr[\Risk>\alpha]$ of the rank-indexed
-procedure is $2.0$--$6.1\%$ against $\delta=0.10$ --- conservative in every cell, and nowhere
-near the nominal level. Second, on real data the population-risk exceedance is $0.0$--$5.1\%$
-across all $40$ cells of \S\ref{sec:exp} (Table~\ref{tab:audit}). We therefore claim the
-theorem for the value-indexed family, and for the rank-indexed variant we claim empirical
-validity with a stated margin, not a proof.
+Two pieces of evidence bound the exposure. First, a synthetic study in which the population risk
+of the selected policy is known exactly: over four score shapes (well-separated logistic, weakly
+separated, heavy-tailed, and a miscalibrated monotone transform) $\times$ four calibration sizes
+($100$, $250$, $500$, $1500$), the realised exceedance $\Pr[\Risk(\emit_{\hat\lambda})>\alpha]$
+of the rank-indexed procedure is $0.0$--$5.9\%$ against $\delta=0.10$ --- conservative in all
+sixteen cells, and nowhere near the nominal level. Second, on real data the population-risk
+exceedance is $0.0$--$5.1\%$ across all $40$ cells of \S\ref{sec:exp}
+(Table~\ref{tab:audit}). We therefore claim the theorem for the value-indexed family, and for
+the rank-indexed variant we claim empirical validity with a stated margin, not a proof.
+
+One methodological note on that simulation, because it bears on how the audit tables in this
+paper should be read. The guarantee is unconditional, and an aborted run emits nothing and so
+cannot violate it; the $0.0$--$5.9\%$ above therefore counts aborted draws as compliant.
+Conditional on the procedure certifying \emph{something}, exceedance in the same simulation
+reaches much higher values on the cells where aborts dominate --- up to $100\%$ in a cell whose
+abort rate is also $100\%$, which is a statement about a handful of lucky draws and not about
+validity. Our real-data audit uses the conditional convention (Table~\ref{tab:audit} excludes
+aborted splits and prints the abort rate beside each figure), which is the conservative choice;
+it stays below $\delta$ everywhere on real data only because the real abort rates in that table
+are small.
 \end{remark}
 
 \begin{lemma}[Minimum certifiable emitted-set size]
@@ -1106,7 +1119,10 @@ count can do better.
 Lemma~\ref{lem:kmin} is elementary but consequential: a fixed sequence whose first policy
 emits fewer than $k_{\min}$ items fails at step one and, because fixed-sequence testing
 stops at the first non-rejection, returns \emph{zero} coverage. We encountered exactly this
-failure and now begin the grid at the analytically derived minimum.
+failure and now begin the grid at the analytically derived minimum. It turns out to be the
+single most consequential fact in the paper's empirical half: \S\ref{sec:kminfail} shows that
+the same mechanism, one step further on, explains a weak score certifying nothing rather than
+less, the collapse of self-repair, and our one negative result.
 
 \subsection{Why repairs cannot be self-certified in practice}
 \label{sec:independence}
@@ -1156,54 +1172,93 @@ suspicion, not knowledge of the truth'' --- into a budget. Two measurements show
 that budget buys.
 
 \paragraph{No low-accuracy region exists where it is needed.}
-Averaged over $60$ fits of the canonical score, the model's accuracy in the bottom $2\%$ of
-$s$ is $20.9\%$ on POPE-1500 and $44.6\%$ on POPE-adversarial, against $\alpha=0.10$; in
-the bottom decile it is $42.8\%$ and $47.3\%$. On Qwen2-VL the bottom $2\%$ is
-\emph{above} chance at $64.3\%$, so flipping there is actively harmful. Only the two
-settings with the lowest headroom (VCD-decoded LLaVA at $2.1\%$, AMBER at $0.0\%$) contain a
-flippable region at all, and those are the settings with the least to gain.
+The model's accuracy in the bottom $2\%$ of $s$ --- which is exactly $r_r$, the flip region's
+own risk --- is $22.1\%$ on POPE-1500 and $43.8\%$ on POPE-adversarial against $\alpha=0.10$;
+in the bottom decile it is $42.8\%$ and $47.3\%$. On Qwen2-VL the bottom $2\%$ is \emph{above}
+chance at $62.4\%$, so flipping there is actively harmful. Only two settings contain a flippable
+region at all, VCD-decoded LLaVA at $4.9\%$ and AMBER at $0.9\%$, and they are the two settings
+whose \emph{accepted region has the least slack to spend}: AMBER already certifies $91.8\%$ of
+its inputs at $\alpha=0.10$ and VCD's accepted risk sits close to the budget. (This is a
+statement about slack in \eqref{eq:selfrepair}, not about headroom $\mu-\alpha$: VCD in fact has
+the \emph{largest} headroom of our five settings, $9.6$ points, and AMBER the smallest, $1.4$.
+The earlier draft of this paragraph conflated the two and had the sign of the VCD claim
+backwards.)
 
 \paragraph{The fixed sequence aborts before the slack can be spent.}
-Substituting the negation of the model's answer at $q=0.02$ and certifying the mixture
-exactly as in \S\ref{sec:validity}, certified coverage falls by $43.9$, $34.7$, $77.5$ and
-$3.9$ points on the four POPE settings. The mechanism is not a graceful trade: the fixed
-sequence returns \emph{nothing at all} on $65\%$, $88\%$, $100\%$ and $25\%$ of splits
-respectively. The reason is structural. The self-repair region has fixed mass, so at the
-\emph{start} of the grid --- where the accepted set is smallest and $K$ barely clears
-$k_{\min}$ --- it is the largest fraction of the emitted set it will ever be, and its
-$20$--$64\%$ error rate fails the very first hypothesis. Fixed-sequence testing must stop at
-the first non-rejection (\S\ref{sec:validity}), so the procedure never reaches the later
-$\lambda$ at which \eqref{eq:selfrepair} would in fact be satisfiable. Self-repair is
-defeated by the interaction between a fixed-mass, high-error repair block and the prefix
-structure of the test, not by the region being uncertifiable in isolation.
-
-\paragraph{What this licenses us to claim.}
-Not that certified correction is impossible without a second channel --- \eqref{eq:selfrepair}
-admits self-repair whenever the accepted region has slack and the flip region is clean
-enough, and on AMBER, where the bottom $2\%$ has $0\%$ accuracy, self-repair does gain
-($+1.3$ points at $\alpha=0.10$). What the measurements license is the weaker and sufficient
-claim that \emph{on the settings where filtering is expensive enough for correction to be
-worth doing, no self-certifiable flip region exists}, so a second channel is required in
-practice. We state this as an empirical regularity with a mechanism, not as a theorem, and
-\S\ref{sec:discussion} lists it among the claims most likely to fail on a new benchmark.
-
-Channel 2 escapes the budget in \eqref{eq:selfrepair} because $Y^{(2)}$ is a genuinely
-different random variable, not a deterministic function of $Y$. Our detector is
-$93$--$100\%$ accurate in its top evidence deciles (Table~\ref{tab:channel2}), so $r_r$
-there is far below $\alpha$ and the constraint is vacuous rather than binding.
+Substituting the negation of the model's answer at $q=0.02$ and certifying the mixture exactly
+as in \S\ref{sec:validity}, certified coverage falls by $49.3$, $37.3$, $76.9$ and $6.6$ points
+on the four POPE settings at $\alpha=0.10$ (all $p<10^{-7}$; Table~\ref{tab:selfrepair}). The
+mechanism is not a graceful trade: the fixed sequence returns \emph{nothing at all} on
+$73.0\%$, $88.8\%$, $98.8\%$ and $25.2\%$ of splits respectively. The reason is structural. The
+self-repair region has fixed mass, so at the \emph{start} of the grid --- where the accepted set
+is smallest and $K$ barely clears $k_{\min}$ --- it is the largest fraction of the emitted set
+it will ever be, and its $4.9$--$62.4\%$ error rate fails the very first hypothesis.
+Fixed-sequence testing must stop at the first non-rejection (\S\ref{sec:validity}), so the
+procedure never reaches the later thresholds at which \eqref{eq:selfrepair} would in fact be
+satisfiable. Self-repair is defeated by the interaction between a fixed-mass, high-error repair
+block and the prefix structure of the test, not by the region being uncertifiable in isolation.
+This is the first of the three instances of that interaction collected in
+\S\ref{sec:kminfail}.
 
 \begin{table}[t]
 \centering
-\caption{Channel-2 (detector) accuracy by evidence-margin decile on POPE. Repairs are drawn
-only from the top decile, where accuracy is far above $1-\alpha$. Accuracy degrades broadly
-with the margin, though not monotonically (the 8th decile falls slightly below the 6th),
-which is why the repair gate must be strict rather than merely above the median.}
-\label{tab:channel2}
-\begin{tabular}{lccccc}
+\caption{Self-certified repair: flipping the model's answer on the bottom $q=0.02$ of $s$ and
+certifying the mixture, against filtering, under the identical protocol ($400$ paired splits,
+$\delta=0.10$). $r_r$ is the flip region's own risk, i.e.\ the model's accuracy there. All
+$p$-values are two-sided paired $t$-tests on the $400$ paired differences. The gain is
+negative wherever the abort rate is large, and positive only where $r_r$ is small.}
+\label{tab:selfrepair}
+\small
+\begin{tabular}{lcccccc}
 \toprule
-Margin decile & 10th (top) & 9th & 8th & 6th & 1st (bottom)\\
+Setting ($\alpha=0.10$) & $r_r$ & Filter & Self-repair & Gain [95\% CI] & $p$ & abort\\
 \midrule
-Detector accuracy & 1.000 & 0.960 & 0.927 & 0.934 & 0.513\\
+POPE-1500 LLaVA    & 22.1\% & 68.6\% & 19.3\% & $-49.3$ $[-52.5,-46.1]$ & $4\!\times\!10^{-106}$ & 73.0\%\\
+POPE-adv LLaVA     & 43.8\% & 44.0\% & \phantom{0}6.6\% & $-37.3$ $[-40.1,-34.5]$ & $2\!\times\!10^{-88}$ & 88.8\%\\
+POPE-adv Qwen2-VL  & 62.4\% & 77.9\% & \phantom{0}1.1\% & $-76.9$ $[-78.6,-75.1]$ & $1\!\times\!10^{-261}$ & 98.8\%\\
+POPE-adv LLaVA+VCD & \phantom{0}4.9\% & 48.8\% & 42.2\% & $-6.6$ $[-8.9,-4.3]$ & $4\!\times\!10^{-8}$ & 25.2\%\\
+AMBER(d) LLaVA     & \phantom{0}0.9\% & 91.8\% & 92.7\% & $+0.9$ $[-0.6,+2.5]$ & $0.25$ (n.s.) & \phantom{0}2.8\%\\
+\midrule
+\multicolumn{7}{l}{\emph{at $\alpha=0.15$, the two clean-flip-region cells become positive:}}\\
+POPE-adv LLaVA+VCD & \phantom{0}4.9\% & 75.8\% & 77.7\% & $+1.9$ $[+0.6,+3.3]$ & $0.006$ & \phantom{0}2.5\%\\
+AMBER(d) LLaVA     & \phantom{0}0.9\% & 95.9\% & 98.7\% & $+2.9$ $[+2.6,+3.1]$ & $6\!\times\!10^{-78}$ & \phantom{0}0.0\%\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What this licenses us to claim.}
+Not that certified correction is impossible without a second channel. Equation
+\eqref{eq:selfrepair} admits self-repair whenever the accepted region has slack and the flip
+region is clean enough, and that is confirmed rather than refuted by the two cells where both
+conditions hold: at $\alpha=0.15$ self-repair gains $+2.9$ points on AMBER
+($p=6\times10^{-78}$) and $+1.9$ on VCD ($p=0.006$). At $\alpha=0.10$ the AMBER cell is
+$+0.9$ points with $95\%$ CI $[-0.6,+2.5]$, $p=0.25$: not distinguishable from zero, and we do
+not count it. What the measurements license is the weaker and sufficient claim that \emph{on the
+settings where filtering is expensive enough for correction to be worth doing, no
+self-certifiable flip region exists}, so a second channel is required in practice. We state this
+as an empirical regularity with a mechanism, not as a theorem, and \S\ref{sec:discussion} lists
+it among the claims most likely to fail on a new benchmark.
+
+Channel 2 escapes the budget in \eqref{eq:selfrepair} because $Y^{(2)}$ is a genuinely
+different random variable, not a deterministic function of $Y$. The top evidence decile, which
+is the only decile repairs are drawn from, is $100\%$ accurate on POPE
+(Table~\ref{tab:channel2}), so $r_r$ there is far below $\alpha$ and the constraint is vacuous
+rather than binding.
+
+\begin{table}[t]
+\centering
+\caption{Channel-2 (detector) accuracy by evidence-margin decile on POPE-1500 ($150$ items per
+decile). Repairs are drawn only from the top decile, where accuracy is $100\%$, far above
+$1-\alpha$. Accuracy improves with the margin but not monotonically --- the 5th falls below the
+4th and the 8th below the 7th --- which is why the repair gate must be strict rather than merely
+above the median. All ten deciles are printed because the non-monotonicity is the point.}
+\label{tab:channel2}
+\small
+\begin{tabular}{lcccccccccc}
+\toprule
+Margin decile & 1 (bottom) & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 (top)\\
+\midrule
+Detector accuracy & 0.513 & 0.713 & 0.733 & 0.807 & 0.772 & 0.934 & 0.953 & 0.927 & 0.960 & 1.000\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1219,29 +1274,73 @@ version gained on LLaVA ($+4.7$, $+5.3$ points) but \emph{lost} on Qwen2-VL ($-4
 a VCD-decoded model ($-2.9$). It also required certifying two families (with and without
 repair) at $\delta/2$ and selecting between them, wasting half the confidence budget.
 
-Fixing $q$ removes both problems. The family becomes nested in the single parameter
-$\lambda$, so one fixed-sequence test at full $\delta$ suffices
-(Theorem~\ref{thm:validity}), and repair precision is held constant while $\lambda$ sweeps.
-Table~\ref{tab:qsens} reports sensitivity: at $q=0.10$ the procedure gains in all eight
-POPE-family cells, whereas looser gates can lose badly.
+Fixing $q$ removes both problems. The family becomes nested in the single threshold
+$t$, so one fixed-sequence test at full $\delta$ suffices (Theorem~\ref{thm:validity}), and
+repair precision is held constant while $t$ sweeps. Table~\ref{tab:qsens} reports the
+sensitivity, over all ten cells rather than the eight POPE cells an earlier draft reported.
 
 \begin{table}[t]
 \centering
 \caption{Sensitivity to the repair gate $q$: change in certified coverage relative to
-filtering, over four settings $\times$ two risk levels. $q$ is fixed a priori, not tuned.}
+filtering, over five settings $\times$ two risk levels ($400$ paired splits). Bracketed
+figures are $95\%$ CIs on the mean paired gain. The two negative cells at $q=0.10$ are the two
+AMBER cells; an earlier draft reported this table over the eight POPE cells only, which
+excluded the loss.}
 \label{tab:qsens}
-\begin{tabular}{lcc}
+\small
+\begin{tabular}{lcccc}
 \toprule
-Repair gate $q$ & Outcome across the eight cells & Worst cell\\
+Setting & $\alpha$ & $q=0.10$ & $q=0.25$ & $q=0.50$\\
 \midrule
-$0.10$ (top decile)   & positive in all eight ($+0.5$ to $+8.0$) & $+0.5$\\
-$0.25$                & mixed & $-16.3$\\
-$0.50$                & mixed & $-15.5$\\
+POPE-1500 LLaVA    & 0.10 & $+3.18$ $[+2.6,+3.8]$  & $+5.39$ $[+3.9,+6.9]$   & $+8.84$ $[+7.7,+10.0]$\\
+POPE-adv LLaVA     & 0.10 & $+3.19$ $[+1.7,+4.7]$  & $-0.05$ $[-2.9,+2.8]$   & $+2.04$ $[-1.4,+5.5]$\\
+POPE-adv Qwen2-VL  & 0.10 & $+1.60$ $[+0.8,+2.4]$  & $-16.44$ $[-20.0,-12.9]$& $-14.86$ $[-18.3,-11.4]$\\
+POPE-adv LLaVA+VCD & 0.10 & $+2.15$ $[+1.3,+3.0]$  & $-6.35$ $[-9.2,-3.5]$   & $-9.04$ $[-12.0,-6.1]$\\
+AMBER(d) LLaVA     & 0.10 & $-10.20$ $[-13.4,-7.0]$& $-38.69$ $[-43.3,-34.1]$& $-25.91$ $[-30.2,-21.6]$\\
+\midrule
+POPE-1500 LLaVA    & 0.15 & $+1.95$ $[+1.8,+2.1]$  & $+5.38$ $[+5.2,+5.6]$   & $+6.78$ $[+6.6,+7.0]$\\
+POPE-adv LLaVA     & 0.15 & $+7.59$ $[+5.5,+9.7]$  & $+10.14$ $[+7.7,+12.6]$ & $+14.47$ $[+12.0,+16.9]$\\
+POPE-adv Qwen2-VL  & 0.15 & $+0.40$ $[+0.3,+0.5]$  & $-1.22$ $[-2.6,+0.2]$   & $+0.28$ $[-0.7,+1.3]$\\
+POPE-adv LLaVA+VCD & 0.15 & $+1.39$ $[+0.5,+2.3]$  & $+0.48$ $[-1.0,+2.0]$   & $+1.40$ $[+0.1,+2.7]$\\
+AMBER(d) LLaVA     & 0.15 & $-11.90$ $[-15.1,-8.7]$& $-11.55$ $[-14.7,-8.4]$ & $-2.19$ $[-3.8,-0.6]$\\
+\midrule
+\textbf{cells positive} & & \textbf{8 / 10} & 5 / 10 & 6 / 10\\
+\textbf{range}          & & $-11.90$ to $+7.59$ & $-38.69$ to $+10.14$ & $-25.91$ to $+14.47$\\
+\textbf{worst abort rate}& & 17.5\% & 43.8\% & 36.0\%\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Why it gains: dilution and leverage}
+\subsection{What ``$q$ is fixed a priori'' can and cannot mean}
+\label{sec:qsel}
+The previous version of this paragraph asserted that $q$ is fixed in advance and not tuned,
+next to a table showing $q=0.10$ to be the best of three values on the same cells that produce
+the headline. That is not a defensible pairing, and Table~\ref{tab:qsens} makes the honest
+version available. Three statements, in decreasing order of comfort.
+
+First, \textbf{$q=0.10$ is not the best value by gain.} At $\alpha=0.15$, $q=0.50$ wins all
+five cells, and it also wins POPE-1500 at $\alpha=0.10$; the mean gain over the eight POPE
+cells is $+2.66$ at $q=0.10$ against $+4.89$ for a per-cell oracle. What $q=0.10$ is best at is
+\emph{robustness}: it is positive in $8$ of $10$ cells against $5$ and $6$, its worst cell is
+three times less bad, and its worst abort rate is less than half. That is a legitimate reason
+to prefer a strict gate and it is the reason we do.
+
+Second, \textbf{the selection exposure is small and points the wrong way for us.} Choosing $q$
+by leave-one-dataset-out --- maximising mean gain on the other datasets at the deployment
+$\alpha$, which is user-specified rather than tuned --- yields a mean gain of $+4.19$ points over
+the eight POPE cells against the $+2.66$ we report for fixed $q=0.10$, with an oracle--LODO gap
+(the actual selection exposure) of $+0.70$ points. A properly transferred choice of $q$ would
+therefore make this paper's numbers \emph{larger}; the reported configuration is conservative.
+
+Third, \textbf{$q$ must be indexed to $\alpha$.} Conditional on $\alpha$, the LODO choice is
+stable ($q=0.10$ at $\alpha=0.10$, $q=0.50$ at $\alpha=0.15$, on every fold). Pooling across
+$\alpha$ destroys it: the pooled rule picks $q=0.50$ for the Qwen $\alpha=0.10$ fold and turns
+$+1.31$ into $-14.71$. Anyone transporting our recommendation to a different risk target should
+re-select, not reuse. Appendix~\ref{app:qdelta} reports a fully valid alternative that removes
+the objection outright --- certify all three $q$ at $\delta/3$ and select on the calibration fold
+--- at a mean cost of $+0.50$ points relative to the reported configuration.
+
+\subsection{Why it gains: dilution, and how much of the gain it explains}
 \label{sec:mechanism}
 
 Our initial hypothesis was that repairs \emph{spend} the accepted set's unused risk budget:
@@ -1286,11 +1385,68 @@ index.
 The empirically relevant regime is the first. Because repairs are drawn from the top
 evidence decile, their risk is \emph{lower} than that of the acceptance gate's
 \emph{marginal} items --- the items that determine whether the constraint binds. Repairs
-therefore act as ballast: a small high-precision mass pulls $\bar r$ down and lets
-$\lambda$ open further. The result is leverage.
-Figure~\ref{fig:precondition}B plots it: $0.9$--$1.8\%$ of items repaired buys $1.9$--$4.7$
-points of certified coverage --- per setting, ratios of $3.4\times$, $2.4\times$, $2.8\times$
-and $1.9\times$.
+therefore act as ballast: a small high-precision mass pulls $\bar r$ down and can let the
+threshold open further.
+
+\paragraph{How much of the gain is that, and how much is arithmetic.}
+An earlier version of this paper reported a ``$1.9$--$3.4\times$ leverage multiplier'': repaired
+mass of $0.9$--$1.8\%$ buying several times its own size in coverage. That framing is largely
+tautological and we withdraw it. Repaired items are \emph{themselves emitted}, so whenever
+$\hat\lambda$ does not fall, CCRC emits exactly filtering's accepted set plus the gated repairs
+and the gain is mechanically equal to the repaired mass --- no dilution required, and nothing
+about the mechanism demonstrated. The quantity that does demonstrate it is the \emph{extra
+accepted} mass admitted because $\hat\lambda$ actually moved. So we decompose the gain per
+split into
+\[
+\underbrace{\text{repairs available at filtering's own }\hat\lambda}_{\text{(i) automatic}}
+\;+\;\underbrace{\text{everything else}}_{\text{(ii) dilution}},
+\]
+computed on the splits where both arms certify something, and report both
+(Table~\ref{tab:dilution}).
+
+Two facts govern the reading. $\hat\lambda$ is \emph{identical} between filtering and CCRC on
+$70.6$--$87.7\%$ of splits at $\alpha=0.10$ and $76.5$--$98.3\%$ at $\alpha=0.15$; on those
+splits there is no dilution effect at all, by construction. And where it does move, the payoff
+is real but small: term (ii) is $+0.20$ to $+1.84$ points at $\alpha=0.10$ and $+0.00$ to
+$+0.65$ at $\alpha=0.15$, and it is not distinguishable from zero on two cells (POPE-adv LLaVA
+at $\alpha=0.15$, $p=0.41$; AMBER at $\alpha=0.15$, $p=0.32$). Term (iii) in the table, the
+mass \emph{lost} from the repair set as $\lambda$ opens and absorbs it, is small and negative
+everywhere, which is the nesting the method assumes showing up in the data.
+
+\begin{table}[t]
+\centering
+\caption{Decomposition of the CCRC gain at $\alpha=0.10$ into the part that is automatic and the
+part attributable to dilution ($400$ paired splits, conditioned on both arms certifying;
+abort rates are reported separately in Table~\ref{tab:ccrc}). Term (i) is the repaired mass
+available at filtering's own threshold, which is emitted whether or not the threshold moves;
+term (ii) is the extra accepted mass admitted because it did. ``$\hat\lambda$ moves'' is the
+fraction of splits on which the two arms select different thresholds. $p$-values are two-sided
+paired $t$-tests on term (ii).}
+\label{tab:dilution}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Setting & $\hat\lambda$ moves & gain & (i) repairs emitted & (ii) dilution [95\% CI] & $p$(ii)\\
+\midrule
+POPE-1500 LLaVA    & 28.0\% & $+2.68$ & $+1.82$ & $+0.86$ $[+0.63,+1.09]$ & $2\!\times\!10^{-12}$\\
+POPE-adv LLaVA     & 29.4\% & $+3.59$ & $+1.74$ & $+1.84$ $[+1.22,+2.46]$ & $1\!\times\!10^{-8}$\\
+POPE-adv Qwen2-VL  & 19.9\% & $+2.03$ & $+1.02$ & $+1.01$ $[+0.43,+1.59]$ & $7\!\times\!10^{-4}$\\
+POPE-adv LLaVA+VCD & 12.3\% & $+2.05$ & $+0.97$ & $+1.08$ $[+0.62,+1.53]$ & $4\!\times\!10^{-6}$\\
+AMBER(d) LLaVA     & 15.2\% & $+2.17$ & $+1.97$ & $+0.20$ $[+0.08,+0.31]$ & $9\!\times\!10^{-4}$\\
+\midrule
+\multicolumn{6}{l}{term (iii), repair mass absorbed as $\lambda$ opens: $-0.02$, $-0.05$,
+$-0.03$, $-0.17$, $-0.17$ points respectively}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The honest headline is therefore not leverage but cheapness: a small mass of near-certain
+repairs can be added to the emitted set at essentially no risk cost, and \emph{on top of that}
+dilution contributes a fraction of a point to $1.8$ points on the minority of splits where the
+constraint actually loosens. Figure~\ref{fig:precondition}B plots the two terms. Note that the
+AMBER row of Table~\ref{tab:dilution} is positive: conditional on certifying, AMBER behaves like
+the other settings, which is the first sign that its reported loss is about something else
+entirely (\S\ref{sec:kminfail}).
 
 \subsection{When it helps: a checkable precondition}
 \label{sec:precondition}
@@ -1325,65 +1481,94 @@ downward without bound.
 An upper bound on the gain cannot predict a loss, and we previously overstated this. Write
 $1-\Cov_{\mathrm{filt}}=(\mu-\alpha)/(1-\alpha)+\varepsilon$. One might hope $\varepsilon$
 is small so that headroom $\mu-\alpha$ alone governs the achievable gain, but our own data
-refutes it: on AMBER the floor is $1.6\%$ while $1-\Cov_{\mathrm{filt}}=7.9\%$, so
-$\varepsilon=6.3\%$, four times the floor. The usable statement is therefore the crude one
---- the gain cannot exceed the abstained mass, so a setting that already certifies most of
-its inputs has little to win and the same exposure to loss --- and the relationship between
-headroom and realised gain is an empirical trend with visible exceptions
-(\S\ref{sec:precondition}), not a law.
+refutes it: on AMBER the floor is $1.6\%$ while $1-\Cov_{\mathrm{filt}}=8.2\%$, so
+$\varepsilon=6.6\%$, four times the floor. The usable statement is therefore the crude one:
+the gain cannot exceed the abstained mass, so a setting that already certifies most of its
+inputs has little to win and the same exposure to loss.
 \end{remark}
 
-Proposition~\ref{prop:precondition} predicts our one negative result. On AMBER's
-discriminative split, $\mu=11.4\%$ against $\alpha=10\%$: the floor is $1.6\%$, filtering
-already certifies $92.1\%$, and the theoretical headroom is at most $7.9$ points. Measured,
-CCRC \emph{loses} $7.5$ points there. Figure~\ref{fig:precondition}A shows the gain tracking
-$\mu-\alpha$ across all settings. Both quantities are known before calibration, so the
-decision to deploy CCRC can be made a priori.
+\paragraph{The headroom diagnostic, demoted.}
+An earlier version of this paper went further and claimed that Proposition~\ref{prop:precondition}
+\emph{predicts} our one negative result, offering AMBER --- $\mu=11.4\%$ against $\alpha=0.10$,
+floor $1.6\%$, filtering already certifying $91.8\%$ --- as the confirming instance. That claim
+does not survive \S\ref{sec:kminfail}, which shows AMBER's loss is an abort phenomenon and that
+conditional on certifying anything CCRC \emph{wins} there. We therefore separate the proved
+bound from the unproved diagnostic and label the latter honestly:
+
+\begin{conjecture}[Headroom precondition; \emph{no confirming instance}]
+\label{conj:headroom}
+There is a threshold $h>0$ such that CCRC's certified-coverage gain over filtering is
+non-negative whenever the headroom $\mu-\alpha$ exceeds $h$ and an applicable evidence channel
+exists, and that settings with $\mu-\alpha<h$ are at material risk of a loss.
+\end{conjecture}
+
+We state this as a conjecture because we have no evidence for it. The bound of
+Proposition~\ref{prop:precondition} is true but is an upper bound, and an upper bound cannot
+predict a loss. Our own five settings do not support the conjecture even as a trend: the four
+positive points \emph{anti}-correlate with headroom (the largest headroom, VCD at $9.6$ points,
+gives the second-smallest gain, and the smallest positive-cell headroom, Qwen at $2.9$ points,
+gives $+1.60$); the one negative point is now explained by a mechanism that has nothing to do
+with headroom; and at $\alpha=0.15$ Qwen has \emph{negative} headroom ($\mu=12.9\%<\alpha$) and
+still gains. With $n=5$ settings we can neither fit $h$ nor reject it. Anyone deploying CCRC
+should therefore use the two checks that \emph{are} supported --- is there abstained mass to
+recover, and is the calibration fold large enough that the first hypothesis of the fixed
+sequence can pass (\S\ref{sec:kminfail}) --- and treat Conjecture~\ref{conj:headroom} as an open
+question rather than as a screening rule.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_precondition.png}
-\caption{(A) Certified coverage gain against the abstention-floor headroom $\mu-\alpha$.
-Gains appear when the headroom exceeds roughly three points and reverse when it does not:
-AMBER(d), with $1.4$ points of headroom, is the single loss.
-(B) Leverage: gain plotted against repaired mass, with $1\times$, $3\times$ and $6\times$
-reference lines. A small high-precision repaired mass buys several times its own size in
-coverage, consistent with the mechanism of Proposition~\ref{prop:dilution}.}
+\caption{(A) Certified coverage gain against the abstention-floor headroom $\mu-\alpha$ at
+$\alpha=0.10$, $n=5$ settings. The panel is a diagnostic and not a prediction
+(Remark~\ref{rem:notprediction}, Conjecture~\ref{conj:headroom}): the four positive points
+anti-correlate with headroom, and the single negative point is explained by
+\S\ref{sec:kminfail} rather than by its position on this axis. We plot it because five points
+is what we have, and because it is the evidence a reader would otherwise ask for.
+(B) The gain decomposed as in Table~\ref{tab:dilution}: grey bars are term (i), the repaired
+items, which are emitted whether or not the threshold moves; blue bars are term (ii), the
+dilution payoff. An earlier version of this panel plotted gain against repaired mass with
+reference lines and asserted a ``$1.9$--$3.4\times$'' multiplier; that ratio is automatic given
+term (i) and the claim is withdrawn (\S\ref{sec:mechanism}). The loss cell is omitted from (B)
+because a decomposition of a negative gain is not informative; it is decomposed by split class in
+Table~\ref{tab:amber} instead.}
 \label{fig:precondition}
 \end{figure}
 
 \subsection{Algorithm}
 
 \begin{algorithm}[t]
-\caption{CCRC (calibration and deployment)}
+\caption{CCRC (calibration and deployment). Thresholds are score \emph{values}, fixed before
+calibration, which is what Theorem~\ref{thm:validity} covers; the bracketed lines are the
+rank-indexed substitution our implementation makes (Remark~\ref{rem:rankvsvalue}).}
 \label{alg:ccrc}
 \begin{algorithmic}[1]
 \Require folds $\mathcal{D}_{\mathrm{fit}},\mathcal{D}_{\mathrm{cal}}$ (disjoint), levels
-$\alpha,\delta$, repair gate $q$, grid $\lambda_1<\dots<\lambda_M$ with
-$\lambda_1$ chosen so $K_{\lambda_1}\ge k_{\min}$ (Lemma~\ref{lem:kmin}; our implementation
-uses $\lambda_1=\min\{0.9,\max\{0.05,1.5k_{\min}/n_{\mathrm{cal}}\}\}$, the $1.5$ giving
-headroom against fold-to-fold variation in $K$)
+$\alpha,\delta$, repair gate value $g$, descending grid $t_1>\dots>t_M$ of score values, with
+$t_1$ chosen so that $K_{t_1}\ge k_{\min}$ in expectation (Lemma~\ref{lem:kmin})
 \State fit channel-1 score $s$ on $\mathcal{D}_{\mathrm{fit}}$ \Comment{disjoint from
 calibration; see \S\ref{sec:ablations}}
-\State $t_m\gets Q_m(1-q)$ on $\mathcal{D}_{\mathrm{cal}}$ \Comment{repair gate fixed}
-\State $\hat\lambda\gets\varnothing$
+\Statex \emph{[implemented variant: set $g\gets Q_m(1-q)$ and $t_j\gets Q_s(1-\lambda_j)$ from
+$\mathcal{D}_{\mathrm{cal}}$, with $q=0.10$ and
+$\lambda_1=\min\{0.9,\max\{0.05,1.5k_{\min}/n_{\mathrm{cal}}\}\}$, the factor $1.5$ giving
+headroom against fold-to-fold variation in $K$]}
+\State $\hat t\gets\varnothing$
 \For{$j=1$ to $M$}
-  \State $A\gets\{i\in\mathcal{D}_{\mathrm{cal}}:s_i\ge Q_s(1-\lambda_j)\}$;
-         $R\gets\{i\notin A:m_i\ge t_m\}$
+  \State $A\gets\{i\in\mathcal{D}_{\mathrm{cal}}:s_i\ge t_j\}$;
+         $R\gets\{i\notin A:m_i\ge g\}$
   \State $V\gets\sum_{i\in A}(1-Y_i)+\sum_{i\in R}(1-Y^{(2)}_i)$; $K\gets|A|+|R|$
   \If{$K<k_{\min}$} \textbf{break} \Comment{untestable; skipping it would break
          fixed-sequence FWER control, so the grid must \emph{start} above $k_{\min}$}
-  \ElsIf{$U(V,K;\delta)\le\alpha$} $\hat\lambda\gets\lambda_j$
+  \ElsIf{$U(V,K;\delta)\le\alpha$} $\hat t\gets t_j$
   \Else\ \textbf{break} \Comment{fixed-sequence testing stops at the first non-rejection}
   \EndIf
 \EndFor
-\State \textbf{at test time, for input $x$:} \textbf{if} $\hat\lambda=\varnothing$ abstain on
+\State \textbf{at test time, for input $x$:} \textbf{if} $\hat t=\varnothing$ abstain on
   every input (coverage $0$);
-  \textbf{else if} $s(x)\ge Q_s(1-\hat\lambda)$ emit $\hat a(x)$;
-  \textbf{else if} $m(x)\ge t_m$ emit $b(x)$;
+  \textbf{else if} $s(x)\ge\hat t$ emit $\hat a(x)$;
+  \textbf{else if} $m(x)\ge g$ emit $b(x)$;
   \textbf{else} abstain
-  \Statex \Comment{$Q_s,Q_m$ are the calibration-fold quantiles fixed above, not recomputed
-  at test time}
+  \Statex \Comment{$\hat t$ and $g$ are fixed before deployment and never recomputed at test
+  time; in the implemented variant they are the calibration-fold quantiles frozen above}
 \end{algorithmic}
 \end{algorithm}
 
@@ -1391,23 +1576,55 @@ calibration; see \S\ref{sec:ablations}}
 \section{Experiments}
 \label{sec:exp}
 
-\paragraph{Protocol.}
-Every reported number uses a three-way disjoint split --- fit the score, calibrate the
-threshold, test --- with fixed-sequence testing and Clopper--Pearson bounds at
-$\delta=0.10$, averaged over $20$--$100$ random splits. The three-way split is not cosmetic:
-\S\ref{sec:ablations} shows that reusing the calibration fold to fit the score silently
-breaks the guarantee for high-capacity scores.
+\paragraph{Protocol, and a correction to the previous one.}
+Every number in this paper uses one protocol: a three-way disjoint split (fit the score,
+calibrate the threshold, test), the fixed-sequence test of Algorithm~\ref{alg:ccrc} started at
+$k_{\min}$, Clopper--Pearson bounds at $\delta=0.10$, and $\ge400$ \emph{paired} random splits
+--- every arm of every comparison sees byte-identical folds, so each gain is a paired difference
+reported with its per-split standard deviation, a $95\%$ Student-$t$ interval, and a two-sided
+paired $t$-test (with a two-sided Wilcoxon signed-rank test as a robustness check, which agrees
+everywhere). All $p$-values in this paper are two-sided.
 
-\paragraph{How validity is audited.}
+That sentence was not true of the previous version of this paper, and the correction changed
+enough numbers that we state it plainly. Eight of the scripts producing tables and figures
+selected the threshold by an exhaustive maximum-coverage search --- ``of all thresholds whose
+Clopper--Pearson bound passes, keep the one that emits the most'' --- rather than by a
+fixed-sequence test. That rule has no valid theory behind it (the selection event is a union
+over the whole grid, so the per-threshold $\delta$ does not transfer to the selected
+threshold), it contradicted this paragraph, and it is measurably more anti-conservative: on
+nine of ten filtering cells its population-risk exceedance is strictly higher, and it buys
+$0.9$--$13.9$ points of coverage it has not paid for. We do not claim it broke the guarantee
+empirically --- on the cells we ran, both rules keep exceedance below $\delta$ --- but it also
+concealed the abort behaviour that turns out to be the dominant effect in three separate places
+(\S\ref{sec:kminfail}). Every number below is recomputed under the valid rule. The cost of
+validity is real: paired against the old rule, the fixed sequence certifies $2.2$ points less
+on POPE-1500 and $13.9$ less on POPE-adversarial at $\alpha=0.10$. Repetition counts also rose
+from $20$--$60$ to $\ge400$, at which the Monte-Carlo standard error on these gains falls from
+$0.8$--$4.2$ points to a few tenths; consistent with what one would expect from a
+maximum-selection rule at low repetition count, \emph{every} re-estimated quantity moved
+against us.
+
+\paragraph{How validity is audited, and what the $p$-values mean.}
 Mean realised risk is \emph{not} the guarantee. The claim is
-$\Pr[\Risk\le\alpha]\ge1-\delta$, so the quantity to audit is the fraction of calibration
-draws whose risk exceeds $\alpha$, compared against $\delta$. We report both, and we
-distinguish two versions of the former, because realised risk on a finite test fold carries
-binomial noise that is not a validity failure. Scored on the test fold, exceedance is
-$11$--$15\%$ on the POPE settings against $\delta=0.10$; scored on the full item set --- a
-lower-noise proxy for the population risk of the selected policy --- it is $1$--$4\%$. The
-guarantee holds; the discrepancy is finite-sample noise in the audit, and we flag it because
-the naive statistic looks like a violation and the mean-risk statistic hides both.
+$\Pr[\Risk\le\alpha]\ge1-\delta$, so the quantity to audit is the fraction of splits whose
+realised risk exceeds $\alpha$, compared against $\delta$, and mean risk appears nowhere in
+this paper. We report two versions, because realised risk on a finite test fold carries
+binomial noise that is not a validity failure. Scored on the held-out test fold ($n/3$ items),
+exceedance is $3.1$--$22.3\%$ across the $40$ cells of Table~\ref{tab:audit} against
+$\delta=0.10$; scored on the full item set --- a lower-noise proxy for the population risk of
+the selected policy, and the column that decides the question --- it is $0.0$--$5.1\%$. The
+guarantee holds; the discrepancy is finite-fold noise around a population risk that
+Clopper--Pearson deliberately parks just under $\alpha$, and it appears for the plain filtering
+baseline as much as for any repair arm. Aborted splits emit nothing, so they have no risk and
+are excluded from these denominators; the abort rate is printed beside every exceedance figure.
+
+One caveat on every interval and $p$-value here, since it would otherwise be over-read. The
+$400$ splits resample the \emph{same} items, so the interval shrinks like
+$1/\sqrt{\text{reps}}$ while dataset-level uncertainty does not shrink at all. These statistics
+test whether the mean gain over the split distribution differs from zero \emph{conditional on
+this dataset}. They are the right statistic for ``is arm A better than arm B on these items''
+and the wrong one for ``would this replicate on a fresh benchmark''; the per-split standard
+deviation, which we also report, is the honest measure of spread.
 
 \paragraph{Models and data.}
 Backbones are LLaVA-1.5-7B \citep{llava} in 4-bit and Qwen2-VL-2B-Instruct \citep{qwenvl};
@@ -1423,67 +1640,101 @@ that the analyses can be reproduced without a GPU.
 Validity holds for any score; only efficiency depends on which one is used. We therefore
 first characterise what makes a score efficient here.
 
-Table~\ref{tab:score} compares scores on POPE. A learned combination of the model's own
-confidence signals is a solid baseline. Generic image--text similarity \citep{clip} adds
-little. An open-vocabulary \emph{detection} signal adds a great deal: $+8.4$ points of
-certified coverage against $+2.3$ for CLIP.
+Table~\ref{tab:score} compares scores on POPE. An open-vocabulary \emph{detection} signal is
+worth $+27.0$ points of certified coverage over a learned combination of the model's own
+confidence signals, against $+21.8$ for generic image--text similarity \citep{clip}, both with
+intervals far from zero. Those magnitudes are much larger than the $+8.4$ and $+2.3$ an earlier
+version of this paper reported, and the reason is the abort column rather than better scoring:
+under a valid fixed sequence the confidence-only baseline \emph{certifies nothing at all} on
+$32.5\%$ of splits and raw confidence on $59.2\%$, so what a weak score costs is not a few
+points of coverage but the entire deployment on a third of calibration draws. The finding
+changed shape when the protocol was fixed --- from ``a better score buys a few more points'' to
+``a weak score cannot certify at all'' --- and \S\ref{sec:kminfail} gives the mechanism exactly.
 
 \begin{table}[t]
 \centering
-\caption{Selective prediction on POPE (LLaVA-1.5-7B, $n=1500$). AURC is area under the
-risk--coverage curve (lower better). Realised test risk was $\le\alpha$ in every row.}
+\caption{Selective prediction on POPE (LLaVA-1.5-7B, $n=1500$, $400$ paired splits). AURC is
+area under the risk--coverage curve (lower better). ``abort'' is the fraction of splits on which
+the fixed sequence certifies nothing and the deployed system covers $0\%$; coverage is the mean
+over all splits including those, so a large abort rate is visible as a large standard deviation.
+Gains in the last column are paired differences against the confidence-only row with $95\%$ CIs;
+all have $p<10^{-40}$ (two-sided paired $t$). The validity audit for these arms is
+Table~\ref{tab:audit}.}
 \label{tab:score}
-\begin{tabular}{lccc}
+\small
+\begin{tabular}{lcccc}
 \toprule
-Score & AURC $\downarrow$ & cov@$10\%$ $\uparrow$ & AUROC $\uparrow$\\
+Score & AURC $\downarrow$ & cov@$10\%$ $\uparrow$ & abort & gain over row 2\\
 \midrule
-Raw confidence                      & 0.0798 & 62.0\% & 0.762\\
-Learned, confidence only            & 0.0701 & 63.6\% & 0.782\\
-\quad + CLIP grounding \citep{clip} & 0.0650 & 66.0\% & 0.796\\
-\quad + detection grounding \citep{owlv2} & \textbf{0.0566} & \textbf{73.1\%} & \textbf{0.829}\\
-\quad + both                        & 0.0559 & 74.1\% & 0.831\\
+Raw confidence                      & 0.0774 & $20.2\pm27.6\%$ & 59.2\% & ---\\
+Learned, confidence only            & 0.0682 & $41.6\pm29.5\%$ & 32.5\% & ---\\
+\quad + CLIP grounding \citep{clip} & 0.0637 & $63.4\pm7.4\%$  & \phantom{0}0.5\% & $+21.8$ $[+18.9,+24.6]$\\
+\quad + detection grounding \citep{owlv2} & 0.0554 & $68.6\pm9.0\%$ & \phantom{0}0.8\% & $+27.0$ $[+24.2,+29.8]$\\
+\quad + both                        & \textbf{0.0547} & $\mathbf{70.7\pm5.6\%}$ & \phantom{0}\textbf{0.0\%} & $+29.1$ $[+26.2,+31.9]$\\
 \bottomrule
 \end{tabular}
 \end{table}
 
+The AUROC column tells the same story more weakly and is omitted for space: it moves from
+$0.768$ (raw confidence) through $0.786$, $0.799$ and $0.832$ to $0.834$, i.e.\ the ranking is
+identical and the differences are small, which is the point --- what the fixed sequence rewards
+is separability in the upper tail, not average ranking quality.
+
 Against a baseline given \emph{both} confidence and multi-sample self-consistency --- the
-scoring philosophy of \citet{conflvlm} --- detection grounding still adds
-$11.9\pm21.1$ points on the adversarial split (Table~\ref{tab:selfcons}) --- a mean gain in
-the same direction, but with a standard deviation that swamps it. We flag this rather than
-report it as support: with $n=450$ a three-way split leaves a $150$-item calibration fold,
-which is genuinely underpowered for a Clopper--Pearson bound at $\delta=0.10$, and the wide
-interval reflects that rather than an absence of grounding signal. The POPE-1500 result
-($+9.6\pm4.7$) is the one we would rely on.
+scoring philosophy of \citet{conflvlm} --- detection grounding adds $+23.8$ points
+($95\%$ CI $[+21.4,+26.3]$) on the adversarial split (Table~\ref{tab:selfcons}). The interval
+excludes zero comfortably, but the honest reading is again about aborts and not about coverage:
+the baseline fails to certify anything on $75.2\%$ of splits and the self-consistency-only score
+on $100\%$, because $n=450$ leaves a $150$-item calibration fold against $k_{\min}=22$. The
+right sentence is \emph{the baseline cannot certify on this split at all}, not \emph{grounding
+adds $24$ points to a working baseline}.
 
 \begin{table}[t]
 \centering
 \caption{Against a faithful self-consistency baseline on POPE-adversarial, the hardest
-split ($K=3$ samples, LLaVA-1.5, $n=450$).}
+split ($K=3$ samples, LLaVA-1.5, $n=450$, $400$ paired splits, $\alpha=0.10$). This arm is
+\emph{not} ConfLVLM: ConfLVLM's scorer is CLIP image--text similarity, which appears as the
+``$+$ CLIP grounding'' row of Table~\ref{tab:score} and as rung~1 of Table~\ref{tab:attrib}.}
 \label{tab:selfcons}
-\begin{tabular}{lcc}
+\small
+\begin{tabular}{lccc}
 \toprule
-Score & AURC $\downarrow$ & cov@$10\%$ $\uparrow$\\
+Score & AURC $\downarrow$ & cov@$10\%$ $\uparrow$ & abort\\
 \midrule
-Self-consistency only & 0.147 & 0.0\%\\
-Confidence $+$ self-consistency & 0.082 & 45.8\%\\
-\quad $+$ detection grounding (ours) & \textbf{0.063} & \textbf{57.7\%}\\
+Self-consistency only & 0.1366 & $0.0\pm0.0\%$ & 100.0\%\\
+Confidence $+$ self-consistency & 0.0770 & $11.0\pm21.1\%$ & \phantom{0}75.2\%\\
+\quad $+$ detection grounding (ours) & \textbf{0.0587} & $\mathbf{34.8\pm27.5\%}$ & \phantom{0}\textbf{32.2\%}\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two regularities follow. The advantage of grounding \emph{grows as the guarantee tightens}:
-at $\alpha=0.05$ it nearly doubles usable coverage ($26.4\%\to47.1\%$), while at
-$\alpha=0.20$ both scores certify almost everything (Figure~\ref{fig:covalpha}). And the
-advantage tracks how much the base model hallucinates: on the more accurate Qwen2-VL-2B the
-same addition is worth $2.0$ points rather than $11.9$, both with intervals that include zero. Grounding is most valuable exactly
-where selective prediction is most expensive.
+Two regularities follow, one of which needs a caveat. The advantage of grounding \emph{grows as
+the guarantee tightens}: at $\alpha=0.05$ certified coverage goes $9.0\%\to27.3\%$, a
+three-fold increase, with the abort rate falling $65.8\%\to24.0\%$, while at $\alpha=0.20$ both
+scores certify almost everything ($97.3\%$ vs.\ $97.7\%$; Figure~\ref{fig:covalpha}). The
+caveat is that ``the grounded score dominates at every level'' holds for detection grounding but
+not for CLIP, whose $\alpha=0.20$ gain is $-0.06$ points ($p=0.27$), indistinguishable from the
+baseline.
+
+The second regularity is that the advantage tracks how much the base model hallucinates, and
+here we report a sign reversal we did not previously see. On the more accurate Qwen2-VL-2B the
+same addition is worth $+3.10$ points $[+1.91,+4.30]$ at $\alpha=0.10$ rather than $+27.0$ ---
+but at $\alpha=0.15$ it \emph{costs} $-0.50$ points $[-0.85,-0.14]$, $p=0.006$. Neither arm
+aborts on any split in that cell, so the negative result cannot be explained away as an abort
+artefact; grounding genuinely does not pay on an already-accurate backbone at a loose target.
+Grounding is most valuable exactly where selective prediction is most expensive, and is not
+free where it is cheap.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.62\textwidth]{coverage_vs_alpha.png}
-\caption{Certified coverage as a function of the risk target. The grounded score dominates
-at every level and the margin widens as $\alpha$ tightens; at $\alpha=0.05$ it nearly
-doubles coverage. Error bars are one standard deviation over splits.}
+\caption{Certified coverage as a function of the risk target (POPE-1500, $400$ paired splits).
+The detection-grounded score dominates at every level and the margin widens as $\alpha$
+tightens; at $\alpha=0.05$ it roughly triples certified coverage. Error bars are one standard
+deviation over splits, and they are large at $\alpha=0.05$ because the distribution is bimodal
+--- a large fraction of splits certify nothing at all (abort rates $65.8\%$, $49.8\%$ and
+$24.0\%$ for the three arms at $\alpha=0.05$). That bimodality is the finding, not noise to be
+smoothed away.}
 \label{fig:covalpha}
 \end{figure}
 
@@ -1491,52 +1742,208 @@ doubles coverage. Error bars are one standard deviation over splits.}
 \label{rem:sep}
 A detector whose standalone accuracy matches the VLM's on POPE ($83.1\%$ vs.\ $81.9\%$)
 certifies far less coverage when used as a selective predictor in its own right
-($59.0\%$ vs.\ $68.2\%$). Conformal coverage depends on how well a score \emph{separates}
+($60.1\%$ vs.\ $68.6\%$). Conformal coverage depends on how well a score \emph{separates}
 correct from incorrect outputs, not on how often the underlying predictor is right. This
 also answers the natural objection to CCRC --- ``if channel 2 is good, why not just use
-it?'' --- in three of four settings (Table~\ref{tab:baselines}).
+it?'' --- in all five settings (Table~\ref{tab:baselines}).
 \end{remark}
 
 \subsection{CCRC across settings}
 \label{sec:ccrcresults}
 
-Table~\ref{tab:ccrc} reports CCRC against filtering under an identical protocol. The
-guarantee holds in every row. Gains are $+0.5$ to $+8.0$ points where the diagnostic of
-\S\ref{sec:precondition} is satisfied, and the single violation of that precondition is
-also the single loss.
+Table~\ref{tab:ccrc} reports CCRC against filtering under an identical protocol, with the
+paired interval, the two-sided paired test, and the abort rate for every cell. Certified
+coverage rises by $+0.40$ to $+7.59$ points in eight of ten cells, and \emph{every} one of those
+intervals excludes zero; it falls by $10.20$ and $11.90$ points on the two AMBER cells, whose
+cause is \S\ref{sec:kminfail} and not the precondition we previously blamed. The guarantee holds
+in every row (Table~\ref{tab:audit}).
 
 \begin{table}[t]
 \centering
-\caption{CCRC ($q{=}0.10$) versus filtering. Realised test risk was $\le\alpha$ in every
-row; realised risk for every row is reported in Table~\ref{tab:multialpha} and. The final row violates the precondition of
-Proposition~\ref{prop:precondition} and is the only loss.}
+\begin{threeparttable}
+\caption{CCRC ($q{=}0.10$) versus filtering, $400$ paired splits per cell. ``ab'' is the abort
+rate: the fraction of splits on which that arm certifies nothing and covers $0\%$. Gain is the
+mean paired difference with a $95\%$ Student-$t$ interval; $p$ is a two-sided paired $t$-test on
+the same $400$ differences (a two-sided Wilcoxon signed-rank test agrees in every row). The
+validity audit --- $\Pr[\text{realised risk}>\alpha]$ against $\delta=0.10$, which is the
+guarantee, rather than mean risk, which is not --- is in Table~\ref{tab:audit}. Coverage means
+include aborted splits as $0\%$, which is what a deployer experiences.}
 \label{tab:ccrc}
-\begin{tabular}{llcccccc}
+\footnotesize
+\begin{tabular}{llccccccc}
 \toprule
-Dataset & Backbone & $n$ & $\mu$ & $\alpha$ & Filter & CCRC & Gain\\
+Dataset & Backbone & $n$ & $\mu$ & $\alpha$ & Filter (ab) & CCRC (ab) & Gain [95\% CI] & $p$\\
 \midrule
-POPE            & LLaVA-1.5    & 1500 & 18.1\% & 0.10 & 68.2\% & \textbf{72.6\%} & $+4.4$\\
-POPE-adv        & LLaVA-1.5    & 444  & 17.3\% & 0.10 & 42.1\% & \textbf{46.8\%} & $+4.7$\\
-POPE-adv        & Qwen2-VL-2B  & 591  & 12.9\% & 0.10 & 77.5\% & \textbf{79.4\%} & $+1.9$\\
-POPE-adv        & LLaVA+VCD    & 591  & 19.6\% & 0.10 & 45.0\% & \textbf{47.5\%} & $+2.5$\\
+POPE     & LLaVA-1.5   & 1500 & 18.1\% & 0.10 & 68.6\% (0.8) & \textbf{71.8\%} (0.0) & $+3.18$ $[+2.6,+3.8]$ & $8\!\times\!10^{-22}$\\
+POPE-adv & LLaVA-1.5   & 444  & 17.3\% & 0.10 & 44.0\% (18.8) & \textbf{47.2\%} (17.5) & $+3.19$ $[+1.7,+4.7]$ & $5\!\times\!10^{-5}$\\
+POPE-adv & Qwen2-VL-2B & 591  & 12.9\% & 0.10 & 77.9\% (0.2) & \textbf{79.5\%} (0.8) & $+1.60$ $[+0.8,+2.4]$ & $2\!\times\!10^{-4}$\\
+POPE-adv & LLaVA+VCD   & 591  & 19.6\% & 0.10 & 48.8\% (5.8) & \textbf{51.0\%} (4.0) & $+2.15$ $[+1.3,+3.0]$ & $9\!\times\!10^{-7}$\\
 \midrule
-POPE            & LLaVA-1.5    & 1500 & 18.1\% & 0.15 & 86.8\% & \textbf{88.4\%} & $+1.7$\\
-POPE-adv        & LLaVA-1.5    & 444  & 17.3\% & 0.15 & 69.2\% & \textbf{77.2\%} & $+8.0$\\
-POPE-adv        & Qwen2-VL-2B  & 591  & 12.9\% & 0.15 & 94.4\% & \textbf{94.9\%} & $+0.5$\\
-POPE-adv        & LLaVA+VCD    & 591  & 19.6\% & 0.15 & 73.4\% & \textbf{75.4\%} & $+2.0$\\
+POPE     & LLaVA-1.5   & 1500 & 18.1\% & 0.15 & 86.4\% (0.0) & \textbf{88.4\%} (0.0) & $+1.95$ $[+1.8,+2.1]$ & $6\!\times\!10^{-102}$\\
+POPE-adv & LLaVA-1.5   & 444  & 17.3\% & 0.15 & 69.1\% (9.5) & \textbf{76.7\%} (0.5) & $+7.59$ $[+5.5,+9.7]$ & $5\!\times\!10^{-12}$\\
+POPE-adv & Qwen2-VL-2B & 591  & 12.9\% & 0.15 & 94.8\% (0.0) & \textbf{95.2\%} (0.0) & $+0.40$ $[+0.3,+0.5]$ & $1\!\times\!10^{-26}$\\
+POPE-adv & LLaVA+VCD   & 591  & 19.6\% & 0.15 & 75.8\% (0.8) & \textbf{77.2\%} (0.2) & $+1.39$ $[+0.5,+2.3]$ & $0.0022$\\
 \midrule
-AMBER(d)        & LLaVA-1.5    & 228  & 11.4\% & 0.10 & 92.1\% & 84.5\% & $-7.5$\\
+AMBER(d) & LLaVA-1.5   & 228  & 11.4\% & 0.10 & \textbf{91.8\%} (0.0) & 81.6\% (\textbf{13.0}) & $-10.20$ $[-13.4,-7.0]$ & $7\!\times\!10^{-10}$\\
+AMBER(d) & LLaVA-1.5   & 228  & 11.4\% & 0.15 & \textbf{95.9\%} (0.0) & 84.0\% (\textbf{12.8}) & $-11.90$ $[-15.1,-8.7]$ & $1\!\times\!10^{-12}$\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item The POPE-adv rows use the $444$ (LLaVA) and $591$ (Qwen, VCD) items for which the detector
+returns a value and the four canonical features. Table~\ref{tab:datasets}'s POPE-adv rows are a
+\emph{different} quantity --- all $450$/$600$ items with ungrounded detector values imputed to the
+median, plus a self-consistency feature --- and the two should not be reconciled.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{Two explanations of the AMBER loss that we can rule out.}
+It is not a weak repair channel: the detector is $95.6\%$ accurate on AMBER overall and $100\%$
+accurate in the top-decile region repairs are drawn from, and the repair region's realised risk
+there is $3.6\%$ at $\alpha=0.10$ and $0.0\%$ at $\alpha=0.15$ --- \emph{below} the accepted
+region's $4.5\%$ and $7.5\%$, so by Proposition~\ref{prop:dilution} dilution is running in
+CCRC's favour on the setting where it loses.
+
+Nor is it what we previously claimed. The earlier version of this paragraph asserted that the
+cause was absent headroom, ``exactly as Proposition~\ref{prop:precondition} predicts'', and
+explicitly ruled out sample size on the grounds that subsampling POPE to $n=228$ still gains
+$+3.2$ points. Both halves were wrong. The subsampling figures measured the
+\emph{grounding-score} gain (confidence-only against confidence-plus-detection), not the
+CCRC-versus-filtering gain, so they could not bear on this question at all; and the
+grounding-score gain at $n=228$ is in any case $+0.2$ points, not $+3.2$, switching on only at
+$n\ge700$ ($+2.9$ at $n=400$, $+19.6$ at $700$, $+26.4$ at $1500$) once the calibration fold is
+large enough to certify anything. The comparison that \emph{is} relevant --- CCRC against
+filtering on POPE subsampled to $n=228$ --- \emph{loses} $3.65$ points, with abort rates of
+$43.5\%$ and $53.8\%$. Sample size was the explanation all along.
+\S\ref{sec:kminfail} gives it properly.
+
+\subsection{A polarity-symmetric repair gate: valid, precise, and useless}
+\label{sec:symgate}
+
+Remark~\ref{rem:onedir} records the sharpest scope restriction on this paper: our margin
+$m=|o-\theta|$ gives the two polarities unequal dynamic range, so every admitted repair says
+``the object is present'' and CCRC as evaluated cannot touch the false-positive existence
+hallucination that POPE-adversarial exists to elicit. A previous version called the symmetric
+fix ``the obvious remedy'' and left it unevaluated. We have now evaluated it, and the result is
+worth a subsection because it converts an admitted gap into a measured impossibility.
+
+\paragraph{Construction, and why it costs nothing in $\delta$.}
+Normalise each polarity onto $[0,1]$ separately, $m^+=(o-\theta)/(1-\theta)$ for detector
+positives and $m^-=(\theta-o)/\theta$ for negatives, and pre-specify \emph{two} gates at the
+\emph{same} fixed $q=0.10$, one per polarity:
+$g^+=Q_{1-q}(m^+\mid o\ge\theta)$ and $g^-=Q_{1-q}(m^-\mid o<\theta)$, with repair when the
+item clears the gate for its own polarity. Because the repair mask depends only on the
+calibration fold and on $o$ --- never on the acceptance threshold --- the emitted family is
+still $\emit_t=A_t\cup M$ with $M$ constant in $t$, so it is still nested, a single
+fixed-sequence test at \emph{full} $\delta$ is still valid, and no union bound or $\delta/2$
+split is introduced. We verified this numerically over a $\lambda$-grid on $30$ random splits
+per setting: zero nesting violations in every arm. The construction also does not enlarge the
+repair budget, it redistributes it: admitting the top $q$ of each polarity keeps total gate mass
+at roughly $q$ of items.
+
+A single gate on the pooled two-sided normalised margin --- the other obvious construction ---
+is the wrong one, and instructively so: the negative-side margin distribution is concentrated
+near $1$ (its $90$th percentile is $0.947$--$0.973$ across settings) while the positive side's is
+not ($0.555$--$0.582$), so a global top-$q$ fills with negatives and the repaired mass becomes
+$100\%$ absent-polarity in every cell. It inverts the bias rather than removing it. We report the
+two-gate version.
+
+\paragraph{It admits negative repairs, at near-perfect precision.}
+It works as designed on its own terms (Table~\ref{tab:sym}). Negative-polarity repairs are
+admitted --- $0.05$--$0.33\%$ of test items, against exactly $0.00\%$ for the one-directional
+gate in all ten cells --- and their precision is $99.9$--$100\%$ wherever any are admitted.
+Certified coverage improves over the one-directional gate on the three POPE-adversarial cells at
+$\alpha=0.10$ ($+1.10$ to $+4.61$ points, $p=0.040$, $0.0024$, $1.2\times10^{-6}$), and a
+decomposition against a positive-branch-only arm confirms that on those cells the improvement
+\emph{is} the new negative repairs ($+1.87$ to $+6.81$ points, all $p<10^{-5}$). It does nothing
+at $\alpha=0.15$ on POPE (three of four differences not significant) and it costs $1.1$--$1.3$
+points on POPE-1500 at both risk levels.
+
+\paragraph{And it repairs no false positives at all.}
+The reason the symmetric gate was wanted was to correct the canonical false-positive existence
+hallucination: the VLM says ``yes'', the object is absent, and the detector says ``no''. Counting
+exactly those items among the repaired ones gives $0.000\%$ in every setting at both risk
+levels, for both the one-directional and the symmetric gate --- ten cells, no exceptions. The
+admitted negative repairs are almost all correct and almost all land on items the model
+\emph{already} answered ``no'' correctly. They change no answer. They are pure risk ballast,
+which is to say they are the dilution mechanism of \S\ref{sec:mechanism} operating on the other
+polarity, and nothing more.
+
+The reason is structural and can be seen without any calibration. Rank the detector-negative
+items by confidence and ask where the repairable false positives sit. On POPE-1500 the top
+decile of the negative side is $97.4\%$ accurate and contains \textbf{zero} of the $85$ reachable
+false positives; the top half is $83.3\%$ accurate and contains $9$; the last decile, at $36.7\%$
+accuracy, is where the remaining $46$ live. The same shape holds on POPE-adv LLaVA (top decile
+$100\%$ accurate, $0$ of $29$ reachable), Qwen2-VL ($0$ of $20$ in the top six deciles) and VCD
+($0$ of $78$ in the top two deciles). \textbf{On the negative side, repair opportunity and repair
+precision are anti-correlated.} An object scoring $o\approx0.001$ is so obviously absent that the
+VLM also says ``no''; the VLM only hallucinates presence when there is \emph{some} visual
+evidence, which is exactly where the detector's own margin is smallest and its accuracy falls to
+$35$--$55\%$ --- far below $1-\alpha$, so those items can never be certified. No strict negative
+gate can reach the hallucinations, and any gate loose enough to reach them is uncertifiable. This
+is a property of the signal, not of the gate's parameterisation, which is why we state it as a
+limitation of certified correction with a detector channel rather than as an implementation
+detail. The one exception is AMBER, where the detector is accurate all the way down the negative
+side and a loose negative gate could reach $10$--$12$ of the $14$ false positives at full
+precision --- and AMBER is the one setting where CCRC should not be used at all.
+
+\paragraph{An independent confirmation of the AMBER diagnosis.}
+The symmetric gate's largest apparent effect is on AMBER, where it converts the one-directional
+gate's loss into gains of $+0.71$ and $+0.32$ points over filtering on the same $500$ splits. It
+would be easy to sell that as the symmetric gate rescuing
+the paper's negative result. It is not. Decomposing on identical splits, the AMBER improvement is
+$+10.75$ and $+12.28$ points from \emph{re-scaling the positive gate} (the two-gate construction
+makes the positive gate much stricter, cutting repaired mass from $1.69\%$ to $0.51\%$) and
+$+0.01$ and $+0.00$ points from polarity. What the stricter gate does is stop perturbing AMBER's
+smallest, most fragile first hypothesis --- the abort rate falls from $13.0\%$ to $0.0\%$. That is
+the same mechanism \S\ref{sec:kminfail} identifies, arrived at from a different direction, and we
+report it as confirmation rather than as a rescue.
+
+\begin{table}[t]
+\centering
+\caption{Polarity-symmetric repair gate against the one-directional gate ($500$ paired splits;
+all arms share splits and the fitted score; $q$ fixed at $0.10$ throughout, so no confidence
+budget is spent on the choice). ``rep.\ mass'' is the fraction of the test fold repaired, split
+by polarity. ``FP corrected'' is the fraction of test items that were false-positive existence
+hallucinations \emph{and} were corrected. The validity audit gives
+$\Pr[\text{risk}>\alpha]\le0.032$ on the population proxy for every arm in every cell.
+\emph{One caveat on cross-table comparison}: this experiment draws its own $500$ paired splits
+so that the symmetric and one-directional arms can be contrasted pairwise, so its one-directional
+column differs from Table~\ref{tab:ccrc}'s CCRC column in the first decimal (e.g.\ $46.76$ here
+against $47.2$ there for POPE-adv LLaVA at $\alpha=0.10$, and $81.49$ against $81.6$ on AMBER).
+Only the within-table differences are paired and only they should be read as effects; the levels
+agree with Table~\ref{tab:ccrc} to Monte-Carlo error.}
+\label{tab:sym}
+\small
+\begin{tabular}{lccccccc}
+\toprule
+& & \multicolumn{2}{c}{certified coverage} & \multicolumn{2}{c}{rep.\ mass (pos / neg)}
+& \multicolumn{2}{c}{FP corrected}\\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Setting & $\alpha$ & one-dir & sym-2gate & one-dir & sym-2gate & one-dir & sym\\
+\midrule
+POPE-1500 LLaVA    & 0.10 & \textbf{71.71} & 70.60 & 1.80 / 0.00 & 0.78 / 0.10 & 0.000\% & 0.000\%\\
+POPE-1500 LLaVA    & 0.15 & \textbf{88.48} & 87.23 & 1.33 / 0.00 & 0.48 / 0.00 & 0.000\% & 0.000\%\\
+POPE-adv LLaVA     & 0.10 & 46.76 & \textbf{51.37} & 1.51 / 0.00 & 0.53 / 0.33 & 0.000\% & 0.000\%\\
+POPE-adv LLaVA     & 0.15 & 76.87 & \textbf{77.25} & 1.33 / 0.00 & 0.36 / 0.05 & 0.000\% & 0.000\%\\
+POPE-adv Qwen2-VL  & 0.10 & 79.10 & \textbf{80.66} & 0.96 / 0.00 & 0.42 / 0.14 & 0.000\% & 0.000\%\\
+POPE-adv Qwen2-VL  & 0.15 & \textbf{95.09} & 95.08 & 0.35 / 0.00 & 0.15 / 0.00 & 0.000\% & 0.000\%\\
+POPE-adv LLaVA+VCD & 0.10 & 50.31 & \textbf{51.42} & 0.86 / 0.00 & 0.22 / 0.30 & 0.000\% & 0.000\%\\
+POPE-adv LLaVA+VCD & 0.15 & \textbf{76.72} & 76.47 & 0.43 / 0.00 & 0.17 / 0.05 & 0.000\% & 0.000\%\\
+AMBER(d) LLaVA     & 0.10 & 81.49 & \textbf{92.25} & 1.69 / 0.00 & 0.51 / 0.01 & 0.000\% & 0.000\%\\
+AMBER(d) LLaVA     & 0.15 & 83.90 & \textbf{96.18} & 0.39 / 0.00 & 0.31 / 0.00 & 0.000\% & 0.000\%\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Isolating the cause of the AMBER loss.}
-Two candidate explanations were tested and rejected. It is not a weak repair channel: the
-detector is $95.6\%$ accurate on that dataset overall and $100\%$ accurate in the top-decile
-region repairs are drawn from. It is not small sample size: subsampling POPE to the same
-$n=228$ still gains $+3.2$ points, and the gain grows with $n$ ($+5.6$ at $400$, $+10.3$ at
-$700$). The cause is the absence of headroom, exactly as Proposition~\ref{prop:precondition}
-predicts.
+\paragraph{Verdict.}
+The symmetric gate is valid, is free in $\delta$, admits negative-polarity repairs at
+$99.9$--$100\%$ precision, and helps on three of ten cells while hurting on two. It does not do
+the thing it was wanted for, in any setting, at either risk level. We would rather report that
+than leave the remedy standing as an unevaluated promise, and we regard the anti-correlation
+between negative-side opportunity and negative-side precision as the more useful finding: it
+tells anyone building certified correction on a detector channel which half of the hallucination
+taxonomy is out of reach and why.
 
 \subsection{Where grounding does not apply}
 \label{sec:exp:noapply}
@@ -1553,29 +1960,36 @@ least $43\%$ of inputs, and in practice on all of them.
 \begin{table}[t]
 \centering
 \begin{threeparttable}
-\caption{Full dataset sweep. ``grnd'' indicates whether channel 2 applies. Coverage columns
-are confidence-only $\to$ with grounding, at $\alpha=0.10$.}
+\caption{Full dataset sweep at $\alpha=0.10$, $400$ paired splits. ``grnd'' indicates whether
+channel 2 applies. Coverage columns are confidence-only $\to$ with grounding, each with its
+abort rate in brackets; the last column is the paired grounding gain with a $95\%$ CI. The
+POPE-adv and AMBER rows use all items with ungrounded detector values imputed to the median plus
+a self-consistency feature, and are therefore not comparable with Table~\ref{tab:ccrc}'s
+grounded-item rows.}
 \label{tab:datasets}
-\begin{tabular}{llccc}
+\small
+\begin{tabular}{llcccc}
 \toprule
-Dataset & Backbone & acc & grnd & cov@$10\%$\\
+Dataset & Backbone & acc & grnd & cov@$10\%$ (abort) & grounding gain\\
 \midrule
-POPE ($1500$)     & LLaVA-1.5   & 81.9\% & yes & $63.6\to\mathbf{73.1}$\%\\
-POPE-adv          & LLaVA-1.5   & 82.7\% & yes & $46.6\to\mathbf{57.4}$\%\\
-POPE-adv          & Qwen2-VL-2B & 87.3\% & yes & $83.5\to\mathbf{85.5}$\%\\
-POPE-adv          & LLaVA+VCD   & 80.3\% & yes & $21.8\to\mathbf{53.9}$\%\\
-MME-existence\tnote{a} & LLaVA-1.5 & 95.0\% & yes & underpowered\\
-AMBER(d)          & LLaVA-1.5   & 78.6\% & partial & see Table~\ref{tab:ccrc}\\
-MME (full)        & LLaVA-1.5   & 68.9\% & no  & $5.7$\%\\
-GQA (yes/no)      & LLaVA-1.5   & 72.4\% & no  & $17.8$\%\\
-HallusionBench    & LLaVA-1.5   & 51.2\% & no  & $0.0$\%\\
+POPE ($1500$)     & LLaVA-1.5   & 81.9\% & yes & $41.6$ (32.5) $\to\mathbf{68.6}$ (0.8)\% & $+27.0$ $[+24.2,+29.8]$\\
+POPE-adv ($450$)  & LLaVA-1.5   & 82.7\% & yes & $11.7$ (75.0) $\to\mathbf{36.5}$ (29.8)\% & $+24.9$ $[+22.2,+27.6]$\\
+POPE-adv ($600$)  & Qwen2-VL-2B & 87.3\% & yes & $75.9$ (0.0) $\to\mathbf{79.0}$ (0.0)\% & $+3.1$ $[+1.9,+4.3]$\\
+POPE-adv ($600$)  & LLaVA+VCD   & 80.3\% & yes & $1.7$ (95.8) $\to\mathbf{47.3}$ (5.0)\% & $+45.6$ $[+43.8,+47.4]$\\
+MME-existence\tnote{a} & LLaVA-1.5 & 95.0\% & yes & $0.0$ (100) $\to0.0$ (100)\% & $\pm0.0$\\
+AMBER(d)          & LLaVA-1.5   & 78.6\% & partial & \multicolumn{2}{l}{see Table~\ref{tab:ccrc}}\\
+MME (full, $700$) & LLaVA-1.5   & 68.9\% & no  & $2.6$ (85.0)\% & ---\\
+GQA (yes/no, $700$)& LLaVA-1.5  & 72.4\% & no  & $4.5$ (84.0)\% & ---\\
+HallusionBench ($447$) & LLaVA-1.5 & 51.2\% & no & $0.0$ (100)\% & ---\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \item[a] Only $60$ items, leaving a $20$-item calibration fold under the three-way split,
-which is below $k_{\min}=22$ (Lemma~\ref{lem:kmin}). Sample size is not the only
-obstruction: at this subset's low base error rate $U(3,60;\delta)=0.108>\alpha$, so power
-would bind even with the full $60$ items available for calibration.
+which is below $k_{\min}=22$ (Lemma~\ref{lem:kmin}), so both arms abort on every split. An
+earlier version described this cell as ``underpowered''; ``$100\%$ abort'' is the same fact
+stated so that a reader can see it. Sample size is not the only obstruction: at this subset's
+low base error rate $U(3,60;\delta)=0.108>\alpha$, so power would bind even with the full
+$60$ items available for calibration.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -1585,73 +1999,98 @@ would bind even with the full $60$ items available for calibration.
 
 Because the two programmes of \S\ref{sec:related} are orthogonal --- mitigation lowers
 $\mu$, risk control governs what is emitted --- our layer should compose with a mitigation
-decoder. It does, and most strongly where the decoder's own confidence is poorly
-calibrated. On POPE-adversarial with visual contrastive decoding \citep{vcd}, adding
-grounding improves AURC from $0.1039$ to $0.0570$ and certified coverage from $0.4\%$ to
-$45.0\%$ ($\Delta\text{AURC}=0.043\pm0.007$).
+decoder. It does, and most strongly where the decoder's own confidence is poorly calibrated. On
+POPE-adversarial with visual contrastive decoding \citep{vcd}, adding grounding improves AURC
+from $0.1031$ to $0.0630$ and certified coverage from $1.7\%$ to $47.3\%$, a paired gain of
+$+45.6$ points $[+43.8,+47.4]$ --- the largest score effect anywhere in this paper, and almost
+entirely an abort effect: the confidence-only arm certifies nothing on $95.8\%$ of splits against
+$5.0\%$ for the grounded arm (Table~\ref{tab:datasets}). VCD improves the decoder's answers
+while leaving its logits a poor correctness score, which is exactly the situation in which an
+external channel is worth the most.
 
 \subsection{Baselines and attribution}
 \label{sec:attribution}
 
 \paragraph{Detector alone.}
 Table~\ref{tab:baselines} answers Remark~\ref{rem:sep}'s objection directly. CCRC beats a
-detector-only selective predictor in three of four settings, sometimes by very large
-margins, because the detector's correctness is harder to \emph{score} than the VLM's. Where
-the detector genuinely dominates the VLM in accuracy (AMBER: $95.6\%$ vs.\ $88.6\%$) it also
-wins standalone, which is a second reason CCRC is the wrong tool in that regime.
+detector-only selective predictor in all five settings, mostly by very large margins, because
+the detector's correctness is harder to \emph{score} than the VLM's: its evidence margin is a
+one-dimensional signal that saturates, so it separates its own correct from its own incorrect
+answers poorly even where its accuracy is high. On AMBER the detector is more accurate than the
+VLM ($95.6\%$ vs.\ $88.6\%$) and still certifies only $19.2\%$.
 
 \begin{table}
 \begin{threeparttable}[t]
 \centering
-\caption{Detector-only selective prediction versus CCRC ($\alpha=0.10$, identical protocol).}
+\caption{Detector-only selective prediction versus CCRC ($\alpha=0.10$, identical protocol,
+$400$ paired splits). ``Detector only'' emits the detector's answer, gated on its own evidence
+margin.}
 \label{tab:baselines}
 \begin{tabular}{lccccc}
 \toprule
 Setting & VLM acc & det.\ acc & Filter (VLM) & CCRC & Detector only\\
 \midrule
-POPE-1500 LLaVA    & 81.9\% & 83.1\% & 68.2\% & \textbf{72.6\%} & 59.0\%\\
-POPE-adv LLaVA     & 82.7\% & 82.4\% & 42.1\% & \textbf{46.8\%} & 21.3\%\\
-POPE-adv Qwen2-VL  & 87.1\% & 82.9\% & 77.5\% & \textbf{79.4\%} & 21.0\%\\
-POPE-adv LLaVA+VCD & 80.4\% & 82.9\% & 45.0\% & \textbf{47.5\%} & 21.0\%\\
-AMBER(d) LLaVA     & 88.6\% & 95.6\% & \textbf{92.1\%} & 84.5\% & 17.9\%\rlap{$^{\dagger}$}\\
+POPE-1500 LLaVA    & 81.9\% & 83.1\% & 68.6\% & \textbf{71.8\%} & 60.1\%\\
+POPE-adv LLaVA     & 82.7\% & 82.4\% & 44.0\% & \textbf{47.2\%} & 17.7\%\\
+POPE-adv Qwen2-VL  & 87.1\% & 82.9\% & 77.9\% & \textbf{79.5\%} & 22.9\%\\
+POPE-adv LLaVA+VCD & 80.4\% & 82.9\% & 48.8\% & \textbf{51.0\%} & 22.9\%\\
+AMBER(d) LLaVA     & 88.6\% & 95.6\% & \textbf{91.8\%} & 81.6\% & 19.2\%\rlap{$^{\dagger}$}\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
-\item[$\dagger$] The detector is $95.6\%$ accurate on AMBER and would certify nearly
-everything given enough calibration data, but with $n=228$ a three-way split leaves $76$
-calibration items and the fixed sequence aborts on $82\%$ of splits (a single error at the
-grid start already breaks the Clopper--Pearson bound at $k\approx33$). The figure therefore
-measures sample size, not detector quality; we report it rather than a
-large-calibration number because it is what this protocol yields. An earlier draft of this
-paper reported $92.6\%$ here and claimed a detector-only baseline beats CCRC on AMBER; that
-number is not reproducible under any split and the claim is withdrawn.
+\item[$\dagger$] The detector is $95.6\%$ accurate on AMBER and would certify nearly everything
+given enough calibration data, but with $n=228$ a three-way split leaves $76$ calibration items
+and the fixed sequence largely aborts (a single error at the grid start already breaks the
+Clopper--Pearson bound at $k\approx33$; \S\ref{sec:kminfail}). The figure therefore measures
+calibration-fold size, not detector quality; we report it rather than a large-calibration number
+because it is what this protocol yields. An earlier draft of this paper reported $92.6\%$ here
+and concluded that a detector-only baseline beats CCRC on AMBER; that number is not reproducible
+under any split and the claim is withdrawn.
 \end{tablenotes}
 
 \end{threeparttable}
 \end{table}
 
 \paragraph{A published scorer, and where our margin comes from.}
-Table~\ref{tab:attrib} places the CLIP-similarity scoring function of \citet{conflvlm} in
-our pipeline and adds our components one at a time. The aggregate margin is $+67$ points,
-and reporting only that number would misattribute it: $+62.6$ of the $67$ comes from the
-score, and $+4.4$ from certified correction. We also note the comparison understates
+Table~\ref{tab:attrib} places the CLIP-similarity scoring function of \citet{conflvlm} in our
+pipeline and adds our components one at a time, cumulatively, so that each row is the previous
+row plus one thing and the increments sum to the total. The aggregate margin is $+66.8$ points;
+$+64.5$ of it is the correctness score and $+2.3$ is certified correction. Reporting the
+aggregate alone would misattribute the paper, so we report the ladder, and the number we ask a
+reader to hold us to is the $+2.3$: it is small, it is the only part that is ours as an
+algorithm, and it is measured under a protocol that no longer flatters it. (For contrast, the
+same quantity in the previous version of this paper was $+4.4$ against a total of $+67$, and
+both figures came from the max-over-thresholds rule.) We also note the comparison understates
 \citet{conflvlm}, whose method was designed for free-form caption claims rather than yes/no
 probes; we transplant their scorer, not their system.
 Figure~\ref{fig:riskcov} shows the corresponding risk--coverage curves.
 
 \begin{table}[t]
 \centering
-\caption{Attribution on POPE ($\alpha=0.10$). Most of the margin over a published scorer
-comes from the score, not from our procedure.}
+\caption{Attribution on POPE-1500 ($\alpha=0.10$, $400$ paired splits). The ladder is cumulative:
+each row adds one component to the row above, and the $\Delta$ column sums to the total. Most of
+the margin over a published scorer comes from the score, not from our procedure. Rungs 2--4
+coincide exactly with rows 2, 3 and 5 of Table~\ref{tab:score}, which they must, being the same
+scores on the same items under the same rule. Rung~5 applies CCRC on top of the six-feature score
+of rung~4 and so reads $73.0\%$; Table~\ref{tab:ccrc}'s CCRC column reads $71.8\%$ because it uses
+the four-feature canonical score, which is the configuration we report as the method. The
+$+2.3$-point increment is measured within this ladder, and the corresponding four-feature
+increment is $+3.18$ points (Table~\ref{tab:ccrc}); we quote the smaller figure in the
+attribution because it is the one measured against the published scorer's own comparison.}
 \label{tab:attrib}
 \begin{tabular}{lcc}
 \toprule
 Method & Coverage & $\Delta$\\
 \midrule
-CLIP-similarity scorer \citep{conflvlm}, filtering & 5.6\%  & ---\\
-\quad + VLM confidence                             & 41.5\% & $+35.9$\\
-\quad + detection grounding                        & 68.2\% & $+26.7$\\
-\quad + certified correction (CCRC)                & \textbf{72.6\%} & $+4.4$\\
+1. CLIP-similarity scorer \citep{conflvlm}, filtering & \phantom{0}6.2\%  & ---\\
+2. \quad + VLM confidence (replacing CLIP)         & 41.6\% & $+35.4$\\
+3. \quad + CLIP grounding                          & 63.4\% & $+21.8$\\
+4. \quad + detection grounding                     & 70.7\% & $+7.3$\\
+5. \quad + certified correction (CCRC)             & \textbf{73.0\%} & $+2.3$\\
+\midrule
+\textbf{total margin over rung 1}                  & & $\mathbf{+66.8}$\\
+\quad of which the correctness score (rungs 2--4)  & & $+64.5$\\
+\quad of which certified correction (rung 5)       & & $+2.3$\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1659,21 +2098,23 @@ CLIP-similarity scorer \citep{conflvlm}, filtering & 5.6\%  & ---\\
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.72\textwidth]{risk_coverage.png}
-\caption{Risk--coverage curves on POPE. The grounded score (blue) lies below the
-confidence-only baseline (LLaVA's own logits, no external evidence) at every coverage level
-short of full coverage, where both necessarily meet the base risk: lower error for the same
-coverage, and more coverage for the same error target. Shaded bands are one standard
-deviation over $20$ three-way splits; the dashed line marks $\alpha=0.10$. The legend
-reports two quantities that should not be confused: \emph{oracle} coverage read off the
-test-fold curve ($71.2\%\to76.6\%$), and conformally \emph{calibrated} coverage
-($63.6\%\to73.1\%$), the latter being what the tables report. Note that this baseline is not
-ConfLVLM: ConfLVLM's scorer is CLIP image--text similarity, which appears here as the
-``$+$ CLIP grounding'' arm of Figure~\ref{fig:comparison} and as a separate row of
-Table~\ref{tab:score}.}
+\caption{Risk--coverage curves on POPE-1500. The grounded score (blue) lies below the
+confidence-only baseline at $99\%$ of coverage levels, meeting it only at full coverage where
+both necessarily equal the base risk: lower error for the same coverage, and more coverage for
+the same error target. Shaded bands are one standard deviation over $400$ paired three-way
+splits; the dashed line marks $\alpha=0.10$. The legend reports two quantities that should not
+be confused: \emph{oracle} coverage read off the test-fold curve ($71.6\%\to78.0\%$), and
+conformally \emph{calibrated} coverage ($41.6\%\to68.6\%$), the latter being what the tables
+report and the gap between them being the price of calibrating rather than knowing. The baseline
+is LLaVA's own output logits with no external evidence, which is why it is labelled
+``confidence only (model logits)'' and not, as in an earlier version of this figure,
+``ConfLVLM-style'': ConfLVLM's scorer is CLIP image--text similarity, which appears separately as
+rung~1 of Table~\ref{tab:attrib} and as the ``$+$ CLIP grounding'' arm of
+Figure~\ref{fig:comparison}.}
 \label{fig:riskcov}
 \end{figure}
 
-\paragraph{The closest concurrent method.}
+\subsection{Composition with the closest concurrent method}
 \label{sec:bcea}
 \citet{bcea} rescue borderline claims by acquiring zoomed views and re-scoring the
 \emph{original} assertion. Holding the base score fixed and adding one mechanism per arm
@@ -1686,7 +2127,10 @@ defensible conclusion is composition, not superiority.
 \begin{table}[t]
 \centering
 \caption{One common base score, one mechanism added per arm (POPE, LLaVA-1.5, $n=394$
-grounded items). All arms valid. Composition beats every single mechanism.}
+grounded items, $\alpha$ as shown). All arms valid. Composition beats every single mechanism.
+This is the one table in the paper at $60$ rather than $\ge400$ paired splits, because the arms
+require a re-scoring pass per split; it uses the same fixed-sequence rule as everything else, and
+the differences here are large enough that the repetition count is not the binding uncertainty.}
 \label{tab:bcea}
 \begin{tabular}{lcc}
 \toprule
@@ -1700,6 +2144,154 @@ Base filter (confidence only)              & 5.5\%  & 16.5\%\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+%===============================================================================
+\section{A small-calibration failure mode of fixed-sequence testing}
+\label{sec:kminfail}
+
+Three results in this paper looked unrelated until we measured the abort rate, and are in fact
+one mechanism seen three times. Because it is elementary, checkable in advance, and --- on our
+data --- larger than the effect our method is designed to produce, we give it its own section
+rather than three scattered paragraphs.
+
+\subsection{The mechanism}
+
+Two facts about the procedure combine badly at small calibration size. The first is
+Lemma~\ref{lem:kmin}: with $\alpha=\delta=0.10$ no emitted set smaller than $k_{\min}=22$ items
+can be certified at all, and the value is \emph{bound-dependent} --- $22$ for Clopper--Pearson but
+$44$, $71$ and $116$ for the betting, empirical-Bernstein and Hoeffding bounds
+(Table~\ref{tab:bounds}) --- so a grid start tuned for one bound silently disables another. The
+second is that fixed-sequence testing must stop at the \emph{first} non-rejection
+(\S\ref{sec:validity}), and the first hypothesis in an ascending sweep is the one with the
+smallest emitted set.
+
+Put together: the strictest hypothesis is simultaneously the one with the least statistical power
+and the one whose failure costs everything. The arithmetic is stark. Our grid starts at
+$\lambda_1=1.5k_{\min}/n_{\mathrm{cal}}$, so the first hypothesis emits $k\approx33$ items, and
+Clopper--Pearson at $k=33$ tolerates exactly \textbf{zero} errors:
+\[
+U(0,33;0.10)=0.0674\le\alpha,\qquad U(1,33;0.10)=0.1128>\alpha,\qquad U(2,33;0.10)=0.1533>\alpha.
+\]
+So whenever the top $33$ calibration items by score contain a single error, the whole sequence
+returns nothing and the deployed system covers $0\%$. Whether that happens is a property of the
+score's extreme upper tail on a $n_{\mathrm{cal}}$-item fold --- not of its average quality, its
+AUROC, or the dataset's difficulty.
+
+The condition for this to be fatal rather than merely costly is exactly the one
+Remark~\ref{rem:prefix} anticipates: feasibility must be a \emph{prefix} of the grid for
+``stop at the first failure'' to lose nothing, and that is risk monotonicity in $\lambda$, which
+\S\ref{sec:validity} declines to assume. Where feasibility is not a prefix, the first hypothesis
+decides the outcome by itself. On POPE-1500 with raw confidence we can verify this exactly: the
+measured first-hypothesis failure rate is $59.2\%$ and the measured abort rate is $59.2\%$ ---
+identical, to the split.
+
+The max-over-thresholds rule we previously used hid all of this, because it was free to skip to a
+large-$k$ threshold where dozens of errors are tolerable. That is the multiplicity it never paid
+for, and the abort column is what appears when the bill is settled.
+
+\subsection{Instance 1: a weak score does not certify a little less, it certifies nothing}
+
+Under a valid fixed sequence, score quality expresses itself almost entirely through the abort
+rate rather than through coverage given certification. Raw confidence aborts on $59.2\%$ of
+splits and a learned confidence-only score on $32.5\%$, against $0.8\%$ for the same score plus
+detection grounding (Table~\ref{tab:score}); the self-consistency baseline of
+Table~\ref{tab:selfcons} aborts on $75.2\%$ and self-consistency alone on $100\%$; the
+confidence-only arm on VCD-decoded LLaVA aborts on $95.8\%$ (Table~\ref{tab:datasets}); and at
+$\alpha=0.05$ even the grounded score aborts on $24.0\%$ (Table~\ref{tab:multialpha}). This is
+why the grounding gains in this version of the paper are three times larger than in the previous
+one, and it is a different and stronger claim: the value of an external evidence channel is not
+that it buys a few points of coverage but that it makes certification possible at all on a third
+to all of calibration draws.
+
+Two cells in this paper have a $100\%$ abort rate (MME-existence, HallusionBench). Their
+certified coverage of $0.0\%$ is the guarantee working exactly as designed --- on HallusionBench
+LLaVA is at chance, $\mu\approx0.49$, and Proposition~\ref{prop:floor} forces abstention on at
+least $43\%$ of inputs --- but ``$0.0\%$ coverage'' and ``mean coverage $2.6\%$ over splits, of
+which $85\%$ are zeros'' are very different statements to a deployer, and only the second is
+honest.
+
+\subsection{Instance 2: self-repair is defeated by the prefix, not by the region}
+
+\S\ref{sec:independence} is the same mechanism with a fixed-mass contaminant. The self-repair
+block has mass independent of $\lambda$, so at the start of the grid it is the largest fraction
+of the emitted set it will ever be, and its $4.9$--$62.4\%$ error rate fails the first hypothesis.
+Coverage does not degrade gracefully; it collapses, by $49.3$, $37.3$, $76.9$ and $6.6$ points,
+with abort rates of $73.0\%$, $88.8\%$, $98.8\%$ and $25.2\%$ (Table~\ref{tab:selfrepair}). The
+budget in \eqref{eq:selfrepair} would in fact be satisfiable at later $\lambda$ on some of these
+settings; the test never gets there. Note that the ordering of the four collapse magnitudes is
+the ordering of the four abort rates, not the ordering of the four flip-region risks.
+
+\subsection{Instance 3: this, and not headroom, is why CCRC loses on AMBER}
+
+AMBER(d) has $n=228$ items, so a three-way split leaves a $76$-item calibration fold. With
+$k_{\min}=22$ the grid starts at $\lambda_1=1.5\times22/76=0.434$ and the first hypothesis again
+emits about $33$ items, tolerating zero errors. AMBER's filtering arm clears that bar reliably
+because its score is clean at the top: it aborts on $0.00\%$ of splits at both risk levels.
+Adding a fixed-mass repair block puts the occasional repair error into that first, smallest,
+most fragile hypothesis --- and the fixed sequence must stop there. CCRC aborts on $13.00\%$ and
+$12.75\%$ of splits.
+
+Table~\ref{tab:amber} decomposes the reported loss by split class, and the answer is unambiguous.
+Conditional on both arms certifying something, CCRC \emph{wins} on AMBER: $+2.17$ points at
+$\alpha=0.10$ ($p=6\times10^{-28}$) and $+0.47$ at $\alpha=0.15$ ($p=7\times10^{-30}$). The
+splits on which CCRC aborts and filtering does not --- $52$ of $400$ --- contribute $-12.09$
+points, which is $119\%$ of the entire reported loss at $\alpha=0.10$ and $103\%$ at
+$\alpha=0.15$. Every other split class contributes positively. And the dilution direction is
+favourable throughout: $r_r=3.60\%<r_a=4.53\%$ at $\alpha=0.10$ and $0.00\%<7.45\%$ at
+$\alpha=0.15$, so the ``repairs consume slack'' branch of Proposition~\ref{prop:dilution} ---
+the branch a headroom explanation requires --- is not the branch AMBER is in.
+
+\begin{table}[t]
+\centering
+\caption{The AMBER(d) loss, decomposed ($400$ paired splits, $q=0.10$). The unconditional gain
+is what Table~\ref{tab:ccrc} reports and what a deployer experiences. The conditional gain is
+what CCRC does when it certifies at all. The gap is entirely one split class. POPE-1500 is shown
+for contrast: there, CCRC never aborts and filtering occasionally does --- the mirror image.}
+\label{tab:amber}
+\small
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{AMBER(d), $n=228$} & \multicolumn{2}{c}{POPE-1500, $n=1500$}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+& $\alpha=0.10$ & $\alpha=0.15$ & $\alpha=0.10$ & $\alpha=0.15$\\
+\midrule
+unconditional gain (Table~\ref{tab:ccrc}) & $-10.20$ & $-11.90$ & $+3.18$ & $+1.95$\\
+gain $\mid$ neither arm aborts & $\mathbf{+2.17}$ & $\mathbf{+0.47}$ & $+2.68$ & $+1.95$\\
+\quad ($95\%$ CI) & $[+1.8,+2.5]$ & $[+0.4,+0.5]$ & --- & ---\\
+abort rate, filtering & 0.00\% & 0.00\% & 0.75\% & 0.00\%\\
+abort rate, CCRC & \textbf{13.00\%} & \textbf{12.75\%} & \textbf{0.00\%} & \textbf{0.00\%}\\
+$\hat\lambda$ moves & 15.2\% & 1.7\% & 28.0\% & 23.5\%\\
+$r_a$ / $r_r$ & 4.53 / \textbf{3.60}\% & 7.45 / \textbf{0.00}\% & 7.96 / 0.24\% & 12.65 / 0.32\%\\
+dilution direction & favourable & favourable & favourable & favourable\\
+\midrule
+\multicolumn{5}{l}{\emph{contribution to the $-10.20$ at $\alpha=0.10$, by split class:}}\\
+\quad both certify ($348$ splits) & $+1.89$ & & &\\
+\quad \textbf{CCRC aborts, filter does not ($52$)} & $\mathbf{-12.09}$ & & &\\
+\quad filter aborts, CCRC does not ($0$) & $+0.00$ & & &\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The effect does not vanish with $n$ over AMBER's available range: the CCRC abort rate is $11.0\%$
+at $n=228$, $10.2\%$ at $190$, $9.2\%$ at $152$ and $61.9\%$ at $114$, because what binds is the
+interaction of fold size with the grid start rather than $n$ alone. And the same probe run on
+POPE confirms that AMBER is not special: subsampled to $n=228$, CCRC loses $3.65$ points on POPE
+too, with abort rates of $43.5\%$ (filtering) and $53.8\%$ (CCRC). The setting that loses is the
+setting with the smallest calibration fold, on either dataset.
+
+\paragraph{What this changes, and what it costs us.}
+It costs us our only claimed instance of Conjecture~\ref{conj:headroom}, which is why that
+statement is now labelled a conjecture with no confirming evidence. It also costs us the clean
+story in which a checkable precondition screens deployments in advance. What replaces it is a
+different check, also computable before calibration and considerably better supported: given
+$n_{\mathrm{cal}}$, $\alpha$ and $\delta$, compute $k_{\min}$ and the emitted count at the grid
+start, ask how many errors the bound tolerates there, and ask whether the score's upper tail is
+clean enough to supply that. If the answer is ``zero errors tolerated'' --- which it is for any
+$n_{\mathrm{cal}}\lesssim500$ at $\alpha=\delta=0.10$ --- then \emph{any} perturbation of the
+strictest hypothesis, including a beneficial one, is a coin flip on the whole deployment. The
+practical remedies are equally elementary: a larger calibration fold, a looser $\alpha$, or a
+grid start chosen so the first hypothesis tolerates at least one error. We flag rather than
+implement the last, because choosing it from data would need its own share of $\delta$.
 
 %===============================================================================
 \section{A sequential failure mode}
@@ -1736,25 +2328,33 @@ continuations is the intervention.
 \paragraph{Result.}
 Repair makes the continuation worse (Table~\ref{tab:monotone},
 Figure~\ref{fig:monotonicity}). Downstream hallucinated mentions rise from $1.207$ to
-$1.413$, a paired difference of $+0.207\pm0.091$ ($n=121$, $t=2.27$, $p=0.025$; Wilcoxon
-$p=0.035$), with $45$ cases worsening against $25$ improving.
+$1.413$, a paired difference of $+0.2066\pm0.0908$ ($n=121$, $t(120)=2.27$, two-sided
+$p=0.025$), with $45$ cases worsening against $25$ improving and $51$ tied. The sign is
+supported by three tests that make different assumptions --- paired $t$ $p=0.025$, Wilcoxon
+signed-rank $p=0.035$, exact sign test $p=0.023$, all two-sided --- which is the robustness
+evidence that matters given that $42\%$ of pairs are tied. (Because of those ties the
+rank-based Hodges--Lehmann location estimate is exactly $0.000$ even though the mean and every
+test statistic are positive; we state that rather than let a reader discover it.)
 
 \begin{table}[t]
 \centering
-\caption{Paired matched-prefix test of monotonicity ($n=121$ cases). Repair significantly
-increases hallucination in the continuation.}
+\caption{Paired matched-prefix test of monotonicity ($n=121$ cases). Repair increases
+hallucination in the continuation. All $p$-values two-sided.}
 \label{tab:monotone}
-\begin{tabular}{lcc}
+\begin{tabular}{lccc}
 \toprule
-Downstream measure (continuation only) & Original prefix & Repaired prefix\\
+Downstream measure (continuation only) & Original & Repaired & paired diff.\ ($p$)\\
 \midrule
-Hallucinated mentions (mean)      & 1.207 & \textbf{1.413}\\
-Hallucinations per 100 words      & 3.61  & 4.30\\
-Faithful mentions (mean)          & 1.579 & 1.752\\
-Continuation length (words)       & 33.4  & 32.9\\
+Hallucinated mentions (mean)      & 1.207 & \textbf{1.413} & $+0.207$ ($0.025$)\\
+Hallucinations per $100$ words    & 3.61  & 4.30  & $+0.75$ ($0.011$)\\
+Faithful mentions (mean)          & 1.579 & 1.752 & $+0.174$ ($0.077$)\\
+Continuation length (words)       & 33.4  & 32.9  & $-0.55$ ($0.092$)\\
+Hallucinated share of mentions    & 0.433 & 0.447 & $-0.004$ ($0.884$)\\
 \midrule
-\multicolumn{3}{l}{Paired difference $+0.207\pm0.091$; $t=2.27$, $p=0.025$; Wilcoxon $p=0.035$}\\
-\multicolumn{3}{l}{Cases better / worse / tie: $25$ / $45$ / $51$}\\
+\multicolumn{4}{l}{Primary endpoint: $+0.2066\pm0.0908$; $t(120)=2.27$, $p=0.025$; Wilcoxon
+$p=0.035$; sign test $p=0.023$}\\
+\multicolumn{4}{l}{$95\%$ CI $[+0.027,+0.386]$; Cohen's $d_z=0.207$; Hodges--Lehmann $+0.000$}\\
+\multicolumn{4}{l}{Cases better / worse / tie: $25$ / $45$ / $51$}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1765,15 +2365,58 @@ Continuation length (words)       & 33.4  & 32.9\\
 \caption{(A) Mean hallucinated mentions in the continuation after keeping versus repairing
 the flagged claim; error bars are standard errors. (B) Distribution of the paired
 difference; mass to the right of zero indicates repair worsening the continuation. The
-effect is modest in size but statistically clear, and its sign is what matters for the
-theory.}
+effect is modest in size and its sign is what matters for the theory; \S\ref{sec:power} bounds
+how little the experiment says about its magnitude.}
 \label{fig:monotonicity}
 \end{figure}
 
-\paragraph{What this rules out.}
-The correction map is not monotone, so the fixed-point argument has no basis: monotone
-convergence arguments of Knaster--Tarski type do not apply, and iterating calibration and
-deployment need not converge. We therefore do not claim a sequential guarantee of that
+\subsection{How much this experiment can support}
+\label{sec:power}
+
+The primary result is significant at conventional levels under three tests, and it is also
+under-powered. Both are true and the second was missing from the previous version of this paper,
+which asserted that ``the fixed-point route is closed''. It is not closed by this evidence; it is
+unsupported by it. The numbers, at the observed paired standard deviation of $0.9993$ with
+$n=121$:
+
+\begin{itemize}
+\item The two-sided minimum detectable effect at $80\%$ power is $+0.2566$, which is
+\emph{larger} than the observed $+0.2066$. The study was designed to detect effects of at least
+about a quarter of a hallucinated mention and detected a smaller one, which is a
+marginally-powered positive rather than a well-powered one.
+\item Achieved power at the observed effect is $61.6\%$; $186$ pairs ($65$ more) would be needed
+for $80\%$ power at this effect size, and $248$ for $90\%$. (Post-hoc achieved power is a
+monotone restatement of the $p$-value and is not evidence about the true effect; we report it
+because it is the number most readers will want and the MDE is the one that carries information.)
+\item Equivalence testing bounds the effect from the other side. Against a pre-specified margin
+of $\pm0.25$ --- a quarter of a hallucinated object per repair, roughly $20\%$ of the baseline ---
+TOST does \emph{not} establish equivalence ($p=0.317$). The smallest margin we can establish at
+the $5\%$ level is $\Delta=0.357$, i.e.\ $29.6\%$ of baseline.
+\item So the experiment simultaneously rules out an exact null, rules out true effects larger in
+magnitude than $0.357$, and cannot distinguish $+0.207$ from anything in $[+0.027,+0.386]$ --- a
+fourteen-fold range. \textbf{The increase is established as a sign, not as a magnitude.}
+\end{itemize}
+
+What survives is exactly what the theory needs and no more. A monotone fixed-point argument
+requires the correction map to be non-increasing in downstream risk; a sign is enough to withdraw
+support from that, and a magnitude would be required only to price the cost, which we therefore do
+not attempt to price. The right statement is: \emph{our data does not support the monotonicity
+property a fixed-point calibration argument would rest on, and settling the question would take
+$n\ge186$ matched pairs.} We do not claim the route is closed, and any downstream use of the
+number $0.207$ as a quantity rather than as a direction is unsupported by this experiment.
+
+We also confirm the per-word figure quoted in Table~\ref{tab:monotone}, since three variants of
+it circulate. The paired per-item rate difference over the $119$ pairs with non-empty original
+continuations is $+0.0075$ per word ($95\%$ CI $[+0.0017,+0.0132]$, two-sided paired $p=0.011$);
+the pooled ratio-of-totals is $+0.0069$ (paired-cluster bootstrap $p=0.0086$). Including the two
+degenerate pairs whose original continuation is empty raises the estimate to $+0.0115$ and the
+$p$-value to $0.023$, because one of them contributes $+0.5$ on a two-word continuation and
+supplies a third of the numerator. We report the $119$-pair version, state the exclusion rule, and
+note that the result is not robust to those two pairs.
+
+\paragraph{What this rules out, and what it does not.}
+Because the correction map is not non-increasing on this evidence, monotone convergence arguments
+of Knaster--Tarski type have no basis here and we do not claim a sequential guarantee of that
 form. What survives is a coupling bound, which is weaker but assumption-light.
 
 For a sequence of claims $O=(o_1,\dots,o_T)$ let $\Risk(O)=\E[\,\#\{t:o_t\text{ false}\}\,]$
@@ -1831,28 +2474,25 @@ uncorrected one --- remains open.
 \end{remark}
 
 \paragraph{What this implies for algorithm design.}
-Beyond closing off a proof strategy, the measurement identifies a cost that a myopic
-procedure does not charge for. Greedy per-claim repair optimises the risk of the claim in
-front of it while imposing roughly $0.21$ additional hallucinated claims on the
-continuation. A correct sequential procedure must therefore price the \emph{continuation},
-not the claim --- for instance by searching over rewrite trajectories under an accumulated
-risk ledger rather than deciding each claim independently. We regard this as the main open
-problem the paper leaves, and note that it is a genuinely different statistical object:
-because repairing claim $i$ changes which claims $i+1,\dots$ exist, the item set is
-endogenous, and selecting among trajectories introduces a selective-inference problem that
-per-item conformal methods do not face.
+The measurement identifies a cost that a myopic procedure does not charge for. Greedy per-claim
+repair optimises the risk of the claim in front of it while imposing an additional hallucinated
+claim on the continuation with probability we can sign but not size. A correct sequential
+procedure must therefore price the \emph{continuation}, not the claim --- for instance by
+searching over rewrite trajectories under an accumulated risk ledger rather than deciding each
+claim independently. \S\ref{sec:discussion} states why that is a genuinely different statistical
+object and why we regard it as the main open problem this paper leaves.
 
 \paragraph{A competing explanation, and what survives it.}
-Table~\ref{tab:monotone} contains a row that complicates the headline. Repair raises
-faithful mentions by $+0.174$ at the same time as it raises hallucinated mentions by
-$+0.207$, in continuations that are slightly \emph{shorter} ($33.4\to32.9$ words). Repaired
-prefixes therefore produce denser object talk, and the obvious alternative reading is that
-correction makes the continuation more descriptive rather than less faithful. We tested
-this directly with two normalisations. Per word, hallucination rises significantly
-($+0.0075$ per word, $p=0.011$). Per \emph{mention}, it does not move at all: the
-hallucinated share of mentions goes $0.433\to0.447$ pooled, and the paired difference is
-$-0.004$ ($p=0.884$, $n=111$ pairs with mentions in both arms). The competing explanation is
-therefore substantially correct as a description of \emph{why} the count rises.
+Table~\ref{tab:monotone} contains rows that complicate the headline. Repair raises
+faithful mentions by $+0.174$ ($p=0.077$) at the same time as it raises hallucinated mentions by
+$+0.207$, in continuations that are slightly \emph{shorter} ($33.4\to32.9$ words, $p=0.092$).
+Repaired prefixes therefore produce denser object talk --- mention density rises about $15\%$ in
+relative terms --- and the obvious alternative reading is that correction makes the continuation
+more descriptive rather than less faithful. Two normalisations settle it. Per word, hallucination
+rises significantly ($+0.0075$ per word, two-sided $p=0.011$). Per \emph{mention}, it does not
+move at all: the hallucinated share of mentions goes $0.433\to0.447$ pooled, and the paired
+difference is $-0.0039$ ($p=0.884$, $n=111$ pairs with mentions in both arms). The competing
+explanation is therefore substantially correct as a description of \emph{why} the count rises.
 
 It does not, however, rescue the monotonicity argument, and the reason is that the quantity
 being certified is a count and not a ratio. A CHAIR-style risk charges for each hallucinated
@@ -1882,58 +2522,82 @@ implies --- is the natural remedy and remains to be tested.
 Channel 1 is a learned function of a handful of scalars. It is natural to ask whether a
 more expressive combiner helps. It does not, and it can silently invalidate the guarantee.
 
-Table~\ref{tab:combiner} reports two protocols. Under the naive protocol, where the
-combiner is fitted on the same fold used to calibrate $\tau$, gradient boosting and random
-forests appear to certify far more coverage --- $91.3\%$ and $88.5\%$ --- but their
-\emph{realised} test risk is $13.3\%$ and $12.1\%$ against a $10\%$ target. The mechanism is
-straightforward: a high-capacity model overfits the calibration scores, so the empirical
-error on the calibration fold understates the true error, and the threshold is set too
-permissively. Under a three-way split all combiners are statistically tied and all are
-valid, while a small multilayer perceptron collapses ($\approx28\%$ coverage, high
-variance) from overfitting four features.
+Table~\ref{tab:combiner} reports two protocols, and the audit statistic is the exceedance
+fraction rather than mean risk. Under the naive protocol, where the combiner is fitted on the
+same fold used to calibrate the threshold, gradient boosting and random forests appear to
+certify far more coverage --- $89.2\%$ and $86.1\%$ --- but $93.5\%$ and $72.5\%$ of their splits
+\emph{exceed} the risk target on held-out data. That is a far more damning statement than the
+mean risks of $13.3\%$ and $12.1\%$ the previous version of this paper reported, and it is the
+guarantee actually being broken. The mechanism is straightforward: a high-capacity model overfits
+the calibration scores, so empirical error on the calibration fold understates true error and the
+threshold is set too permissively. (Note that under this protocol the full-item-set exceedance is
+\emph{not} a valid proxy --- two thirds of those items were used to fit the score, so random
+forest looks fine at $6.8\%$ there while failing at $72.5\%$ on held-out data. Where fit and
+calibration overlap, only the held-out column may be read.)
+
+Under a three-way split all combiners are valid --- but they are \emph{not} tied, which is what an
+earlier version of this paper claimed. Logistic regression beats gradient boosting by $11.90$
+points ($p=8\times10^{-18}$) and random forest by $15.41$ points ($p=2\times10^{-20}$), and the
+reason is again the abort rate: $14.5\%$ and $24.8\%$ of splits against logistic regression's
+$0.0\%$. A high-capacity score here is not merely no better; it fails the first hypothesis of the
+fixed sequence on up to a quarter of splits. The MLP is worse still, $14.2\%$ mean coverage with
+a $60.8\%$ abort rate, from overfitting six features.
 
 \begin{table}[t]
 \centering
-\caption{Combiner ablation on POPE ($\alpha=0.10$, $30$ repetitions). Under data reuse,
-high-capacity combiners \emph{break} the guarantee; under a three-way split they are valid
-and tied. Logistic regression is chosen deliberately.}
+\caption{Combiner ablation on POPE-1500 ($\alpha=\delta=0.10$, $400$ paired repetitions, six
+features). The audit column is $\Pr[\text{realised risk}>\alpha]$, not mean risk. Under data
+reuse, high-capacity combiners \emph{break} the guarantee on the majority of splits; under a
+three-way split they are valid but abort. Logistic regression is chosen deliberately, and for a
+different reason than we previously gave.}
 \label{tab:combiner}
-\begin{tabular}{lcccc}
+\footnotesize
+\begin{tabular}{lcccccc}
 \toprule
-& \multicolumn{2}{c}{Naive: fit $=$ calibrate} & \multicolumn{2}{c}{Three-way split}\\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}
-Combiner & cov@$10\%$ & test risk & cov@$10\%$ & test risk\\
+& \multicolumn{2}{c}{Naive: fit $=$ calibrate} & \multicolumn{4}{c}{Three-way split}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-7}
+Combiner & cov@$10\%$ & $\widehat{\Pr}[\Risk>\alpha]$ (test fold) & cov@$10\%$ & abort
+& $\widehat{\Pr}[\Risk>\alpha]$ (all items) & vs.\ logistic\\
 \midrule
-Logistic regression & 74.8\% & 8.8\% \phantom{\textbf{!}} & 72.5\% & 8.4\%\\
-Gradient boosting   & 91.3\% & \textbf{13.3\%} (violated) & 72.5\% & 8.3\%\\
-Random forest       & 88.5\% & \textbf{12.1\%} (violated) & 75.7\% & 8.5\%\\
-MLP $(64,32)$       & $\approx$28\% & --- & $\approx$28\% & ---\\
+Logistic regression & 74.3\% & 18.5\% & \textbf{70.7\%} & \textbf{0.0\%} & 3.2\% & ---\\
+Gradient boosting   & 89.2\% & \textbf{93.5\%} (violated) & 58.8\% & 14.5\% & 0.0\% & $-11.90$\\
+Random forest       & 86.1\% & \textbf{72.5\%} (violated) & 55.3\% & 24.8\% & 0.3\% & $-15.41$\\
+MLP $(64,32)$       & 25.6\% & 14.9\% & 14.2\% & 60.8\% & 1.3\% & $-56.49$\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 We draw two conclusions. Practically, the score must be fitted on a fold disjoint from
-calibration --- a discipline that costs coverage but is necessary for any scorer whose
-capacity is not negligible. Conceptually, capacity is not the bottleneck: the features are
-already informative scalars, and what limits efficiency is the quality of the grounding
-signal, not the flexibility of the combiner.
+calibration --- a discipline that costs $3.6$ points of coverage for logistic regression and
+$30$ points for the tree ensembles, and is necessary for any scorer whose capacity is not
+negligible. Conceptually, capacity is not the bottleneck: the features are already informative
+scalars, and what limits efficiency is the quality of the grounding signal, not the flexibility
+of the combiner --- with the addendum, new in this version, that excess capacity is not free but
+actively harmful under a valid sequential test.
 
 \subsection{The risk bound}
 
 The emitted-set error is a binomial proportion, so an exact interval should dominate
 general-purpose concentration inequalities, and it does: at $\alpha=0.10$ Clopper--Pearson
-certifies $71.6\%$ coverage, the betting bound $61.9\%$, empirical Bernstein $24.8\%$, and Hoeffding $21.6\%$
-(Table~\ref{tab:bounds}). All three are valid; the latter two are simply conservative,
-realising $4.6\%$ and $3.2\%$ risk against a $10\%$ budget. This is consistent with the
-hierarchy established by \citet{crcimposs} and indicates that for binary losses the choice
-of bound is worth more than several points of coverage. Variance-adaptive or betting-style
-bounds \citep{waudbysmith2024} become preferable for graded losses, which is the natural
-setting for claim-level factuality scores.
+certifies $70.7\%$ coverage, the betting bound $62.5\%$, empirical Bernstein $23.2\%$ and
+Hoeffding $18.8\%$ (Table~\ref{tab:bounds}). All four are valid; the loose two are simply
+conservative, realising $3.2\%$ and $4.2\%$ risk against a $10\%$ budget. This is consistent with
+the hierarchy established by \citet{crcimposs} and indicates that for binary losses the choice of
+bound is worth more than fifty points of coverage. The $k_{\min}$ column is the same story from
+the other end and is the one to check before choosing: at $\alpha=\delta=0.10$ Hoeffding cannot
+certify an emitted set smaller than $116$ items, so on a $76$-item calibration fold it cannot
+certify anything at all whatever the score does. Variance-adaptive or betting-style bounds
+\citep{waudbysmith2024} become preferable for graded losses, which is the natural setting for
+claim-level factuality scores.
 
 \begin{table}[t]
 \centering
-\caption{Risk-bound ablation (POPE, $\alpha=0.10$, three-way split). Exact binomial
-dominates for a binary loss; the others are valid but conservative.}
+\caption{Risk-bound ablation (POPE-1500, three-way split, $400$ repetitions). Exact binomial
+dominates for a binary loss; the others are valid but conservative. $k_{\min}$ is the smallest
+emitted set the bound can certify with zero observed errors (Lemma~\ref{lem:kmin}), which is a
+pre-calibration screening quantity: a bound whose $k_{\min}$ exceeds what the grid start can emit
+certifies nothing. The audit column is the fraction of splits whose risk on all items exceeds
+$\alpha$, against $\delta=0.10$.}
 \label{tab:bounds}
 \begin{tabular}{lccccccc}
 \toprule
@@ -1942,10 +2606,10 @@ dominates for a binary loss; the others are valid but conservative.}
 Upper confidence bound & $k_{\min}$ & cov & risk & $\widehat{\Pr}[\Risk>\alpha]$
                                     & cov & risk & $\widehat{\Pr}[\Risk>\alpha]$\\
 \midrule
-Hoeffding                & 116 & 21.6\% & 4.1\% & $0\%$ & 75.1\% & 9.7\%  & $0\%$\\
-Empirical Bernstein      &  71 & 24.8\% & 3.4\% & $0\%$ & 70.2\% & 9.4\%  & $0\%$\\
-Betting (e-CRC)          &  44 & 61.9\% & 6.2\% & $0\%$ & 79.0\% & 10.4\% & $0\%$\\
-Clopper--Pearson (exact) &  22 & \textbf{71.6\%} & 8.2\% & $2\%$ & \textbf{86.1\%} & 12.5\% & $5\%$\\
+Hoeffding                & 116 & 18.8\% & 4.2\% & $0\%$ & 75.8\% & 9.4\%  & $0\%$\\
+Empirical Bernstein      &  71 & 23.2\% & 3.2\% & $0\%$ & 70.3\% & 8.8\%  & $0\%$\\
+Betting (e-CRC)          &  44 & 62.5\% & 5.9\% & $0\%$ & 78.1\% & 9.9\% & $0\%$\\
+Clopper--Pearson (exact) &  22 & \textbf{70.7\%} & 7.8\% & $3\%$ & \textbf{86.1\%} & 12.5\% & $2\%$\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1963,10 +2627,12 @@ certify an output that differs from the model's --- while requiring, as
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{comparison_figure.png}
-\caption{(A) Risk--coverage on POPE for the score variants. (B) Capability comparison with
-recent methods. Mitigation approaches change the base model but provide no guarantee;
-existing conformal approaches guarantee but only remove or abstain. Our layer composes on
-top of mitigation decoders (\S\ref{sec:exp}).}
+\caption{(A) Risk--coverage on POPE-1500 for the three score variants, $400$ paired three-way
+splits, with oracle and conformally calibrated coverage at $\alpha=0.10$ labelled separately in
+the legend. (B) Capability comparison with recent methods. Mitigation approaches change the base
+model but provide no guarantee; existing conformal approaches guarantee but only remove or
+abstain; \citet{bcea} guarantees and acquires evidence but does not change the emitted answer.
+Our layer composes on top of mitigation decoders (\S\ref{sec:vcd}).}
 \label{fig:comparison}
 \end{figure}
 
@@ -1975,56 +2641,70 @@ top of mitigation decoders (\S\ref{sec:exp}).}
 \label{sec:discussion}
 
 \paragraph{What the results support.}
-Permitting a selective predictor to emit a substituted answer is a real degree of freedom:
-it evades the premise of Proposition~\ref{prop:floor} and, when the preconditions hold,
-converts a small amount of high-precision external evidence into several times as much
-certified coverage. The guarantee is unaffected by the substitution
-(Theorem~\ref{thm:validity}), because risk control cares about error indicators rather than
-about provenance.
+Permitting a selective predictor to emit a substituted answer is a real degree of freedom: it
+evades the premise of Proposition~\ref{prop:floor}, the guarantee survives the substitution
+(Theorem~\ref{thm:validity}) because risk control cares about error indicators rather than about
+provenance, and in eight of ten cells it converts a repaired mass of $1$--$2\%$ into $+0.4$ to
+$+7.6$ points of certified coverage with intervals excluding zero. The mechanism is understood
+well enough to be decomposed: most of that is the repaired items being emitted at almost no risk
+cost, and $+0.2$ to $+1.8$ points is genuine dilution.
 
 \paragraph{What they do not.}
-The gains are modest and conditional. The mechanism requires headroom
-(Proposition~\ref{prop:precondition}), a strict gate (Table~\ref{tab:qsens}), and an
-independent channel (\S\ref{sec:independence}); each is a real constraint, and one of
-our five benchmarks fails the first. Most of our margin over a published baseline comes from
-the correctness score rather than from the algorithm (Table~\ref{tab:attrib}), and the
-closest concurrent method is complementary rather than dominated (Table~\ref{tab:bcea}).
-The one-shot theory is a correct but standard application of fixed-sequence testing with
-exact bounds; the interesting theory is sequential, and \S\ref{sec:sequential} shows the
-most natural route to it is closed.
+The gains are modest and conditional. The mechanism requires a strict gate
+(Table~\ref{tab:qsens}), an independent channel (\S\ref{sec:independence}), and a calibration
+fold large enough that the first hypothesis of the fixed sequence can pass
+(\S\ref{sec:kminfail}) --- and the last of these costs us more on the setting where it binds than
+the mechanism gains anywhere. What we do \emph{not} have is the clean headroom precondition an
+earlier version of this paper claimed: Conjecture~\ref{conj:headroom} has no confirming instance
+in our data. Most of our margin over a published baseline is the correctness score rather than
+the algorithm --- $64.5$ points against $2.3$ (Table~\ref{tab:attrib}) --- and the closest
+concurrent method is complementary rather than dominated (Table~\ref{tab:bcea}). The one-shot
+theory is a correct but standard application of fixed-sequence testing with exact bounds, and it
+is stated for a value-indexed family while our measurements come from the rank-indexed variant
+(Remark~\ref{rem:rankvsvalue}). The interesting theory is sequential, and
+\S\ref{sec:sequential} shows that we cannot currently support the most natural route to it.
 
 \paragraph{Limitations.}
-Channel 2 is an object detector, so the evaluated method addresses existence hallucination;
-on attribute-, counting- and reasoning-heavy benchmarks it degenerates to filtering, which
-remains valid but gains nothing. The independence of channel 2 is an assumption, and a
-detector sharing the VLM's blind spots would weaken certification without invalidating it.
-The repair gate $q$ is fixed a priori rather than learned, and a data-driven choice would
-require its own share of the confidence budget. Exchangeability is assumed throughout;
+Channel 2 is an object detector, so the evaluated method addresses existence hallucination ---
+and, within that, only \emph{missed} objects: \S\ref{sec:symgate} shows that even a
+polarity-symmetric gate corrects no false-positive existence hallucination in any setting,
+because on the negative side the reachable items are the ones the model already gets right. On
+attribute-, counting- and reasoning-heavy benchmarks the method degenerates to filtering, which
+remains valid but gains nothing. The independence of channel 2 is an assumption, and our own
+instantiation violates it (channel 1's features include the detector score); a detector sharing
+the VLM's blind spots would weaken certification without invalidating it. The repair gate $q$ is
+fixed a priori rather than learned; \S\ref{sec:qsel} prices what that choice is worth and
+Appendix~\ref{app:qdelta} gives a fully valid alternative. Exchangeability is assumed throughout;
 under deployment shift the stated level need not hold, and adaptive conformal methods
-\citep{gibbs2021} would be required. Finally, our sequential experiment uses one backbone
-and a context-blind repair rule, and its negative conclusion should be read with that
-scope.
+\citep{gibbs2021} would be required. Our sequential experiment uses one backbone, a context-blind
+repair rule, and $n=121$ pairs, which is under-powered as a magnitude claim
+(\S\ref{sec:power}). And every interval in this paper is over splits of a fixed dataset, so none
+of them speaks to replication on new items.
 
 \paragraph{Outlook.}
-The open problem we consider most interesting is the one the negative result exposes.
-Because repairing a claim changes which subsequent claims exist, a sequential procedure
-faces an endogenous item set and must select among rewrite trajectories rather than filter a
-fixed list. Selecting the best trajectory and then reporting its certificate is a
-selective-inference error, so a correct procedure needs a certificate that is simultaneous
-over the search tree. Building that, and pricing the downstream cost we measured, is the
-natural continuation of this work.
+The open problem we consider most interesting is the one the sequential negative result exposes.
+Because repairing a claim changes which subsequent claims exist, a sequential procedure faces an
+endogenous item set and must select among rewrite trajectories rather than filter a fixed list.
+Selecting the best trajectory and then reporting its certificate is a selective-inference error,
+so a correct procedure needs a certificate simultaneous over the search tree. Settling whether
+repair degrades continuations at all would take $n\ge186$ matched pairs; building the
+simultaneous certificate is the larger task. A second, cheaper item: the failure mode of
+\S\ref{sec:kminfail} suggests that fixed-sequence testing is the wrong search strategy at small
+calibration size, and that a method spending a little $\delta$ to avoid staking everything on the
+strictest hypothesis would dominate it exactly where our method currently loses.
 
 \section{Conclusion}
 
 Selective prediction for vision--language models is expensive because of a bound whose
 premise --- that the emitted answer is the model's own --- is an assumption about the action
-space rather than about the data. Relaxing it works, but not freely: certified correction
-requires an independent evidence channel, a strict repair gate, and base risk comfortably
-above the target, and it delivers its gains through a dilution effect that gives small
-repairs disproportionate leverage. Applied myopically in generation, the same idea makes
-things measurably worse. We have tried to report the conditions and the failures as
-carefully as the improvements, in the belief that for methods whose selling point is a
-guarantee, the boundaries of that guarantee are the substance of the contribution.
+space rather than about the data. Relaxing it works, but not freely and not by much: certified
+correction requires an independent evidence channel, a strict repair gate, and a calibration fold
+large enough for the sequential test to get started, and what it delivers is a couple of points
+of certified coverage against the sixty-odd that the correctness score delivers. Applied
+myopically in generation, the same idea makes things measurably worse. We have tried to report the
+conditions and the failures as carefully as the improvements --- including the ones that cost us a
+proposition, a multiplier and a diagnosis --- in the belief that for methods whose selling point
+is a guarantee, the boundaries of that guarantee are the substance of the contribution.
 
 \subsubsection*{Broader Impact Statement}
 Attaching guarantees to model outputs can improve safety, but a guarantee is only as
@@ -2055,23 +2735,110 @@ calibration repairs ($9.8\%$ and $9.7\%$ on the two groups). The last point moti
 treating conditional coverage as a separate requirement from marginal coverage; we report it
 on synthetic data only, as our real-data samples are not category-balanced.
 
+A second synthetic study, added in this version, is the one Remark~\ref{rem:rankvsvalue} relies
+on: it fixes a known $\Pr[Y=1\mid s]$ so that the population risk of any selected threshold can
+be computed by quadrature rather than estimated, and measures the exceedance of the
+\emph{rank}-indexed fixed sequence --- the variant we implement, and the one the theorem does not
+cover --- over four score shapes $\times$ four calibration sizes at $4000$ replications per cell.
+Unconditional exceedance is $0.0$--$5.9\%$ against $\delta=0.10$ in all sixteen cells. The
+simulation also reproduces \S\ref{sec:kminfail} from first principles: abort rates run from $1\%$
+to $100\%$ across the grid and are governed by how fast $\Pr[Y=1\mid s]$ rises in the extreme
+upper tail, not by the score's average separability.
+
 \subsection{Multi-$\alpha$ table}
 Table~\ref{tab:multialpha} gives certified coverage at four risk levels, the numerical
-version of Figure~\ref{fig:covalpha}.
+version of Figure~\ref{fig:covalpha}. The abort block is the part worth reading: at
+$\alpha=0.05$, $k_{\min}=45$ and two thirds of splits certify nothing on the confidence-only
+score.
 
 \begin{table}[h]
 \centering
-\caption{Certified coverage at four risk targets (POPE, LLaVA-1.5, $20$ splits).}
+\caption{Certified coverage and abort rate at four risk targets (POPE-1500, LLaVA-1.5, $400$
+paired splits). $k_{\min}$ is $45$, $22$, $15$, $11$ at the four targets. Gains over
+confidence-only are paired; all exclude zero except CLIP at $\alpha=0.20$ ($-0.06$, $p=0.27$),
+which is why ``the grounded score dominates at every level'' is stated in
+\S\ref{sec:score} for detection grounding only.}
 \label{tab:multialpha}
 \begin{tabular}{lcccc}
 \toprule
 Score & $\alpha=0.05$ & $0.10$ & $0.15$ & $0.20$\\
 \midrule
-Confidence only & 26.4\% & 63.6\% & 85.5\% & 98.0\%\\
-$+$ detection grounding & \textbf{47.1\%} & \textbf{73.1\%} & \textbf{88.5\%} & \textbf{98.2\%}\\
+\multicolumn{5}{l}{\emph{certified coverage}}\\
+Confidence only         & \phantom{0}9.0\% & 41.6\% & 81.4\% & 97.3\%\\
+$+$ CLIP grounding      & 13.9\% & 63.4\% & 82.5\% & 97.2\%\\
+$+$ detection grounding & \textbf{27.3\%} & \textbf{68.6\%} & \textbf{86.4\%} & \textbf{97.7\%}\\
+\midrule
+\multicolumn{5}{l}{\emph{abort rate}}\\
+Confidence only         & 65.8\% & 32.5\% & 0.0\% & 0.0\%\\
+$+$ CLIP grounding      & 49.8\% & \phantom{0}0.5\% & 0.0\% & 0.0\%\\
+$+$ detection grounding & \textbf{24.0\%} & \phantom{0}\textbf{0.8\%} & 0.0\% & 0.0\%\\
+\midrule
+\multicolumn{5}{l}{\emph{paired gain of detection grounding over confidence only}}\\
+& $+18.29$ & $+27.01$ & $+5.03$ & $+0.48$\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{Validity audit, all cells}
+\label{app:audit}
+Table~\ref{tab:audit} is the audit referred to throughout: the fraction of splits whose realised
+risk exceeds $\alpha$, against $\delta=0.10$, for every setting $\times$ risk level $\times$ arm.
+The column that decides the question is \texttt{exc(all)}, the selected policy re-scored on all
+$n$ items, which is a low-noise proxy for its population risk; \texttt{exc(te)} is the same
+statistic on the $n/3$ held-out fold and is inflated by binomial noise at that size. Aborted
+splits emit nothing and are excluded from the denominators.
+
+\begin{table}[h]
+\centering
+\caption{Validity audit over all $40$ cells ($400$ paired splits each). Every cell satisfies
+$\texttt{exc(all)}\le\delta=0.10$. Ranges: \texttt{exc(all)} $0.0$--$5.1\%$, \texttt{exc(te)}
+$3.1$--$22.3\%$.}
+\label{tab:audit}
+\small
+\begin{tabular}{lcccccccc}
+\toprule
+& & \multicolumn{2}{c}{filtering} & \multicolumn{2}{c}{$q=0.10$}
+& \multicolumn{2}{c}{$q=0.25$} & $q=0.50$\\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-9}
+Setting & $\alpha$ & te & all & te & all & te & all & te / all\\
+\midrule
+POPE-1500 LLaVA    & 0.10 & 14.9 & 3.5 & 14.5 & 3.5 & 15.2 & 3.1 & 15.5 / 2.8\\
+POPE-1500 LLaVA    & 0.15 & 15.5 & 3.2 & 14.2 & 2.0 & 15.5 & 2.8 & 15.2 / 2.8\\
+POPE-adv LLaVA     & 0.10 & 10.8 & 2.5 & 10.6 & 3.3 & 15.3 & 4.0 & 16.6 / 3.7\\
+POPE-adv LLaVA     & 0.15 & 14.1 & 0.8 & 12.6 & 1.5 & 12.5 & 1.3 & 12.9 / 1.5\\
+POPE-adv Qwen2-VL  & 0.10 & 16.0 & 1.8 & 15.4 & 1.8 & 17.0 & 3.0 & 17.6 / 3.6\\
+POPE-adv Qwen2-VL  & 0.15 & 10.5 & 0.0 & \phantom{0}9.8 & 0.0 & \phantom{0}9.9 & 0.0 & \phantom{0}9.8 / 0.0\\
+POPE-adv LLaVA+VCD & 0.10 & 13.0 & 1.9 & 12.2 & 2.3 & 16.3 & 3.1 & \textbf{22.3} / \textbf{5.1}\\
+POPE-adv LLaVA+VCD & 0.15 & 12.6 & 2.0 & 12.8 & 2.0 & 14.1 & 1.5 & 12.5 / 2.5\\
+AMBER(d) LLaVA     & 0.10 & \phantom{0}7.8 & 1.5 & \phantom{0}7.2 & 0.9 & \phantom{0}8.0 & 0.9 & \phantom{0}7.2 / 0.7\\
+AMBER(d) LLaVA     & 0.15 & \phantom{0}3.2 & 0.0 & \phantom{0}3.2 & 0.0 & \phantom{0}3.1 & 0.0 & \phantom{0}3.4 / 0.0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{A fully valid alternative to fixing $q$: three gates at $\delta/3$}
+\label{app:qdelta}
+\S\ref{sec:qsel} concedes that fixing $q=0.10$ a priori is a design choice informed by the same
+cells that produce the headline. The objection can be removed outright at a price we can quote.
+Certify all three of $q\in\{0.10,0.25,0.50\}$ at $\delta/3$ and select on the calibration fold;
+the union bound makes this valid without qualification, at the cost of a larger $k_{\min}$
+($22\to33$ at $\alpha=0.10$, $15\to21$ at $\alpha=0.15$).
+
+The $\delta/3$ tax on a \emph{fixed} $q$ is large --- $0.8$ to $11.8$ points of certified coverage
+for the same $q=0.10$ --- but the union-bound version earns it back by being allowed to select:
+averaged over the ten cells, the fully valid select-at-$\delta/3$ procedure costs $+0.50$ points
+relative to the reported $q=0.10$-at-full-$\delta$ configuration, gaining $1.4$ to $7.5$ points
+on five cells and losing $1.4$ to $4.2$ on the other five. Validity holds throughout
+($\texttt{exc(all)}\le0.012$ in every row), with abort rates rising to $12$--$15\%$ on three
+cells, which is the visible face of the larger $k_{\min}$.
+
+We report this as an appendix arm rather than adopting it, for one reason worth stating:
+selecting the $q$ with the largest certified \emph{calibration} coverage systematically prefers
+the loosest gate --- it picks $q=0.50$ on $61$--$87\%$ of splits for the two POPE cells --- and has
+no way to know that a loose gate transfers badly across settings (Table~\ref{tab:qsens}). A fixed
+strict gate is preferable to a validly-selected one here because the selection criterion
+available on the calibration fold is not the criterion that matters, and that is a better
+argument for fixing $q$ than the unsupported ``fixed a priori'' we previously offered.
 
 \subsection{Reproducibility}
 All extracted per-item signals (model probabilities, self-consistency counts, detector
@@ -2079,5 +2846,14 @@ scores, labels) are released as JSON, so every table and figure in this paper ca
 regenerated on CPU without access to a GPU. The GPU scripts that produced those signals are
 released as well, together with the failed variants discussed in \S\ref{sec:decoupling} and
 \S\ref{sec:independence}, which we retain because the failures are part of the argument.
+
+The fixed-sequence procedure lives in one module that every analysis script imports, so a change
+to the protocol cannot silently apply to some tables and not others; the port described in
+\S\ref{sec:exp} was verified by checking the shared implementation against the reference one on
+identical splits across all five settings $\times$ two risk levels $\times$ two arms, with zero
+disagreements in $2{,}400$ comparisons (identical selected thresholds to $10^{-12}$, including
+agreement on which splits abort). Each table in the paper names the script that produces it in the
+released manifest, and the two synthetic studies of \S\ref{app:audit} and above ship as separate
+scripts.
 
 \end{document}

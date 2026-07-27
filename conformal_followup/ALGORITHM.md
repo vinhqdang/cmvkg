@@ -36,7 +36,13 @@ gate's **marginal** items (detector top decile: 96–100% correct). Adding them
 therefore **lowers** the emitted set's average risk, which relaxes the binding
 constraint and lets the acceptance gate open further along the nested sequence.
 
-The consequence is **leverage**: the coverage gain is 3–6x the repaired mass.
+The consequence is a gain larger than the repaired mass. NOTE (retraction): the "3–6x"
+and later "1.9–3.4x" leverage multipliers previously stated here are withdrawn. Repaired
+items are themselves emitted, so any ratio above 1x is automatic whenever lambda-hat does
+not fall, and lambda-hat is identical between filtering and CCRC on 72–88% of splits.
+The gain decomposes into (i) the repaired mass, emitted automatically, and (ii) a dilution
+term worth +0.20 to +1.84 pp at alpha=0.10. See CANONICAL_NUMBERS.md section 13 and the
+manuscript's Table 6.
 
 | setting (α=0.10) | repaired mass | coverage gain |
 |---|---|---|
@@ -283,9 +289,10 @@ Vision-Language Models"** (arXiv 2606.16667) is close prior art and must be cite
 2. **The independent-channel requirement, with a proof of necessity.** BCEA lets the same
    score flag *and* rescue (validity restored by recalibration) — admissible because it
    never changes the answer. For *correction* that is impossible: we showed
-   self-certification is circular and empirically dead (bottom 2% of s still 13.3%
-   correct > α). Correction therefore **requires** a second, independent channel.
-3. **The risk-dilution mechanism** and its 3–6x leverage.
+   self-certification is bounded by the accepted region's slack and empirically dead
+   (bottom 2% of s still 22.1% correct > α on POPE-1500). Correction therefore **requires** a second, independent channel.
+3. **The risk-dilution mechanism**, decomposed: repaired mass is emitted automatically,
+   and the dilution term proper is +0.20 to +1.84 pp (no leverage multiplier is claimed).
 4. **The μ−α precondition** linking the gain to Prop. 3's closed-form abstention floor.
 
 **What CCRC can no longer claim:** being first to escape heavy abstention in VLM

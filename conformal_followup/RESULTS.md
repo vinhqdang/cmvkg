@@ -122,18 +122,30 @@ Prop. 3 of arXiv 2606.29054 proves any **emit-or-abstain** predictor must abstai
 
 ## B4. Mechanism: risk dilution → acceptance headroom
 Strict-gate repairs are *more* accurate than the acceptance gate's marginal items, so
-they lower emitted risk and let λ open further. **Coverage gain is 3–6× the repaired
-mass** (1.4% repaired → +4.7 pp coverage).
+they lower emitted risk and let λ open further. RETRACTED: the "3–6× the repaired mass"
+claim (and its later "1.9–3.4×" restatement) is withdrawn — repaired items are themselves
+emitted, so any multiplier above 1× is automatic, and λ̂ is unchanged on 72–88% of splits.
+Canonical decomposition (400 paired splits, α=0.10): term (i) repaired mass emitted
+automatically, term (ii) dilution +0.20 to +1.84 pp. See CANONICAL_NUMBERS.md §13.
 
-## B5. Precondition (from the AMBER negative result)
-Gain tracks the abstention floor μ−α. Isolated by controlled tests: *not* a bad channel
-(detector 95.6% on AMBER, 100% in the repair region) and *not* small n (POPE subsampled
-to 228 still gains +3.2).
+## B5. The AMBER negative result — DIAGNOSIS CORRECTED
+The earlier diagnosis on this line ("gain tracks the abstention floor μ−α; *not* small n,
+since POPE subsampled to 228 still gains +3.2") is **withdrawn on both counts**. The +3.2
+figure measured the *grounding-score* gain, not the CCRC-vs-filtering gain, and the correct
+comparison (CCRC vs filtering on POPE at n=228) **loses −3.65 pp** with abort rates 43.5% /
+53.8%. Canonically (400 paired splits, `amber_diagnosis.py`):
 
-| μ−α (α=0.10) | gain |
-|---|---|
-| ≥ 3 pp | +1.9 … +4.7 |
-| ~1.4 pp (AMBER) | −7.5 |
+| quantity | α=0.10 | α=0.15 |
+|---|---|---|
+| unconditional gain (what the table reports) | −10.20 | −11.90 |
+| gain conditional on both arms certifying | **+2.17** | **+0.47** |
+| abort rate, filtering / CCRC | 0.00% / **13.00%** | 0.00% / **12.75%** |
+| r_a / r_r (dilution direction) | 4.53% / 3.60% (favourable) | 7.45% / 0.00% (favourable) |
+
+The loss is entirely FST abort under a 76-item calibration fold — the same prefix mechanism
+that defeats self-repair — not absent headroom and not a weak repair channel (detector 95.6%
+on AMBER, 100% in the repair region). The μ−α headroom precondition now has **no validated
+instance** and is a conjecture. See CANONICAL_NUMBERS.md §14.
 
 **Use CCRC only when μ is comfortably above α** — checkable a priori.
 
@@ -226,7 +238,9 @@ setup.
 # Part C — TMLR manuscript
 
 Location: `manuscript_tmlr/` (official TMLR style files from `JmlrOrg/tmlr-style-file`).
-Build: `pdflatex -> bibtex -> pdflatex x2`. Authors: Quang-Vinh Dang, Phuong-Lan Nguyen.
+Build: `pdflatex -> bibtex -> pdflatex x2`. The author list is deliberately absent from
+this repository while the submission is under double-blind review; see the ANONYMITY NOTE
+at the top of `manuscript_tmlr/main.tex` for how to restore it at camera-ready.
 
 | block | what | state |
 |---|---|---|

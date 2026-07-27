@@ -1,4 +1,16 @@
+# LaTeX build artefacts -- regenerate with:
+#   pdflatex main && bibtex main && pdflatex main && pdflatex main
 main.aux
-main.blg
 main.log
+main.blg
 main.out
+main.toc
+main.lof
+main.lot
+main.fls
+main.fdb_latexmk
+main.synctex.gz
+*.aux
+*.log
+*.blg
+*.out
