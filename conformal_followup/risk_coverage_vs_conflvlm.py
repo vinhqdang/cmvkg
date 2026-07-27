@@ -92,7 +92,7 @@ for name in ARMS:
     M = np.array(S["curve"]); m = M.mean(0); sd = M.std(0, ddof=1)
     ax.fill_between(GRID, m - sd, m + sd, color=COL[name], alpha=.15, lw=0)
     ax.plot(GRID, m, color=COL[name], lw=2.4,
-            label=(f"{name}\n   AURC={np.mean(S['aurc']):.4f}"
+            label=(f"{name}"
                    f"\n   calibrated cov@10% = {np.mean(S['cov'])*100:.1f}%"
                    f"\n   oracle cov@10% = {np.mean(S['oracle'])*100:.1f}%  (not calibrated)"))
 ax.axhline(ALPHA, ls="--", lw=1.2, color="#c8384f")
