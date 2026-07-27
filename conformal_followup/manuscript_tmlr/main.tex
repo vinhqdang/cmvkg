@@ -687,33 +687,24 @@ covariate shift, for which weighted conformal prediction is the standard remedy
 deployed decision rule itself \citep{fannjiang2022fcs}. Validity can be restored in some
 such settings by careful reweighting \citep{anydist}, and adaptive conformal inference
 tracks drift online with no distributional assumptions \citep{gibbs2021}. Model cascades
-and routing systems face a structurally similar problem --- the decision of which model
-answers changes the input distribution seen downstream \citep{chen2023frugalgpt,gupta2024}.
-
-Our sequential experiment (\S\ref{sec:sequential}) shows that in generative correction this
-shift is not benign, and that the obstacle is stronger than the loss of exchangeability.
-Even granting a mechanism to restore validity under the induced shift, the intervention
-degrades the object being certified: repairing a hallucinated claim measurably increases
-hallucination in the continuation. Exchangeability can be repaired by reweighting; a
-monotonicity violation cannot.
+and routing systems face a structurally similar problem \citep{chen2023frugalgpt,gupta2024}.
+Our sequential experiment (\S\ref{sec:sequential}) shows that in generative correction the
+obstacle is stronger than the loss of exchangeability: even granting a mechanism to restore
+validity under the induced shift, the intervention degrades the object being certified.
+Exchangeability can be repaired by reweighting; a monotonicity violation cannot.
 
 \subsection{What is new here}
 \label{sec:rel:summary}
 
 Positioned against the above, our claim is narrow and, we hope, correspondingly credible.
-The hallucination-mitigation literature repairs without certifying. The conformal
-literature certifies without repairing. \citet{crcimposs} show that certifying without
-repairing has a hard price, and \citet{bcea} show how to reduce --- but not escape --- that
-price from inside the premise. What is new in this paper is (i) a selective predictor whose
-action space includes substitution and whose guarantee covers the resulting mixture,
-(ii) a budget constraint showing what self-certified substitution would cost, together
-with measurements showing that on the settings where correction pays there is no region
-cheap enough to satisfy it, so that a second independent channel is a practical
-requirement rather than a design preference, (iii) an
-account of the mechanism by which substitution buys coverage, with a checkable
-precondition for when it will not, and (iv) a falsification of the monotonicity property
-that a sequence-level version of the idea would need. Points (ii) and (iv) are negative,
-and we regard them as the more durable half of the contribution.
+\citet{crcimposs} show that certifying without repairing has a hard price and \citet{bcea}
+show how to reduce --- but not escape --- that price from inside the premise. What is new here
+is a selective predictor whose action space includes substitution and whose guarantee covers
+the resulting mixture, together with the four measurements that bound it: the budget on
+self-certified substitution, the decomposition of where the gain actually comes from, the
+small-calibration failure mode of the sequential test, and the two measured impossibilities
+(symmetric-gate repair of false positives, and sequence-level monotonicity). The negative
+half is the more durable one.
 
 %===============================================================================
 \section{Problem setup}
@@ -743,10 +734,15 @@ $Y$ & correctness \emph{indicator} of the model's answer, $\mathbf{1}\{\hat a=a^
 $Y^{(2)}$ & correctness indicator of channel 2's answer\\
 $s(X)$ & channel-1 correctness (conformity) score; large means likely correct\\
 $m(X)$ & channel-2 evidence margin\\
-$\lambda$ & acceptance permissiveness; larger $\lambda$ accepts more\\
-$q$ & \emph{fixed} repair-gate quantile, never calibrated\\
+$t\in\mathcal{T}$ & acceptance threshold \emph{value}, from a grid $t_1>\dots>t_M$ fixed
+before calibration\\
+$g$ & \emph{fixed} repair-gate threshold value on $m$, never calibrated\\
+$\lambda$, $q$ & permissiveness and repair quantile of the rank-indexed variant we
+implement,\\
+& with $t=Q_s(1-\lambda)$ and $g=Q_m(1-q)$ (Remark~\ref{rem:rankvsvalue})\\
 $Q_s(\cdot),Q_m(\cdot)$ & empirical quantiles of $s$, $m$ on the calibration fold\\
-$K_\lambda$, $V_\lambda$ & emitted count; error count among emitted\\
+$K_t$, $V_t$ & emitted count; error count among emitted (written $K_\lambda,V_\lambda$
+in the rank-indexed variant)\\
 $\Risk,\Cov$ & risk of, and coverage of, the emitted set\\
 $k_{\min}$ & smallest emitted count that can be certified (Lemma~\ref{lem:kmin})\\
 $\Iota$ & sequential interference term (Theorem~\ref{thm:coupling})\\
@@ -773,8 +769,10 @@ Calibration and test items are exchangeable draws from the same distribution.
 
 \begin{assumption}[Pre-specified policy family]
 \label{ass:family}
-The candidate policies form a family $\{\pi_\lambda\}_{\lambda\in\Lambda}$ whose index set
-and ordering are fixed before seeing calibration data.
+The candidate policies form a family $\{\pi_t\}_{t\in\mathcal{T}}$ whose index set and
+ordering are fixed before seeing calibration data. In our formulation $\mathcal{T}$ is a grid
+of \emph{score values}, not of ranks or quantiles; Remark~\ref{rem:rankvsvalue} discusses the
+difference, which is the difference between a two-line proof and an open problem.
 \end{assumption}
 
 \subsection{Filtering, and the floor it cannot cross}
@@ -819,6 +817,46 @@ advance}, since $\mu$ and $\alpha$ are known before any calibration; and it is
 \emph{conditional on a premise} --- that the emitted answer is the model's own --- which is
 an assumption about the action space, not about the data.
 
+\subsection{How much of the abstention is the floor? (Not much.)}
+\label{sec:floorbite}
+
+Before building on the floor it is worth measuring how much of the bill it actually explains,
+because a reader who sees ``at least $9.0\%$ must be refused'' next to ``$68.6\%$ certified
+coverage'' can easily attribute the whole $31.4$-point gap to it. Table~\ref{tab:floorbite}
+does the arithmetic. The floor accounts for $14$--$29\%$ of realised abstention on our five
+settings at $\alpha=0.10$; on POPE-adversarial with LLaVA it is $8.1$ points out of $56.0$.
+
+\begin{table}[t]
+\centering
+\caption{The abstention floor against the abstention actually incurred by our filtering
+pipeline at $\alpha=0.10$ (Table~\ref{tab:ccrc}). The floor is real and irreducible, and it is
+a minority of the bill.}
+\label{tab:floorbite}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Setting & $\mu$ & floor $\frac{\mu-\alpha}{1-\alpha}$ & certified cov.\ & abstention
+& floor share\\
+\midrule
+POPE-1500 LLaVA    & 18.1\% & 9.0\%  & 68.6\% & 31.4\% & 29\%\\
+POPE-adv LLaVA     & 17.3\% & 8.1\%  & 44.0\% & 56.0\% & 14\%\\
+POPE-adv Qwen2-VL  & 12.9\% & 3.2\%  & 77.9\% & 22.1\% & 15\%\\
+POPE-adv LLaVA+VCD & 19.6\% & 10.7\% & 48.8\% & 51.2\% & 21\%\\
+AMBER(d) LLaVA     & 11.4\% & 1.6\%  & 91.8\% & 8.2\%  & 20\%\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The remaining three-quarters is score quality and finite-sample power. Two consequences follow,
+and we would rather state them here than have them extracted from us. First, the floor is the
+right reason to look at the \emph{action space} and the wrong reason to expect large gains from
+doing so: it is the part of the bill that no score and no sample size can retire, which is why
+substitution is worth introducing, but retiring it recovers a fraction of what is being paid.
+Second, the honest ordering of magnitudes in this paper is score $\gg$ power $>$ action space:
+$66.0$ points from the correctness score against $2.1$ from certified correction
+(\S\ref{sec:attribution}), and a failure mode driven purely by calibration-fold size
+(\S\ref{sec:kminfail}) that costs more than our mechanism gains. We report the $2.1$.
+
 \subsection{Two channels}
 
 \begin{definition}[Channels]
@@ -842,15 +880,26 @@ This is a property of our channel~2, not of CCRC, but it bounds every positive r
 and we state it before the experiments rather than after. We instantiate $b$ by thresholding
 an open-vocabulary detector's confidence $o(X)$ at $\theta=0.15$ and set
 $m(X)=|o(X)-\theta|$. A maximally confident detector \emph{negative} therefore attains only
-$m\le\theta=0.15$, whereas positives reach $0.85$. The calibrated repair gate
-$Q_m(1-q)$ at $q=0.10$ sits at $0.36$, $0.37$, $0.37$ and $0.21$ on our four settings ---
-above $\theta$ in every case. Consequently \textbf{$100\%$ of admitted repairs are
-``detector says the object is present''} ($45/45$, $60/60$, $60/60$, $23/23$), and CCRC as
-evaluated can repair only \emph{missed} objects. It never repairs the canonical
-false-positive existence hallucination that POPE-adversarial is built to elicit; those items
-are abstained, not corrected. This also explains why the repaired mass is only
-$0.9$--$1.8\%$. A symmetric margin with polarity-specific gates is the obvious remedy and we
-have not evaluated it.
+$m\le\theta=0.15$, whereas positives reach $0.85$. The gate $g=Q_m(1-q)$ at $q=0.10$ sits at
+$0.383$, $0.357$, $0.366$, $0.366$ and $0.209$ on our five settings --- above $\theta$ in every
+case. Consequently \textbf{$100.0\%$ of the repaired mass is ``detector says the object is
+present''} in all ten (setting, $\alpha$) cells, measured over $500$ paired splits
+(\S\ref{sec:symgate}, Table~\ref{tab:sym}), and CCRC as evaluated can repair only \emph{missed}
+objects. It never repairs the canonical false-positive existence hallucination that
+POPE-adversarial is built to elicit; those items are abstained, not corrected.
+
+It also explains why the repaired mass is small. Stating the denominator, since it is easy to
+mistake: repaired mass is the number of repaired items as a fraction of \emph{the test fold},
+which is $n/3$ items under the three-way split, and it is $0.97$--$1.97\%$ at $\alpha=0.10$ and
+$0.35$--$1.36\%$ at $\alpha=0.15$ --- so on POPE-1500 (test fold $500$) a typical split repairs
+about nine items. All ``repaired mass'' percentages in this paper use that denominator, and all
+gains are percentage points of the same test fold, which is what makes the two directly
+comparable in \S\ref{sec:mechanism}.
+
+A symmetric margin with polarity-specific gates is the obvious remedy. We have now evaluated
+it: it is valid, it admits negative-polarity repairs at $99.9$--$100\%$ precision, and it
+repairs no false positives at all (\S\ref{sec:symgate}). The restriction above is therefore not
+an artefact of our margin's parameterisation.
 \end{remark}
 
 In our instantiation channel 1 combines the VLM's yes/no probability, its confidence
@@ -866,27 +915,34 @@ and wrong independently. \S\ref{sec:independence} shows this is what makes repai
 
 \subsection{The procedure}
 
-Fix a strict evidence quantile $q$ (we use $q=0.10$: repairs are drawn only from the top
-decile of channel-2 evidence). For permissiveness $\lambda\in[0,1]$, policy $\pi_\lambda$
-acts as
+Fix a strict evidence gate $g$ and a descending grid of acceptance thresholds
+$t_1>t_2>\dots>t_M$, both before seeing calibration data. For $t\in\mathcal{T}=\{t_j\}$, policy
+$\pi_t$ acts as
 \begin{equation}
-\pi_\lambda(x)=
+\pi_t(x)=
 \begin{cases}
-\textsc{accept}\ \hat a(x), & s(x)\ge Q_s(1-\lambda),\\[2pt]
-\textsc{repair with}\ b(x), & s(x)<Q_s(1-\lambda)\ \text{and}\ m(x)\ge Q_m(1-q),\\[2pt]
-\textsc{abstain}, & \text{otherwise,}
+\textsc{accept}\ \hat a(x), & s(x)\ge t,\\[2pt]
+\textsc{repair with}\ b(x), & s(x)<t\ \text{and}\ m(x)\ge g,\\[2pt]
+\textsc{abstain}, & \text{otherwise.}
 \end{cases}
 \label{eq:policy}
 \end{equation}
-where $Q_s,Q_m$ are empirical quantiles computed on the calibration fold.
 Figure~\ref{fig:method} shows the induced partition of the $(s,m)$ plane. The emitted set
-is $\emit_\lambda=A_\lambda\cup R_\lambda$ with $A_\lambda$ the accepted and $R_\lambda$
-the repaired items, and the emitted-set error counts what is \emph{actually emitted},
+is $\emit_t=A_t\cup R_t$ with $A_t$ the accepted and $R_t$ the repaired items, and the
+emitted-set error counts what is \emph{actually emitted},
 \begin{equation}
-V_\lambda=\sum_{i\in A_\lambda}(1-Y_i)+\sum_{i\in R_\lambda}\bigl(1-Y^{(2)}_i\bigr),
-\qquad K_\lambda=|A_\lambda|+|R_\lambda|.
+V_t=\sum_{i\in A_t}(1-Y_i)+\sum_{i\in R_t}\bigl(1-Y^{(2)}_i\bigr),
+\qquad K_t=|A_t|+|R_t|.
 \label{eq:err}
 \end{equation}
+Both thresholds are values on the score axes rather than ranks in the calibration sample. That
+choice is what makes $K_t$ a random variable and the emitted error indicators conditionally
+i.i.d., which in turn makes Theorem~\ref{thm:validity} two lines long; it is worth the
+paragraph we spend on it in Remark~\ref{rem:rankvsvalue}. Our implementation sets the two
+values from calibration-fold quantiles, $g=Q_m(1-q)$ with the fixed $q=0.10$ (repairs come
+only from the top decile of channel-2 evidence) and $t_j=Q_s(1-\lambda_j)$ on a grid of
+permissiveness $\lambda_1<\dots<\lambda_M$; that variant is the one we measure everywhere, and
+Remark~\ref{rem:rankvsvalue} reports what we know about its validity.
 
 \begin{figure}[t]
 \centering
@@ -948,64 +1004,84 @@ are the calibrated $Q_s(1-\lambda)$ and the fixed gate $Q_m(1-q)$ from one split
 
 \begin{theorem}[CCRC validity]
 \label{thm:validity}
-Let Assumptions~\ref{ass:exch}--\ref{ass:family} hold, let $\{\lambda_1<\dots<\lambda_M\}$
-be a pre-specified grid, and let
+Let Assumptions~\ref{ass:exch}--\ref{ass:family} hold, let $\mathcal{T}=\{t_1>\dots>t_M\}$
+and the repair gate $g$ be fixed before calibration, and let
 \[
 U(e,k;\delta)=\sup\{p:\Pr[\mathrm{Bin}(k,p)\le e]>\delta\}
 \]
 be the one-sided Clopper--Pearson upper confidence bound. Define
-$\hat\lambda$ by fixed-sequence testing: proceed through $j=1,2,\dots$ while
-$U(V_{\lambda_j},K_{\lambda_j};\delta)\le\alpha$ on the calibration fold, and set
-$\hat\lambda$ to the last index that passed. Then the deployed policy
-$\pi_{\hat\lambda}$ satisfies
+$\hat t$ by fixed-sequence testing: proceed through $j=1,2,\dots$ while
+$U(V_{t_j},K_{t_j};\delta)\le\alpha$ on the calibration fold, and set
+$\hat t$ to the last index that passed. Then the deployed policy
+$\pi_{\hat t}$ satisfies
 \[
-\Pr\bigl[\Risk(\emit_{\hat\lambda})\le\alpha\bigr]\ \ge\ 1-\delta .
+\Pr\bigl[\Risk(\emit_{\hat t})\le\alpha\bigr]\ \ge\ 1-\delta .
 \]
 \end{theorem}
 
 \begin{proof}
-Fix $j$ and consider the null $H_j:\Risk(\emit_{\lambda_j})>\alpha$. Conditional on
-$K_{\lambda_j}=k$, the emitted-set errors in \eqref{eq:err} are, under
-Assumption~\ref{ass:exch}, exchangeable Bernoulli indicators; note that this holds for the
-mixture because each emitted item contributes exactly one indicator, namely $1-Y_i$ if
-accepted and $1-Y^{(2)}_i$ if repaired, and membership in $A_{\lambda_j}$ or $R_{\lambda_j}$
-is determined by $(s,m)$ and the pre-specified $\lambda_j,q$ rather than by the labels.
+Fix $j$ and consider the null $H_j:\Risk(\emit_{t_j})>\alpha$. Because $t_j$ and $g$ are
+constants, membership in the emitted set,
+$\{s_i\ge t_j\}\cup\{s_i<t_j,\ m_i\ge g\}$, is a function of item $i$ alone, and each emitted
+item contributes exactly one error indicator: $1-Y_i$ if accepted, $1-Y^{(2)}_i$ if repaired.
+Under Assumption~\ref{ass:exch} the items are exchangeable draws, so conditional on
+$K_{t_j}=k$ the $k$ emitted indicators are i.i.d.\ Bernoulli with common mean
+$\Risk(\emit_{t_j})$ --- selection is by a set fixed in advance, which does not tilt the
+conditional error probability, and $k$ is random but ancillary. Hence
+$V_{t_j}\mid K_{t_j}=k\sim\mathrm{Bin}\bigl(k,\Risk(\emit_{t_j})\bigr)$ and, by construction of
+the Clopper--Pearson bound, $\Pr[U(V_{t_j},k;\delta)\le\alpha\mid H_j]\le\delta$: the event
+that the bound certifies a policy whose true risk exceeds $\alpha$ has probability at most
+$\delta$, so $\phi_j=\mathbf{1}\{U\le\alpha\}$ is a valid level-$\delta$ test of $H_j$.
 
-Exchangeability alone does not give $V_{\lambda_j}\sim\mathrm{Bin}(k,\Risk)$, and the gap is
-not academic in our implementation: $Q_s(1-\lambda)$ and $Q_m(1-q)$ are empirical quantiles
-of the same fold whose errors are counted, so conditional on the calibration features the
-emitted indicators have item-specific means and $V_{\lambda_j}$ is \emph{Poisson binomial}
-with mean $k\bar p$, $\bar p=\Risk(\emit_{\lambda_j})$, rather than binomial.
-Clopper--Pearson survives the substitution. The lower tail of a Poisson binomial with mean
-$k\bar p$ is dominated by that of $\mathrm{Bin}(k,\bar p)$ \citep{hoeffding1956}, i.e.\
-$\Pr[V_{\lambda_j}\le v]\le\Pr[\mathrm{Bin}(k,\bar p)\le v]$ for $v\le k\bar p$; and since
-$U(v,k;\delta)$ is decreasing in $v$, the certification event
-$\{U(V_{\lambda_j},k;\delta)\le\alpha\}$ is a lower-tail event on $V_{\lambda_j}$, so under
-$H_j$ its probability is at most its probability under the equal-mean binomial. Hence, by
-construction of the Clopper--Pearson bound, $\Pr[U(V_{\lambda_j},k;\delta)\le\alpha\mid H_j]\le\delta$: the event that the bound
-certifies a policy whose true risk exceeds $\alpha$ has probability at most $\delta$, so
-$p_j=\mathbf{1}\{U\le\alpha\}$ is a valid level-$\delta$ test of $H_j$.
-
-The index set and its ordering are pre-specified by Assumption~\ref{ass:family}, which is
-all that fixed-sequence testing requires for validity. Nesting is not needed for validity,
-but it is what makes the procedure powerful: because $q$ is fixed, $A_\lambda$ increases and
-$R_\lambda$ decreases in $\lambda$, so $\emit_\lambda=A_\lambda\cup M$ with
-$M=\{m\ge Q_m(1-q)\}$ fixed, and \emph{coverage} is monotone increasing in $\lambda$ even
-though the risk is not --- which is what makes ``the last index that passed'' the right thing
-to return. Fixed-sequence testing applies: testing
-$H_1,H_2,\dots$ in the pre-specified order and stopping at the first non-rejection controls
-the family-wise error rate at $\delta$ without any multiplicity correction
-\citep{angelopoulos2021ltt}. The returned $\hat\lambda$ is among the rejected hypotheses,
-so with probability at least $1-\delta$ every rejected $H_j$ is false, i.e.
-$\Risk(\emit_{\hat\lambda})\le\alpha$.
+The index set and its ordering are pre-specified by Assumption~\ref{ass:family}, which is all
+that fixed-sequence testing requires: testing $H_1,H_2,\dots$ in that order and stopping at
+the first non-rejection controls the family-wise error rate at $\delta$ without any
+multiplicity correction \citep{angelopoulos2021ltt}. The returned $\hat t$ is among the
+rejected hypotheses, so with probability at least $1-\delta$ every rejected $H_j$ is false,
+i.e.\ $\Risk(\emit_{\hat t})\le\alpha$.
 \end{proof}
 
-\begin{remark}[why the mixture is not a complication]
-The proof needs only that each emitted item contributes one $\{0,1\}$ error indicator whose
-distribution does not depend on the labels of other items. Whether that indicator refers to
-the model's answer or to channel~2's is irrelevant. This is precisely why
-Proposition~\ref{prop:floor} does not bind: its premise restricts the \emph{action space},
-which the guarantee itself does not require.
+Two structural remarks follow; the second is the one a careful reader should hold us to.
+
+\begin{remark}[why the mixture is not a complication, and why nesting is not a hypothesis]
+The proof needs only that each emitted item contributes one $\{0,1\}$ error indicator and that
+the set it is drawn from is fixed in advance. Whether that indicator refers to the model's
+answer or to channel~2's is irrelevant, which is precisely why Proposition~\ref{prop:floor}
+does not bind: its premise restricts the \emph{action space}, which the guarantee itself never
+uses. Nesting is likewise not a validity hypothesis, but it is what makes the procedure
+powerful: because $g$ is fixed, $A_t$ grows and $R_t$ shrinks as $t$ falls, so
+$\emit_t=A_t\cup M$ with $M=\{m\ge g\}$ constant, and \emph{coverage} increases along the grid
+even though the risk need not --- which is what makes ``the last index that passed'' the right
+thing to return.
+\end{remark}
+
+\begin{remark}[value-indexed versus rank-indexed families]
+\label{rem:rankvsvalue}
+An earlier version of this theorem indexed the family by quantiles, $t=Q_s(1-\lambda)$ with
+$Q_s$ the empirical quantile of the \emph{same} calibration fold whose errors are counted, and
+asserted that the emitted-error count was binomial with mean $k\,\Risk$. That step is where the
+difficulty actually lives, and it does not hold as stated: selecting the top
+$\lceil\lambda n_{\mathrm{cal}}\rceil$ items by score makes $k$ deterministic and makes the
+selection event a function of all items jointly, so conditionally on the calibration features
+the emitted indicators have item-specific means and $V$ is \emph{Poisson binomial} rather than
+binomial. Poisson-binomial lower tails are dominated by the equal-mean binomial
+\citep{hoeffding1956}, which points in the conservative direction, but that domination is not
+by itself a treatment of the order-statistic selection effect. Indexing by score \emph{values}
+removes the problem instead of bounding it, at the price of one extra pre-specification, and
+it costs nothing in practice: a value grid may be laid down on a held-out score histogram, as
+Algorithm~\ref{alg:ccrc} does.
+
+We nonetheless report measurements from the rank-indexed implementation throughout, because it
+is what our scripts run and what a practitioner without a pre-specified value grid would write.
+Two pieces of evidence bound the exposure. First, a synthetic study in which the true risk is
+known: over four score shapes (well-separated logistic, weakly separated, heavy-tailed, and a
+deliberately miscalibrated monotone transform) $\times$ four calibration sizes
+($100$, $250$, $500$, $1500$), the realised exceedance $\Pr[\Risk>\alpha]$ of the rank-indexed
+procedure is $2.0$--$6.1\%$ against $\delta=0.10$ --- conservative in every cell, and nowhere
+near the nominal level. Second, on real data the population-risk exceedance is $0.0$--$5.1\%$
+across all $40$ cells of \S\ref{sec:exp} (Table~\ref{tab:audit}). We therefore claim the
+theorem for the value-indexed family, and for the rank-indexed variant we claim empirical
+validity with a stated margin, not a proof.
 \end{remark}
 
 \begin{lemma}[Minimum certifiable emitted-set size]
