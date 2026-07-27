@@ -71,21 +71,33 @@ for proto in ["I: reuse (fit == calibrate)", "II: three-way split (disjoint)"]:
             ma = s >= thr
             A["ral"].append(float((1 - c[ma]).mean()) if ma.sum() else None)
     OUT[proto] = R
+    naive = proto.startswith("I:")
     print(f"\n=== Protocol {proto}   (alpha={ALPHA:.0%}, delta={DELTA:.0%}, "
           f"{REPS} paired reps) ===")
+    if naive:
+        print("  NOTE: under fit==calibrate, exc(all) is NOT a valid population proxy --")
+        print("  two thirds of the items were used to fit the score, so an overfit combiner")
+        print("  looks accurate on exactly those items. The verdict below is therefore set")
+        print("  on exc(te), the held-out fold, which is the only honest column here.")
     print(f"{'combiner':12s}{'cov@10%':>16s}{'abort':>8s}"
           f"{'exc(te)':>9s}{'exc(all)':>10s}{'verdict':>12s}")
     for k in MK:
         A = R[k]; cv = np.array(A["cov"]) * 100
-        xa = F.exceedance(A["ral"], ALPHA)
+        xt = F.exceedance(A["rte"], ALPHA); xa = F.exceedance(A["ral"], ALPHA)
+        audit = xt if naive else xa                 # see NOTE above
         print(f"{k:12s}{cv.mean():9.1f}+-{cv.std(ddof=1):4.1f}%"
               f"{F.abort_rate(A['lam'])*100:7.1f}%"
-              f"{F.exceedance(A['rte'],ALPHA)*100:8.1f}%{xa*100:9.1f}%"
-              f"{('VIOLATED' if xa > DELTA + 1e-12 else 'OK'):>12s}")
+              f"{xt*100:8.1f}%{xa*100:9.1f}%"
+              f"{('VIOLATED' if audit > DELTA + 1e-12 else 'OK'):>12s}")
 
-print(f"\nValidity verdict is set on exc(all) > delta={DELTA:.2f}: the fraction of splits")
-print("whose realised population risk exceeds alpha. Mean realised risk is NOT the")
-print("guarantee, and under protocol I the mean can look acceptable while the tail fails.")
+print(f"\nValidity verdict: Pr[realised risk > alpha] > delta={DELTA:.2f}. Mean realised risk")
+print("is NOT the guarantee and is not reported; under protocol I the mean can look")
+print("acceptable while the tail fails badly.")
+print("  Protocol II verdict uses exc(all) (the low-noise population proxy; fit and")
+print("  calibration folds are disjoint from nothing being audited, so the bias is mild).")
+print("  Protocol I verdict uses exc(te), because exc(all) is contaminated there by")
+print("  construction -- see the NOTE above. This is why a naive high-capacity combiner")
+print("  can show a small exc(all) and a catastrophic exc(te) in the same row.")
 print("exc(te)=held-out test fold (n_te=%d, unbiased/noisy); exc(all)=all %d items."
       % (n - 2 * (n // 3), n))
 print("abort = fraction of splits certifying nothing (coverage 0%, included in the mean).")
