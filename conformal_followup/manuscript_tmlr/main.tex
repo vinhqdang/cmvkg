@@ -18,6 +18,7 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{lemma}{Lemma}
 \newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 \newtheorem{assumption}{Assumption}
@@ -34,15 +35,19 @@
 \title{Certified Correction of Vision--Language Hallucinations:\\
 Gains, Preconditions, and a Sequential Failure Mode}
 
-% Camera-ready author block. Ignored while the anonymous \usepackage{tmlr} is active;
-% restore [accepted] above to reveal it.
-\author{%
-  \name Quang-Vinh Dang \email vinh.dq4@buv.edu.vn \\
-  \addr British University Vietnam, Hung Yen, Viet Nam
-  \AND
-  \name Phuong-Lan Nguyen \email 30066017@st.buv.edu.vn \\
-  \addr British University Vietnam, Hung Yen, Viet Nam
-}
+% ANONYMITY NOTE. This file is released with the anonymous submission and therefore
+% contains no author information anywhere, including in comments. The \author block
+% below is a placeholder that the tmlr class renders as "Anonymous authors" while the
+% anonymous \usepackage{tmlr} is active.
+%
+% TO RESTORE FOR CAMERA-READY:
+%   1. switch line 2 to \usepackage[accepted]{tmlr};
+%   2. replace the placeholder block below with one \name/\email/\addr triple per
+%      author, separated by \AND, in the order agreed by the author list;
+%   3. set \openreview to the real forum id;
+%   4. re-add the acknowledgements section.
+% The author list is kept outside this repository until acceptance.
+\author{\name Anonymous authors \\ \addr Paper under double-blind review}
 
 \def\month{07}
 \def\year{2026}
@@ -66,26 +71,37 @@ strong, abstain otherwise, and certify the error rate of everything emitted at l
 $\alpha$ with confidence $1-\delta$.
 
 We prove validity for CCRC, characterise its behaviour, and evaluate it across five
-benchmarks, two backbones and a mitigation decoder. Four findings organise the paper, and \S\ref{sec:intro} lists the five contributions they
-support.
+benchmarks, two backbones and a mitigation decoder, under a single protocol: a three-way
+disjoint split, fixed-sequence testing, exact binomial bounds, and $\ge400$ paired splits
+with intervals and two-sided paired tests on every contrast. Five findings organise the
+paper, and \S\ref{sec:intro} lists the contributions they support.
 First, the correctness \emph{score} matters more than the procedure: a detection-grounded
-score improves certified coverage over model-internal uncertainty by $11.9$--$32.1$ points,
-and we decompose our total margin over a published CLIP-based scorer to show that $62.6$ of
-$67$ points come from the score rather than from our algorithm. Second, repairs cannot be
-self-certified --- we prove that certifying a substitution with the complement of the score
-that flagged it is circular, and confirm that the resulting procedure repairs nothing.
-Third, where CCRC helps it does so by \emph{dilution}: $0.9$--$1.8\%$ of items repaired at
-a strict evidence gate buys $1.9$--$3.4\times$ that mass in certified coverage, because
-high-precision repairs lower the emitted set's average risk and relax the binding
-constraint; we give a diagnostic, checkable before calibration, that is consistent with both the
-gains and the single dataset on which CCRC loses. Fourth, the natural generative extension
-fails: in a paired matched-prefix experiment, repairing a claim mid-caption significantly
-\emph{increases} downstream hallucination ($+0.207\pm0.091$ mentions, $n=121$, $p=0.025$),
-which closes off a fixed-point calibration argument (correction-map monotonicity, not the
-risk monotonicity in $\lambda$ that our one-shot guarantee avoids needing) and exposes an unpriced cost that a
-context-blind sequential procedure must charge for. We also reproduce the closest concurrent method and
-find the two mechanisms are complementary rather than competing. Code, extracted per-item
-signals, and all negative results are released.
+score improves certified coverage over model-internal uncertainty by $3.1$--$45.6$ points,
+and we decompose our total margin over a published CLIP-based scorer to show that $66.0$ of
+$68.1$ points come from the score and $2.1$ from our algorithm --- the $2.1$ is the number we
+ask a reader to trust. Second, self-certified repair is bounded rather than impossible: we
+give a mixture-level budget showing that substituting the complement of the score that
+flagged an item can occupy only as much mass as the accepted region's slack, and measure
+that on the settings where correction pays no region cheap enough exists, so certified
+coverage collapses by $6.6$--$49.3$ points. Third, where CCRC helps, the gain decomposes into
+a part that is automatic --- the $1.0$--$2.0\%$ of repaired items are themselves emitted --- and
+a genuine \emph{dilution} bonus that fires only on the $12$--$28\%$ of splits where the
+calibrated threshold actually moves and is worth $+0.2$ to $+1.8$ points. Certified coverage
+rises by $+0.4$ to $+7.6$ points in four settings, with every interval excluding zero, and
+falls by $10.2$ points on the fifth; the loss is an abort phenomenon of the sequential test
+under a $76$-item calibration fold, not absent headroom. Fourth, a polarity-symmetric repair
+gate --- the obvious remedy for our one-directional evidence channel --- is valid and admits
+negative-polarity repairs at $99.9$--$100\%$ precision, and yet corrects $0.000\%$ of
+false-positive existence hallucinations in all ten cells, because on that side repair
+opportunity and repair precision are anti-correlated. Fifth, the natural generative extension
+does not work: in a paired matched-prefix experiment, repairing a claim mid-caption
+\emph{increases} downstream hallucination ($+0.207\pm0.091$ mentions, $n=121$, two-sided
+$p=0.025$, though under-powered as a magnitude claim), which withdraws support for a
+fixed-point calibration argument (correction-map monotonicity, not the risk monotonicity in
+$\lambda$ that our one-shot guarantee avoids needing) and exposes an unpriced cost that a
+context-blind sequential procedure must charge for. We also reproduce the closest concurrent
+method and find the two mechanisms are complementary rather than competing. Code, extracted
+per-item signals, and all negative results are released.
 \end{abstract}
 
 %===============================================================================
@@ -137,46 +153,32 @@ action space of a conformal selective predictor is $\{\text{emit the model's ans
 
 \subsection{Two literatures that do not meet}
 
-The reason the fourth action is absent is, we think, sociological as much as technical:
-the two research communities with a stake in it work on different halves of the problem
-and rarely cite each other.
+The reason the third action is absent is, we think, sociological as much as technical: the
+two communities with a stake in it work on different halves of the problem.
 
-\paragraph{One literature makes the model wrong less often.}
-This is by far the larger body of work, and it is inventive. It modifies decoding to
-penalise the attention patterns associated with neglecting the image in favour of the
-language prior
-\citep{opera}; contrasts logits from clean and corrupted views of the image
-\citep{vcd,degf}; localises the failure to particular layers and heads and intervenes
-surgically \citep{attnlens,only,maskcd,causalgating}, or corrects the positional prior that
-biases where the model looks \citep{mcallava}; injects the output of a
-vision expert during generation \citep{marine}; verifies and rewrites after the fact
-\citep{woodpecker,lure,reverse}; or grounds the model in retrieved external knowledge
-\citep{mkgrag,rule}. The measured effects are substantial and the methods are cheap. But
-the output of this literature is always of the form \emph{our hallucination rate is lower
-than theirs on this benchmark}. A deployer who asks ``what fraction of the claims you emit
-tomorrow will be false?'' gets an empirical average over a fixed test set, which is not an
-answer to the question asked.
+One literature makes the model wrong less often, and is inventive about it: modified
+decoding \citep{opera,vcd,degf}, mechanistic and positional interventions
+\citep{attnlens,only,maskcd,causalgating,mcallava}, injected vision-expert guidance
+\citep{marine}, post-hoc verify-and-rewrite \citep{woodpecker,lure,reverse}, and retrieval
+grounding \citep{mkgrag,rule}. The measured effects are substantial and the methods are
+cheap. But its output is always of the form \emph{our hallucination rate is lower than
+theirs on this benchmark}, and a deployer who asks ``what fraction of the claims you emit
+tomorrow will be false?'' gets an average over a fixed test set, which is not an answer to
+the question asked.
 
-\paragraph{The other literature answers that question, and charges for it.}
-Conformal prediction and its risk-control descendants turn any heuristic score into a
-decision rule with a finite-sample, distribution-free guarantee. Applied to generation,
-the result is \emph{selective prediction}: emit when a correctness score clears a
-calibrated threshold, abstain otherwise, and the error rate \emph{among emitted outputs}
-is at most $\alpha$ with probability $1-\delta$
-\citep{conformallm,conformalfactuality,conflvlm,onlineabstention}. This is exactly the
-promise a deployer wants, it holds without distributional assumptions beyond
-exchangeability, and it holds for the next batch and not merely the last one. The price is
-paid in coverage: every item the rule cannot vouch for is an item nobody is served.
+The other literature answers that question and charges for it. Conformal prediction and its
+risk-control descendants turn any heuristic score into a decision rule with a finite-sample,
+distribution-free guarantee; applied to generation the result is \emph{selective prediction},
+in which the error rate among emitted outputs is at most $\alpha$ with probability $1-\delta$
+\citep{conformallm,conformalfactuality,conflvlm,onlineabstention}. The price is paid in
+coverage: every item the rule cannot vouch for is an item nobody is served.
 
-Neither literature is wrong. But notice what falls between them. The first literature
-builds systems that can \emph{repair} a wrong answer --- Woodpecker rewrites captions with
-detector output, REVERSE resamples flagged spans, MARINE injects object-level guidance ---
-and never certifies the result. The second literature certifies rigorously and never
-repairs. The obvious composition, \emph{certified repair}, is what the verify-and-correct line
-\citep{woodpecker,lure,cmvkgguard} gestures at without achieving: pipelines whose
-correctness rests on benchmark averages. This paper asks the question that line leaves
-open --- what would it take to attach a real guarantee to a system that changes its own
-answers?
+Neither literature is wrong, but notice what falls between them. The first builds systems
+that can \emph{repair} a wrong answer and never certifies the result; the second certifies
+rigorously and never repairs. The obvious composition, \emph{certified repair}, is what the
+verify-and-correct line \citep{woodpecker,lure,cmvkgguard} gestures at without achieving.
+This paper asks what it would take to attach a real guarantee to a system that changes its
+own answers.
 
 \subsection{The price of a guarantee, and why it is not a tuning problem}
 
@@ -196,17 +198,31 @@ oracle score obeys it. A larger calibration set does not relax it. It is a prope
 action space, not of the estimator.
 
 The consequences on real systems are not subtle. On our POPE-1500 setup with LLaVA-1.5-7B
-the empirical base risk is $\mu\approx0.18$; at $\alpha=0.10$ at least $8.9\%$ of inputs
-must be refused before any method is chosen. Our own tuned filtering pipeline, which is
-competitive with published conformal VLM results, certifies $42.1\%$ coverage on
-POPE-adversarial at $\alpha=0.10$: three in five questions go unanswered. On
-HallusionBench, where the base risk is high enough that the floor swallows the entire
-budget, it certifies $0.0\%$. Zero. The guarantee holds vacuously, over an empty emitted
-set, which is exactly the failure mode a practitioner would call useless.
+the empirical base risk is $\mu=18.1\%$; at $\alpha=0.10$ at least $9.0\%$ of inputs must be
+refused before any method is chosen. Our own tuned filtering pipeline, which is competitive
+with published conformal VLM results, certifies $44.0\%$ coverage on POPE-adversarial at
+$\alpha=0.10$: three in five questions go unanswered. On HallusionBench, where the base risk
+is high enough that the floor swallows the entire budget, it certifies $0.0\%$. Zero. The
+guarantee holds vacuously, over an empty emitted set, which is exactly the failure mode a
+practitioner would call useless.
 
-This is the point at which the natural engineering instinct --- \emph{find a better score}
---- runs into the theorem. A better score moves you toward the floor faster. It cannot move
-you through it. Whatever is to be done must be done to the action space.
+\paragraph{The floor is not what binds today, and we do not pretend otherwise.}
+Those two numbers invite an overattribution we want to head off, because it would flatter
+this paper. The floor on POPE-adversarial is $8.1$ points; the abstention our pipeline
+actually incurs there is $56.0$ points. Across our five settings the floor accounts for only
+$14$--$29\%$ of realised abstention (\S\ref{sec:floorbite}). The remaining three-quarters is
+score quality and finite-sample power --- the very things the theorem says it cannot speak
+to. The floor is therefore the right reason to look at the \emph{action space}: it is the one
+part of the bill no amount of engineering will retire, and it is why the substitution action
+is worth introducing at all. It is not a claim that removing it recovers the other
+$40$ points. That is exactly why the honest accounting in \S\ref{sec:attribution} attributes
+$66.0$ points to the correctness score and $2.1$ to our own mechanism, and why we report the
+$2.1$.
+
+This is also the point at which the natural engineering instinct --- \emph{find a better
+score} --- runs into the theorem. A better score moves you toward the floor faster. It cannot
+move you through it. Whatever is to be done \emph{to the floor} must be done to the action
+space.
 
 \subsection{Re-reading the premise}
 
@@ -235,13 +251,15 @@ which turns out to be a hard constraint rather than an implementation detail
 (\S\ref{sec:independence}).
 
 \paragraph{Why it can win, in one sentence.}
-High-precision repairs are \emph{low-risk} emissions. Adding them to the emitted set pulls
-its average risk below $\alpha$, which slackens the binding constraint, which lets the
-acceptance threshold move down, which admits a much larger population of ordinary
-accepted items. The gain is therefore levered: in our experiments $0.9$--$1.8\%$ of items
-repaired buys $1.9$--$4.7$ percentage points of certified coverage, a
-$1.9$--$3.4\times$ multiplier. The mechanism is not ``we fixed some answers''; it is ``fixing a few answers
-changed the price of all the others''.
+High-precision repairs are \emph{low-risk} emissions, so adding them to the emitted set
+pulls its average risk below $\alpha$, which slackens the binding constraint and can let the
+acceptance threshold move down, admitting a larger population of ordinary accepted items. We
+are careful about how much of the measured gain that mechanism actually explains
+(\S\ref{sec:mechanism}): the $1.0$--$2.0\%$ of repaired items are emitted whether or not the
+threshold moves, which is arithmetic rather than leverage, and the threshold is
+\emph{unchanged} on $72$--$88\%$ of splits. The dilution term proper is worth $+0.2$ to
+$+1.8$ points. So the mechanism is real, measured, and secondary; the headline is that a
+small mass of near-certain repairs can be emitted essentially free.
 
 \subsection{What went wrong on the way, and what it taught us}
 
@@ -252,18 +270,15 @@ spine of the argument, and each is a section below.
 
 \paragraph{The cheap version defeats itself.}
 The first design certified repairs using the complement of the score that flagged the
-original: if $s$ is low, surely $1-s$ vouches for flipping the answer. This is circular,
-and we can say exactly how. For binary decisions the risk of the flipped answer on a
-flagged region equals the model's \emph{accuracy} on that region, so a self-repair region
-is cheap only where the model is right less than $\alpha$ of the time --- a strictly
-stronger demand than finding a region where it is unconfident. We first thought this
-impossible and can now be more precise: it is admissible whenever the accepted region has
-slack (Proposition~\ref{prop:selfrepair}), but on the settings where correction is worth
-doing the region does not exist ($20.9\%$ accuracy in the bottom $2\%$ of our score against
-$\alpha=0.10$; $64.3\%$ on Qwen2-VL), and attempting it makes the fixed sequence abort
-outright on $65$--$100\%$ of splits. So a second, independent channel is required in
-practice, which is the paper's main structural claim --- an empirical regularity with a
-mechanism, not a theorem.
+original: if $s$ is low, surely $1-s$ vouches for flipping the answer. For binary decisions
+the risk of the flipped answer on a flagged region equals the model's \emph{accuracy} on that
+region, so a self-repair region is cheap only where the model is right less than $\alpha$ of
+the time --- a strictly stronger demand than finding a region where it is unconfident. It is
+admissible whenever the accepted region has slack (Proposition~\ref{prop:selfrepair}), but on
+the settings where correction is worth doing the region does not exist ($22.1\%$ accuracy in
+the bottom $2\%$ of our score against $\alpha=0.10$; $62.4\%$ on Qwen2-VL), and attempting it
+makes the fixed sequence abort outright on $25$--$99\%$ of splits. So a second, independent
+channel is required in practice --- an empirical regularity with a mechanism, not a theorem.
 
 \paragraph{The obvious parameterisation loses on half our backbones.}
 Given two channels, the natural move is to sweep both gates with the single risk-control
@@ -271,50 +286,56 @@ parameter. We did, and it lost $4.2$ points on Qwen2-VL and $2.9$ on VCD-decoded
 relative to plain filtering, because a liberal acceptance threshold drags the repair gate
 open with it and admits low-precision repairs precisely when the budget is tightest. The
 fix is to decouple: the repair gate is fixed and strict, and only acceptance is calibrated
-(\S\ref{sec:decoupling}). This is a small change with a large effect, and we report the
-version that failed because the reason it failed is the reason the final design looks the
-way it does.
+(\S\ref{sec:decoupling}). We report the version that failed because the reason it failed is
+the reason the final design looks the way it does.
 
 \paragraph{The gains are real, modest, and not uniform.}
-Averaged over settings the improvement is a few points of certified coverage, with one
-reversal. We chased the reversal and found a partial explanation: the achievable gain is
-capped by the abstained mass, so a benchmark that already certifies most of its inputs has
-little to gain and the same exposure to loss. This yields a checkable diagnostic --- $\mu$
-comfortably above $\alpha$, with an applicable evidence channel --- which is consistent
-with the failure on AMBER-discriminative but, being an upper bound on the gain, does not
-predict it (\S\ref{sec:precondition}, Remark~\ref{rem:notprediction}). Upside is bounded;
-downside is not.
+Certified coverage rises by $+0.4$ to $+7.6$ points in four settings and falls by $10.2$ on
+the fifth. We chased that reversal under the wrong hypothesis --- that the achievable gain is
+capped by the abstained mass, so a benchmark already certifying most of its inputs has little
+to gain (\S\ref{sec:precondition}). The bound is true and useless as an explanation:
+conditional on both arms certifying anything, CCRC \emph{wins} on the losing benchmark
+($+2.17$ points), dilution runs in its favour there, and the entire reported loss is the fixed
+sequence aborting on $13\%$ of splits under a $76$-item calibration fold --- the same prefix
+mechanism that defeats self-repair (\S\ref{sec:kminfail}). Upside is bounded, downside is not,
+and what binds is the test's behaviour at small emitted counts rather than headroom.
 
 \paragraph{Most of our headline margin is not our algorithm.}
-Compared against a published conformal VLM scorer we gain about $67$ points of certified
-coverage on one setting. Decomposed, roughly $62.6$ of those points come from the
-correctness score --- a boring combination of logit and grounding features --- and
-around $4.4$ from the certified-correction mechanism itself. We report the decomposition
-rather than the headline (\S\ref{sec:attribution}), and we would rather a reader trust the
-$4.4$ than be sold the $67$.
+Compared against a published conformal VLM scorer we gain $68.1$ points of certified coverage
+on one setting. Decomposed, $66.0$ of those points come from the correctness score --- a boring
+combination of logit and grounding features --- and $2.1$ from the certified-correction
+mechanism itself (\S\ref{sec:attribution}). We would rather a reader trust the $2.1$ than be
+sold the $68$.
+
+\paragraph{The obvious remedy for our one-directional gate remedies nothing.}
+Our evidence channel can only argue that an object is \emph{present}, so as evaluated CCRC
+repairs missed objects and never the canonical false-positive existence hallucination
+(Remark~\ref{rem:onedir}). We built the polarity-symmetric gate that fixes this in principle.
+It is valid, it admits negative-polarity repairs at $99.9$--$100\%$ precision, and it corrects
+$0.000\%$ of false-positive hallucinations in all ten cells, because on the negative side the
+items reachable at high precision are the ones the model already answers correctly
+(\S\ref{sec:symgate}). An admitted gap becomes a measured impossibility.
 
 \paragraph{In generation, correction backfires.}
-The motivating case for repair is generative: replacing a hallucinated object word is
-plainly more useful than deleting the sentence containing it. Extending the guarantee to a
-sequence requires that repairing a claim not make later claims worse --- a monotonicity
-property that would license a fixed-point argument. We tested it directly with a paired
-matched-prefix design and it fails: repaired prefixes yield $+0.207\pm0.091$ additional
-hallucinated mentions downstream ($n=121$, $p=0.025$). The fixed-point route --- which needs the correction map to be monotone --- is closed. We
-give the weaker coupling bound that survives (Theorem~\ref{thm:coupling}) and report the
-failure as a finding, since it constrains anyone attempting on-policy certified editing.
+The motivating case for repair is generative. Extending the guarantee to a sequence requires
+that repairing a claim not make later claims worse --- a monotonicity property that would
+license a fixed-point argument. A paired matched-prefix test finds the opposite sign:
+repaired prefixes yield $+0.207\pm0.091$ additional hallucinated mentions downstream
+($n=121$, two-sided $p=0.025$). The experiment is directional but under-powered
+(\S\ref{sec:power}), so the supported conclusion is that our data does not support the
+fixed-point route, not that the route is closed. We give the coupling bound that survives
+(Theorem~\ref{thm:coupling}).
 
 \paragraph{The closest competitor turns out to be an ally.}
-Concurrent work \citep{bcea} shares our benchmarks, our machinery, and our motivation, and
-we initially read it as a scoop. Reproducing it under a common base score shows the two
-mechanisms rescue disjoint populations of claims --- theirs the ones where more looking
-resolves the doubt, ours the ones where the model is simply wrong and something else is
-right --- and compose additively (\S\ref{sec:bcea}). We narrow our novelty claim
-accordingly, to the substitution action and its guarantee.
+Concurrent work \citep{bcea} shares our benchmarks, machinery and motivation. Reproducing it
+under a common base score shows the two mechanisms rescue disjoint populations of claims and
+compose additively (\S\ref{sec:bcea}), so we narrow our novelty claim to the substitution
+action and its guarantee.
 
 \medskip
-We report all of this. The paper is arranged so that each design decision is forced by a
-measurement rather than asserted, and the negative results appear as findings rather than
-as caveats appended to a positive headline.
+The paper is arranged so that each design decision is forced by a measurement rather than
+asserted, and the negative results appear as findings rather than as caveats appended to a
+positive headline.
 
 \subsection{Contributions}
 \begin{enumerate}
@@ -334,61 +355,73 @@ that flagged the original makes the repair's risk equal to the model's \emph{acc
 the flagged region. Proposition~\ref{prop:selfrepair} bounds the mass such a repair may
 occupy by the accepted region's slack; we then measure that on the settings where
 correction is worth doing no sufficiently low-accuracy region exists, and that the
-fixed-sequence test aborts entirely on $65$--$100\%$ of splits when self-repair is
+fixed-sequence test aborts entirely on $25$--$99\%$ of splits when self-repair is
 attempted. The conclusion --- use a second, independent channel --- is an empirical
 regularity with a mechanism, not a theorem.
 
-\item \textbf{A mechanism and a precondition} (\S\ref{sec:mechanism},
-\S\ref{sec:precondition}). We show why repair helps when it helps: high-precision repairs
-lower the emitted set's average risk, relaxing the binding constraint and permitting a more
-permissive acceptance threshold (Proposition~\ref{prop:dilution}). The effect is levered:
-$0.9$--$1.8\%$ repaired mass yields $1.9$--$4.7$ points of coverage. We then bound the
-achievable gain by the abstained mass (Proposition~\ref{prop:precondition}), which
-explains the asymmetry we observe --- upside is capped, downside is not --- and yields a
-diagnostic that is consistent with, though it does not predict, the one benchmark where
-CCRC loses.
+\item \textbf{A measured mechanism, and a precondition we withdraw as an explanation}
+(\S\ref{sec:mechanism}, \S\ref{sec:precondition}). High-precision repairs lower the emitted
+set's average risk, relaxing the binding constraint and permitting a more permissive
+acceptance threshold (Proposition~\ref{prop:dilution}). We then decompose the realised gain
+and find that most of it is not that mechanism: the repaired $1.0$--$2.0\%$ is emitted
+automatically, the calibrated threshold is unchanged on $72$--$88\%$ of splits, and the
+dilution term proper is $+0.2$ to $+1.8$ points. Proposition~\ref{prop:precondition} bounds
+the achievable gain by the abstained mass, which is true but, we now show, has \emph{no
+confirming instance} in our data: the headroom diagnostic built on it is demoted to
+Conjecture~\ref{conj:headroom} and the one loss it was supposed to explain is explained
+instead by \S\ref{sec:kminfail}.
 
-\item \textbf{A sequential negative result} (\S\ref{sec:sequential}). In a paired
-matched-prefix experiment on free-form captions, repairing a hallucinated claim
-significantly increases hallucination in the continuation. This rules out the \emph{correction-map} monotonicity on which a fixed-point argument for an
-on-policy sequential guarantee would rest (a different property from risk monotonicity in
-$\lambda$, which Theorem~\ref{thm:validity} never uses), and we give the
-weaker coupling bound that survives (Theorem~\ref{thm:coupling}).
+\item \textbf{A small-calibration failure mode of fixed-sequence testing}
+(\S\ref{sec:kminfail}). The minimum certifiable emitted-set size (Lemma~\ref{lem:kmin})
+combines with the prefix structure of the test into a single mechanism that explains three
+apparently unrelated results: weak scores certify nothing at all rather than a little less,
+self-repair collapses, and CCRC's one negative result is an abort phenomenon under a $76$-item
+calibration fold. We give the bound-dependent $k_{\min}$ ladder ($22$, $44$, $71$, $116$),
+report abort rates everywhere, and identify the condition (feasibility failing to be a prefix
+in $\lambda$) under which the first hypothesis decides the outcome.
+
+\item \textbf{Two measured impossibilities} (\S\ref{sec:symgate}, \S\ref{sec:sequential}). A
+polarity-symmetric repair gate is valid at no cost in $\delta$ and admits negative-polarity
+repairs at $99.9$--$100\%$ precision, yet corrects no false-positive existence hallucination
+in any setting, because on that side repair opportunity and precision are anti-correlated.
+And in a paired matched-prefix experiment on free-form captions, repairing a hallucinated
+claim increases hallucination in the continuation, which withdraws support for the
+\emph{correction-map} monotonicity a fixed-point argument would need (a different property
+from risk monotonicity in $\lambda$, which Theorem~\ref{thm:validity} never uses); we give
+the coupling bound that survives (Theorem~\ref{thm:coupling}) and a power analysis bounding
+what the experiment can and cannot establish.
 
 \item \textbf{Honest attribution and positioning} (\S\ref{sec:attribution}). We decompose
-our margin over a published scorer and report that most of it is the score, not the
-procedure. We reproduce the closest concurrent method \citep{bcea} and find the two
+our margin over a published scorer and report that $66.0$ of $68.1$ points are the score and
+$2.1$ the procedure. We reproduce the closest concurrent method \citep{bcea} and find the two
 mechanisms compose rather than compete.
 \end{enumerate}
 
 \subsection{Roadmap}
 \S\ref{sec:related} situates the work between the two literatures above.
-\S\ref{sec:setup} fixes notation and derives the abstention floor in our own terms, so
-that the object CCRC certifies can be compared with it directly. \S\ref{sec:method} gives
-the procedure, its guarantee, the impossibility result, the decoupling argument, the
-dilution mechanism, and the precondition. \S\ref{sec:exp} reports experiments across five
-benchmarks, two backbones and one mitigation decoder, including the setting where the
-method fails and the baselines that narrow the credit due to it. \S\ref{sec:sequential}
-reports the sequential falsification and what survives it. \S\ref{sec:ablations} isolates
-the score combiner (with a validity trap we fell into), the choice of concentration bound,
-and positioning against prior art. \S\ref{sec:discussion} states the limitations we
-consider load-bearing.
+\S\ref{sec:setup} fixes notation, derives the abstention floor in our own terms, and measures
+how much of realised abstention it accounts for. \S\ref{sec:method} gives the procedure
+(Algorithm~\ref{alg:ccrc}), its guarantee, the self-certification budget, the decoupling
+argument, the dilution mechanism and its decomposition, and the precondition.
+\S\ref{sec:exp} reports experiments across five benchmarks, two backbones and one mitigation
+decoder, including the symmetric-gate result and the setting where the method fails.
+\S\ref{sec:kminfail} consolidates the small-calibration failure mode.
+\S\ref{sec:sequential} reports the sequential falsification, its power, and what survives it.
+\S\ref{sec:ablations} isolates the score combiner (with a validity trap we fell into) and the
+choice of concentration bound. \S\ref{sec:discussion} states the limitations we consider
+load-bearing.
 
 %===============================================================================
 \section{Related work}
 \label{sec:related}
 
-This section is organised around the gap identified in \S\ref{sec:intro}. We first survey
-what is known about hallucination in vision--language models and the very large body of
-work that reduces it (\S\ref{sec:rel:hallu}), noting throughout that essentially none of it
-produces a guarantee. We then survey distribution-free risk control
-(\S\ref{sec:rel:conformal}) and its application to language and vision--language generation
-(\S\ref{sec:rel:conflm}), noting that essentially all of it operates by deletion or
-abstention. \S\ref{sec:rel:uq} covers non-conformal uncertainty quantification, which
-supplies many of the scores both literatures use. \S\ref{sec:rel:position} treats the two
-concurrent papers that bear most directly on our claim, and \S\ref{sec:rel:shift}
-the shift induced by acting on one's own output. \S\ref{sec:rel:summary} states what,
-after all of this, we take to be new.
+This section is organised around the gap identified in \S\ref{sec:intro}: the
+hallucination-mitigation literature repairs without certifying (\S\ref{sec:rel:hallu}), the
+distribution-free risk-control literature certifies without repairing
+(\S\ref{sec:rel:conformal}, \S\ref{sec:rel:conflm}), and the uncertainty-quantification
+literature (\S\ref{sec:rel:uq}) supplies scores to both. \S\ref{sec:rel:position} treats the
+two concurrent papers that bear most directly on our claim and \S\ref{sec:rel:shift} the
+shift induced by acting on one's own output.
 
 \subsection{Hallucination in vision--language models}
 \label{sec:rel:hallu}
@@ -397,121 +430,87 @@ after all of this, we take to be new.
 Hallucination in multimodal models is conventionally decomposed by what is fabricated:
 \emph{existence} (an absent object is asserted), \emph{attribute} (a present object is
 described wrongly), and \emph{relation} (spatial or interactional claims that do not hold)
-\citep{amber}. Surveys of the multimodal case \citep{bai2024survey,liu2024survey} and of
-the text-only antecedent \citep{ji2023} converge on a small set of proximate causes. First,
-\emph{language-prior dominance}: the autoregressive decoder is trained on text in which
-certain objects co-occur, and at generation time it will complete ``a desk with a keyboard
-and a\dots'' with \texttt{mouse} whether or not a mouse is visible. Second, \emph{visual
-under-attention}: attention mass on image tokens decays with position, so later tokens in
-a long caption are generated with progressively less visual grounding. Third,
-\emph{instruction-tuning artefacts}: supervision built from captions that describe more
-than is visible teaches the model to over-describe \citep{liu2023lrv}. Fourth, ordinary
-\emph{miscalibration} of the underlying classifier \citep{guo2017}, which matters for us
-because it determines how informative the model's own logits are as a correctness score.
+\citep{amber}. Surveys \citep{bai2024survey,liu2024survey,ji2023} converge on a few proximate
+causes: \emph{language-prior dominance} (the decoder completes ``a desk with a keyboard
+and a\dots'' with \texttt{mouse} whether or not one is visible), \emph{visual
+under-attention} (attention mass on image tokens decays with position), \emph{instruction-tuning
+artefacts} from supervision that describes more than is visible \citep{liu2023lrv}, and
+ordinary \emph{miscalibration} \citep{guo2017}, which matters for us because it determines how
+informative the model's own logits are as a correctness score.
 
-The taxonomy is not decoration; it determines which evidence can refute a claim, and
+The taxonomy is not decoration: it determines which evidence can refute a claim, and
 therefore which claims a system like ours can repair. Existence claims are checkable by an
-open-vocabulary detector \citep{owlv2,liu2024groundingdino}. Attribute claims require finer
-perception than a detector supplies. Relation claims require structure that neither a
-detector nor a similarity model represents. We return to this in \S\ref{sec:exp:noapply},
-where the composition of a benchmark --- not its difficulty --- decides whether our
-evidence channel applies at all.
+open-vocabulary detector \citep{owlv2,liu2024groundingdino}; attribute claims require finer
+perception than a detector supplies; relation claims require structure that neither a detector
+nor a similarity model represents. \S\ref{sec:exp:noapply} shows the composition of a
+benchmark --- not its difficulty --- deciding whether our evidence channel applies at all.
 
 \paragraph{Benchmarks, and what they measure.}
-POPE \citep{pope} probes existence with balanced yes/no questions under three negative
-samplings: \emph{random} objects, \emph{popular} (frequent in the corpus), and
-\emph{adversarial} (frequently co-occurring with objects that are present). The last is
-substantially harder precisely because it pits the language prior against the image, which
-makes it the most informative split for our purposes. CHAIR \citep{chair} scores free-form
-captions by the fraction of mentioned objects absent from MS-COCO ground truth, and remains
-the standard generative metric despite its restriction to a closed vocabulary. AMBER
-\citep{amber} provides an LLM-free benchmark with per-image lists of present and
-hallucinated objects across generative and discriminative splits, and annotates attribute
-and relation types as well as existence. MMHal-Bench --- introduced by \citet{sun2024aligning} alongside Fact-RLHF --- evaluates
-diverse hallucination types in question answering using a strong judge model. MME \citep{mme}
-measures broad perception and cognition across fourteen subtasks, only some of which are
-grounding-checkable. HallusionBench \citep{hallusionbench} targets visual illusions,
-charts, and reasoning traps, and is hard enough that strong models approach chance --- a
-property that turns out to matter a great deal for any method with an abstention floor.
-GQA \citep{gqa} supplies compositional questions over scene graphs.
+POPE \citep{pope} probes existence with balanced yes/no questions under \emph{random},
+\emph{popular} and \emph{adversarial} negative samplings; the last is hardest because it pits
+the language prior against the image, which makes it the most informative split for our
+purposes. CHAIR \citep{chair} scores free-form captions by the fraction of mentioned objects
+absent from MS-COCO ground truth. AMBER \citep{amber} provides an LLM-free benchmark with
+per-image present/hallucinated object lists across generative and discriminative splits.
+MMHal-Bench, introduced by \citet{sun2024aligning} alongside Fact-RLHF, uses a strong judge
+model. MME \citep{mme} measures perception and cognition across fourteen subtasks, only some
+grounding-checkable; HallusionBench \citep{hallusionbench} targets illusions, charts and
+reasoning traps and is hard enough that strong models approach chance --- a property that
+matters a great deal for any method with an abstention floor; GQA \citep{gqa} supplies
+compositional questions over scene graphs.
 
-We use POPE, AMBER, MME, GQA and HallusionBench. One methodological remark belongs here
-rather than in the experiments: single-type AMBER subsets are label-degenerate (the
-\texttt{hallucination} subset has all-\texttt{no} gold answers, the \texttt{relation}
-subset all-\texttt{yes}), which inflates AUROC to $1.0$ for any score correlated with the
-question type. We report on the mixed subset for this reason, and flag it because the
-degeneracy is easy to miss.
+We use POPE, AMBER, MME, GQA and HallusionBench. One methodological remark belongs here:
+single-type AMBER subsets are label-degenerate (the \texttt{hallucination} subset has
+all-\texttt{no} gold answers, the \texttt{relation} subset all-\texttt{yes}), which inflates
+AUROC to $1.0$ for any score correlated with the question type. We report on the mixed subset
+for this reason, and flag it because the degeneracy is easy to miss.
 
-\paragraph{Mitigation by decoding.}
-The largest and most active family modifies the decoding distribution at inference time,
-with no retraining. OPERA \citep{opera} identifies a columnar attention pattern over a few
-\emph{summary} tokens, at which knowledge aggregates and image tokens are neglected,
-penalises it in the beam score, and rolls back to re-allocate \emph{token selection} when
-the pattern is detected. Visual contrastive decoding \citep{vcd} contrasts
-logits computed from the clean image against logits from a diffusion-corrupted version,
-subtracting the component of the distribution that survives visual degradation --- i.e.\ the
-component driven by the prior. Other variants change what is contrasted: HALC \citep{chen2024halc} contrasts
-adaptively selected fine-grained fields of view rather than a globally corrupted image, and
-\citet{favero2024} formalise the contrast as an information-grounding objective. DeGF \citep{degf} closes a generative loop:
-it synthesises an image from the candidate caption and diffs it against the input. MARINE
-\citep{marine} injects object-level guidance from an external vision expert into the
-decoding step, which is the closest decoding-time analogue of our evidence channel --- with
-the difference that it steers the model rather than replacing its answer, and offers no
-bound.
+\paragraph{Mitigation by decoding, intervention and training.}
+The largest and most active family modifies the decoding distribution at inference time with
+no retraining. OPERA \citep{opera} identifies a columnar attention pattern over a few
+\emph{summary} tokens, penalises it in the beam score, and rolls back to re-allocate
+\emph{token selection}. Visual contrastive decoding \citep{vcd} subtracts logits computed from
+a diffusion-corrupted image, removing the component that survives visual degradation; HALC
+\citep{chen2024halc} contrasts adaptively selected field-of-view crops instead, and
+\citet{favero2024} formalise the contrast as an information-grounding objective. DeGF
+\citep{degf} synthesises an image from the candidate caption and diffs it against the input.
+MARINE \citep{marine} injects object-level guidance from an external vision expert, the
+closest decoding-time analogue of our evidence channel --- except that it steers the model
+rather than replacing its answer, and offers no bound. A second line localises the failure to
+particular heads and layers and intervenes there \citep{attnlens,only,maskcd,causalgating};
+a third attacks the positional prior, MCA-LLaVA \citep{mcallava} replacing RoPE's
+one-dimensional decay with a two-dimensional Manhattan-distance spatial decay. A fourth
+changes the model: factually augmented RLHF \citep{sun2024aligning}, RLHF-V
+\citep{yu2024rlhfv}, whose fine-grained \emph{correctional} feedback is the closest
+training-time analogue of certified correction minus the certificate, and robust instruction
+tuning \citep{liu2023lrv}.
 
-These methods are cheap, training-free, and demonstrably effective. Their relation to our
-work is compositional rather than competitive: they lower the base risk $\mu$, while we
-control the risk of what is emitted. Because the abstention floor is
-$(\mu-\alpha)/(1-\alpha)$, \emph{any} reduction in $\mu$ directly relaxes the constraint we
-operate under, so the two lines of work multiply rather than substitute. We verify this
-empirically by running our layer on top of \citet{vcd} in \S\ref{sec:vcd}, and find both
-that the composition works and that the coupled variant of our own method fails there ---
-which is how we discovered the need to decouple the repair gate.
-
-\paragraph{Mitigation by attention-level and mechanistic intervention.}
-A related line localises hallucination to specific components and intervenes there.
-Attention-lens style analyses trace hallucinated tokens to identifiable heads and layers
-\citep{attnlens,only}, and interventions range from masking image heads
-\citep{maskcd} to causal gating of the information paths implicated \citep{causalgating}. A
-distinct line attacks the positional prior instead: MCA-LLaVA \citep{mcallava} replaces
-RoPE's one-dimensional long-term decay with a two-dimensional Manhattan-distance spatial
-decay, removing the bias that makes instruction tokens over-attend to bottom-right image
-tokens. These give the most detailed available picture of
-\emph{where} the failure lives. They are orthogonal to our concern, which is not where the
-error comes from but what the emitted set's risk is once it exists; we cite them because
-they are the strongest current evidence that hallucination is a structured, localisable
-phenomenon rather than noise --- which is in turn why an independent channel can be
-expected to be informative about it.
-
-\paragraph{Mitigation by training and preference optimisation.}
-A second family changes the model. Factually augmented RLHF \citep{sun2024aligning} scores
-responses against ground-truth image content during reward modelling. RLHF-V
-\citep{yu2024rlhfv} collects fine-grained \emph{correctional} human feedback --- humans
-edit hallucinated segments --- and aligns on the edits, which is conceptually the closest
-training-time analogue of certified correction, minus the certificate. Robust instruction
-tuning \citep{liu2023lrv} attacks the artefact at its source by constructing negative
-instructions. These require training and produce a better $\mu$; again, complementary.
+All of these lower the base risk $\mu$ while we control the risk of what is emitted. Because
+the abstention floor is $(\mu-\alpha)/(1-\alpha)$, \emph{any} reduction in $\mu$ relaxes the
+constraint we operate under, so the two lines multiply rather than substitute; we verify this
+by running our layer on top of \citet{vcd} in \S\ref{sec:vcd}. We also cite the mechanistic
+line as the strongest current evidence that hallucination is structured and localisable
+rather than noise --- which is why an independent channel can be expected to be informative
+about it.
 
 \paragraph{Mitigation by post-hoc verification and rewriting.}
-The third family is the one our work descends from: generate, then check, then change.
-Woodpecker \citep{woodpecker} extracts object claims from a caption, queries detectors,
-and rewrites the caption using a language model. LURE \citep{lure} identifies
-hallucination-prone captions from co-occurrence and uncertainty statistics and revises
-them. REVERSE \citep{reverse} trains the model to emit explicit confidence markers during
-generation and then retrospectively resamples the spans it flagged, which makes it the
-closest work in \emph{spirit} to ours: it also changes the output rather than deleting it.
-Knowledge-grounded variants replace detectors with retrieval over multimodal knowledge
-graphs \citep{mkgrag} or domain corpora \citep{rule}.
+The family our work descends from is: generate, then check, then change. Woodpecker
+\citep{woodpecker} extracts object claims, queries detectors, and rewrites with a language
+model. LURE \citep{lure} identifies hallucination-prone captions from co-occurrence and
+uncertainty statistics and revises them. REVERSE \citep{reverse} trains the model to emit
+confidence markers and then resamples the spans it flagged, which makes it the closest work in
+\emph{spirit} to ours: it also changes the output rather than deleting it. Knowledge-grounded
+variants replace detectors with retrieval over multimodal knowledge graphs \citep{mkgrag} or
+domain corpora \citep{rule}.
 
 Every method in this family performs the same three steps we do --- flag, consult external
-evidence, substitute --- and none of them certifies the substitution. The quantity they
-report is a benchmark average after rewriting. \citet{cmvkgguard} is of exactly this type,
-and the present paper can be read as asking what it would take to attach a guarantee to
-such a pipeline. The attachment is not a matter of wrapping the pipeline in a
-calibration loop: the natural way to certify a correction is circular
-(\S\ref{sec:independence}), and the honest version requires an architectural
-commitment that the verify-and-rewrite literature happens to satisfy by accident rather
-than by design.
+evidence, substitute --- and none certifies the substitution; the quantity reported is a
+benchmark average after rewriting. \citet{cmvkgguard} is of exactly this type, and the present
+paper can be read as asking what it would take to attach a guarantee to such a pipeline. The
+attachment is not a matter of wrapping the pipeline in a calibration loop: the natural way to
+certify a correction is circular (\S\ref{sec:independence}), and the honest version requires
+an architectural commitment that this literature happens to satisfy by accident rather than by
+design.
 
 \subsection{Conformal prediction and distribution-free risk control}
 \label{sec:rel:conformal}
@@ -522,18 +521,15 @@ prediction sets with finite-sample marginal coverage under exchangeability alone
 \citet{angelopoulos2023gentle} for a modern treatment. Refinements adapt the sets to local
 difficulty \citep{romano2019}, exploit leave-one-out structure \citep{barber2021}, control
 error per class \citep{sadinle2019,ding2023}, condition on groups
-\citep{vovk2003mondrian}, and relax exchangeability itself \citep{barber2023}.
-
-For our purposes the relevant generalisation is from \emph{coverage} to \emph{risk}.
-Risk-controlling prediction sets \citep{bates2021rcps} bound the expectation of a monotone
-loss rather than a miscoverage indicator. Conformal risk control
-\citep{angelopoulos2024crc} extends this to a general family of monotone risks with a
-single scalar parameter. Learn-Then-Test \citep{angelopoulos2021ltt} drops monotonicity
-altogether and treats the choice of configuration as a multiple-testing problem, which is
-the tool we need: our policy family is indexed by a threshold whose induced risk is
-\emph{not} guaranteed monotone once repairs enter the emitted set, and LTT's
-fixed-sequence testing lets us search a nested family at full $\delta$ without a
-Bonferroni penalty.
+\citep{vovk2003mondrian}, and relax exchangeability itself \citep{barber2023}. The relevant
+generalisation for us is from \emph{coverage} to \emph{risk}: risk-controlling prediction sets
+\citep{bates2021rcps} bound the expectation of a monotone loss, conformal risk control
+\citep{angelopoulos2024crc} extends this to monotone risks with a single scalar parameter, and
+Learn-Then-Test \citep{angelopoulos2021ltt} drops monotonicity altogether and treats the choice
+of configuration as a multiple-testing problem. The last is the tool we need: our policy
+family's induced risk is \emph{not} guaranteed monotone once repairs enter the emitted set,
+and LTT's fixed-sequence testing lets us search a pre-ordered family at full $\delta$ without
+a Bonferroni penalty.
 
 \paragraph{The bound matters.}
 Which concentration inequality supplies the per-hypothesis $p$-value has a large practical
@@ -543,38 +539,34 @@ tighter again \citep{waudbysmith2024}. For a binary loss --- our case, since an 
 right or wrong --- the exact Clopper--Pearson interval \citep{clopper1934} dominates all of
 these, and we confirm the ordering experimentally in \S\ref{sec:ablations}. Anytime-valid
 inference via e-processes and Ville's inequality \citep{waudbysmith2024,ramdas2023} extends
-validity to data-dependent stopping, which is the natural machinery for sequence-level
-guarantees and which we take up --- and find insufficient on its own --- in
-\S\ref{sec:sequential}.
+validity to data-dependent stopping, the natural machinery for sequence-level guarantees,
+which we take up --- and find insufficient on its own --- in \S\ref{sec:sequential}.
 
 \paragraph{Selective prediction is older than conformal prediction.}
 The accept/abstain trade-off dates to \citet{chow1970}; its statistical theory
 \citep{elyaniv2010,bartlett2008,cortes2016} and its deep-learning instantiations
-\citep{geifman2019} predate the conformal treatment. What conformal methods add is not the
-idea of abstaining but the distribution-free, finite-sample character of the promise. It is
-worth keeping the distinction in view, because the impossibility bound we build on is a
-statement about the selective-prediction \emph{action space}, and therefore applies to the
-classical formulations just as much as to the conformal ones. Learning-with-rejection
-theory has, to our knowledge, likewise never considered a \emph{reject-and-substitute}
-action with a risk certificate.
+\citep{geifman2019} predate the conformal treatment, which adds not the idea of abstaining
+but the distribution-free, finite-sample character of the promise. The distinction is worth
+keeping in view, because the impossibility bound we build on is a statement about the
+selective-prediction \emph{action space} and so applies to the classical formulations too.
+Learning-with-rejection theory has, to our knowledge, likewise never considered a
+\emph{reject-and-substitute} action with a risk certificate.
 
 \subsection{Conformal methods for language and vision--language models}
 \label{sec:rel:conflm}
 
 \paragraph{Text.}
-Conformal language modeling \citep{conformallm} calibrates sampling, stopping and
-rejection rules so that the returned set of generations contains an acceptable output with
-high probability. Conformal factuality \citep{conformalfactuality} decomposes an output
-into sub-claims and \emph{backs off} --- progressively removing the least supported claims
---- until a factuality guarantee holds, which makes the emitted object a subset of the
-original. Conformal alignment \citep{gui2024conformal} certifies which foundation-model
-outputs are trustworthy enough to use. Multiple-choice settings admit a direct application
-of split conformal prediction \citep{kumar2023}, and conformal machinery has been used to
-calibrate when an LLM planner should ask a human for help \citep{ren2023knowno} --- an
-action space of $\{$act, defer$\}$, again without substitution. Token-level and next-token
-variants calibrate on entropy or logit statistics \citep{tecp,cover}. Online and
-bootstrapped variants address feedback loops and estimator variance
-\citep{onlineabstention,tamingvar}, and pipeline-level joint coverage over multiple stages
+Conformal language modeling \citep{conformallm} calibrates sampling, stopping and rejection
+rules so that the returned set of generations contains an acceptable output with high
+probability. Conformal factuality \citep{conformalfactuality} decomposes an output into
+sub-claims and \emph{backs off} until a factuality guarantee holds, making the emitted object
+a subset of the original. Conformal alignment \citep{gui2024conformal} certifies which
+foundation-model outputs are trustworthy enough to use; multiple-choice settings admit split
+conformal prediction directly \citep{kumar2023}; and conformal machinery calibrates when an
+LLM planner should ask a human for help \citep{ren2023knowno} --- an action space of
+$\{$act, defer$\}$, again without substitution. Token-level variants calibrate on entropy or
+logit statistics \citep{tecp,cover}, online and bootstrapped variants address feedback loops
+and estimator variance \citep{onlineabstention,tamingvar}, and pipeline-level joint coverage
 has been studied \citep{pasc}.
 
 \paragraph{Vision--language.}
@@ -583,8 +575,9 @@ treats each generated detail as a hypothesis, scores it with a domain-appropriat
 --- CLIP similarity \citep{clip} for natural-scene descriptions, BiomedCLIP for radiology,
 LayoutLMv3 for documents --- and filters unsupported details, reporting a reduction in
 claim error from $87.8\%$ to $10.0\%$ for LLaVA-1.5 scene descriptions at a stated
-coverage cost. \citet{twoaxes} decompose the reliability question along a coverage axis and
-a risk axis and study the trade-off directly.
+coverage cost. \citet{twoaxes} study conformal abstention for visual question answering along
+two axes of their own: whether the model's answer is correct and whether the question is
+answerable at all from the image.
 
 \paragraph{The common operation.}
 Across this entire body of work --- text and multimodal, offline and online, claim-level
@@ -601,15 +594,14 @@ the result.
 Our channel-1 score is not novel and we do not claim it is; it belongs to a large
 literature on estimating generative uncertainty, which supplies the raw material that
 conformal wrappers calibrate. Sequence likelihood and length-normalised logprobs are the
-baseline. \citet{kadavath2022} show that models can be prompted to predict their own
-correctness. Semantic uncertainty \citep{kuhn2023} clusters samples by entailment before
-computing entropy, so that paraphrases do not count as disagreement, and semantic entropy
-scales this into a practical hallucination detector \citep{farquhar2024}. Verbalised
-confidence \citep{lin2022} elicits a probability in words. SelfCheckGPT \citep{manakul2023}
-detects hallucination by sampling several generations and measuring mutual consistency,
-which requires no logit access; self-consistency \citep{wang2023selfconsistency} uses the
-same signal to improve accuracy rather than to flag. Calibration of the underlying
-classifier \citep{guo2017} determines how much any of these are worth.
+baseline; \citet{kadavath2022} prompt models to predict their own correctness; semantic
+uncertainty \citep{kuhn2023} clusters samples by entailment before computing entropy so that
+paraphrases do not count as disagreement, and semantic entropy scales this into a practical
+hallucination detector \citep{farquhar2024}; verbalised confidence \citep{lin2022} elicits a
+probability in words; SelfCheckGPT \citep{manakul2023} measures mutual consistency across
+samples with no logit access, and self-consistency \citep{wang2023selfconsistency} uses the
+same signal to improve accuracy rather than to flag. Calibration of the underlying classifier
+\citep{guo2017} determines how much any of these are worth.
 
 Two observations relevant to our design. First, all of these are \emph{self-referential}:
 they interrogate the model about its own output. This is exactly the property that
@@ -623,97 +615,67 @@ independence, not their accuracy, that makes them usable as channel~2.
 \subsection{The two closest works, and what separates us from them}
 \label{sec:rel:position}
 
-\paragraph{The impossibility bound.}
+\paragraph{The impossibility bound, and the three ways to answer it.}
 \citet{crcimposs} asks when conformal risk control can certify structured LLM outputs at
-all, and the paper is best read as three results with one practical moral. First, the
-impossibility result: when the base risk exceeds the target, any distribution-free method
-must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of examples. Because $\mu$ and $\alpha$
-are both known before calibration, this doubles as a \emph{closed-form feasibility test} ---
-one can determine whether CRC will work at all without running it. Second, a certification
-hierarchy across Hoeffding, empirical Bernstein, and a betting-based e-CRC bound, with the
-Hoeffding-to-Bernstein step supplying the largest single gain ($+37\%$ certified
-configurations) and e-CRC earning its keep only when calibration data is scarce ($10\%$
-certification at $20\%$ of the data against $0\%$ for Hoeffding). Third, a validation of
-adaptive conformal inference under cross-dataset shift, cutting risk-target violations from
-$71\%$ to $21\%$, with the residual failures concentrated exactly where the impossibility
-bound predicts they must be. The empirical scope is substantial --- six open-weight models
-from 3B to 72B parameters, eight datasets, four tasks, six nonconformity scores --- and its
-verdict is blunt: hard NER, QA and classification configurations are simply uncertifiable
-at $\alpha=0.10$.
+all. Three results matter here. First, the impossibility result: when the base risk exceeds
+the target, any distribution-free method must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of
+examples; because $\mu$ and $\alpha$ are known before calibration this doubles as a
+closed-form feasibility test. Second, a certification hierarchy across Hoeffding, empirical
+Bernstein and a betting-based e-CRC bound, with the Hoeffding-to-Bernstein step supplying the
+largest single gain ($+37\%$ certified configurations) and e-CRC earning its keep only when
+calibration data is scarce. Third, a validation of adaptive conformal inference under
+cross-dataset shift, cutting risk-target violations from $71\%$ to $21\%$, with residual
+failures concentrated where the bound predicts. The scope is substantial --- six open-weight
+models from 3B to 72B, eight datasets, four tasks, six nonconformity scores --- and the verdict
+is blunt: hard NER, QA and classification configurations are uncertifiable at $\alpha=0.10$.
 
-Two things about this paper matter for us. The first is what it does \emph{not} study: the
-setting is text-only structured generation (named-entity recognition, JSON extraction,
-question answering, classification), so the multimodal case, where an independent
-perceptual channel is available in a way it is not for pure text, is outside its scope. The
-second is the remedy it recommends. Faced with infeasibility at $\alpha=0.10$, the
-prescription is to \emph{relax the target}: at $\alpha=0.30$--$0.40$ certification becomes
-practical ($47\%$ of NER, $40\%$ of QA, $60\%$ of classification configurations). That is a
-sound recommendation and, for many deployments, the right one. It is also an admission
-about the shape of the problem, and it is the fork this paper takes differently. We do not
-weaken or contradict the bound --- it is correct, and we re-derive it in our own notation in
-Proposition~\ref{prop:floor}. We exit its premise, and then pay for the exit by re-deriving
-validity for the mixture (Theorem~\ref{thm:validity}) and by discovering the constraints
-that substitution imposes (\S\ref{sec:independence} and Theorem~\ref{thm:coupling}). The
-same author's pipeline-level conformal work \citep{pasc} composes stage-wise guarantees and
-is subject to the same premise at every stage.
-
-\paragraph{Three responses to one bound.}
-It is worth naming the alternatives explicitly, because the contribution of this paper is
-best understood as a choice among them. Given a base risk $\mu$ above the target $\alpha$,
-the floor $(\mu-\alpha)/(1-\alpha)$ can be answered in exactly three ways.
-\textbf{(i)~Relax the target.} Accept a weaker promise until it becomes feasible; this is
-the recommendation of \citet{crcimposs}, and at $\alpha=0.30$--$0.40$ it works.
-\textbf{(ii)~Lower $\mu$, or sharpen the score.} Every mitigation method in
-\S\ref{sec:rel:hallu} does the former; \citet{bcea} does the latter, by spending a budget
-to look again before deciding. Both stay inside the premise and both shrink the floor
-without removing it. \textbf{(iii)~Change the action space.} Emit something the model did
-not say. This is the only response for which the theorem stops applying, and it is the one
-we take --- at the cost of having to re-derive the guarantee and of inheriting two new
-constraints that (i) and (ii) do not face.
+Two things about it matter for us. The first is what it does \emph{not} study: the setting is
+text-only structured generation, so the multimodal case, where an independent perceptual
+channel is available in a way it is not for pure text, is outside its scope. The second is the
+remedy it recommends, because it names the fork this paper takes differently. Given $\mu>\alpha$
+the floor admits exactly three responses. \textbf{(i)~Relax the target}, the recommendation of
+\citet{crcimposs}: at $\alpha=0.30$--$0.40$ certification becomes practical ($47\%$ of NER,
+$40\%$ of QA, $60\%$ of classification configurations). \textbf{(ii)~Lower $\mu$ or sharpen the
+score}: every mitigation method in \S\ref{sec:rel:hallu} does the former and \citet{bcea} the
+latter; both stay inside the premise and shrink the floor without removing it.
+\textbf{(iii)~Change the action space} --- emit something the model did not say. Only for (iii)
+does the theorem stop applying, and it is the one we take, at the cost of re-deriving validity
+for the mixture (Theorem~\ref{thm:validity}) and inheriting constraints the other two do not
+face (\S\ref{sec:independence}, Theorem~\ref{thm:coupling}). We do not weaken or contradict the
+bound; we re-derive it in our own notation in Proposition~\ref{prop:floor}. The same author's
+pipeline-level conformal work \citep{pasc} is subject to the same premise at every stage.
 
 \paragraph{Budgeted conformal evidence acquisition.}
-\citet{bcea} is concurrent, close, and worth describing carefully because a reader who
-skims both papers may reasonably ask what is left. Their diagnosis is the same as ours, and they
-state it more sharply than we do: to hold the hallucination rate below $5\%$ on a balanced
-object-existence benchmark, a state-of-the-art conformal filter must abstain on more than
-$80\%$ of claims. Their remedy is to replace the binary answer/abstain decision with a
-\emph{three-way} choice --- answer, abstain, or acquire additional visual evidence by
-re-examining the image (zooming, cropping, or applying a claim-specific intervention)
-under a bounded budget --- then form a post-acquisition score and re-threshold, restoring
-validity by calibrating on post-acquisition rather than pre-acquisition scores. Their
-setting (POPE/COCO, LLaVA and Qwen backbones), their machinery (Clopper--Pearson $p$-values
-with fixed-sequence testing), and their motivation coincide with ours, and in the regime we
-reproduce they report certified coverage rising from roughly $28\%$ to $37\%$ at
-$\alpha=0.10$.
+\citet{bcea} is concurrent and close enough that a reader who skims both may reasonably ask
+what is left. Their diagnosis is ours, stated more sharply: to hold the hallucination rate
+below $5\%$ on a balanced object-existence benchmark, a state-of-the-art conformal filter must
+abstain on more than $80\%$ of claims. Their remedy replaces the binary answer/abstain decision
+with a three-way choice --- answer, abstain, or acquire additional visual evidence by
+re-examining the image under a bounded budget --- and restores validity by calibrating on
+post-acquisition scores. Their setting (POPE/COCO, LLaVA and Qwen backbones), machinery
+(Clopper--Pearson $p$-values with fixed-sequence testing) and motivation coincide with ours,
+and in the regime we reproduce they report certified coverage rising from roughly $28\%$ to
+$37\%$ at $\alpha=0.10$.
 
-The distinction is precise, and it survives the fact that both papers describe a
-``three-way choice''. Their third action is \emph{acquire}: spend budget to look again, and
-then answer or abstain on the strength of a better-informed score. Ours is \emph{repair}:
-emit a different answer. BCEA changes \emph{how confident it is} about the model's claim; we
-change \emph{what claim is emitted}. In their own framing there is no corrected answer --- an
-item that survives acquisition is emitted as the model wrote it, and an item that does not
-is abstained. This means BCEA remains inside the premise of \citet{crcimposs}: it moves
-items across the threshold by improving the score, which the bound explicitly permits,
-which is why it reduces the floor's bite without escaping the floor. It is, in the taxonomy
-below, the ``better score'' response rather than the ``relax $\alpha$''
-response. CCRC is the third response --- change the action space --- and it is the only one
-of the three for which the bound stops applying.
-The practical consequence is that the two rescue different populations: BCEA rescues
-claims where a closer look resolves genuine ambiguity, and CCRC rescues claims where the
-model is confidently or unconfidently wrong and an independent channel is right. We
-reproduce BCEA under a common base score and one mechanism per arm in \S\ref{sec:bcea} and
-find the gains approximately additive. We accordingly narrow our novelty claim to the
-substitution action and the guarantee over the resulting mixture, rather than to the
-observation that conformal VLM filtering abstains too much --- an observation we share with
-them.
+The distinction survives the fact that both papers describe a ``three-way choice''. Their third
+action is \emph{acquire}: spend budget to look again, then answer or abstain on a better-informed
+score. Ours is \emph{repair}: emit a different answer. BCEA changes \emph{how confident it is}
+about the model's claim; we change \emph{what claim is emitted}. So BCEA is response (ii) above
+and remains inside the premise of \citet{crcimposs} --- which is why it reduces the floor's bite
+without escaping it --- while CCRC is response (iii). The practical consequence is that the two
+rescue different populations, and \S\ref{sec:bcea} finds the gains approximately additive under
+a common base score. We accordingly narrow our novelty claim to the substitution action and the
+guarantee over the resulting mixture, rather than to the observation that conformal VLM
+filtering abstains too much, which we share with them.
 
 \paragraph{A note on the word ``certified''.}
 The term is used in at least three senses in nearby literatures, and we mean the third.
-In certified robustness \citep{cohen2019} it denotes a worst-case guarantee over a
-perturbation ball. In automated program repair \citep{legoues2019} a ``validated'' patch is
-one that passes a test suite, an empirical check with no statistical content. Our sense is
-the conformal one: a finite-sample, distribution-free, high-probability bound on the risk
-of the emitted mixture under exchangeability. We do not claim any per-item guarantee, and
+In certified robustness the guarantee is over a perturbation ball --- deterministically for
+exact verifiers, and with high probability over the smoothing noise for randomized smoothing
+\citep{cohen2019}. In automated program repair \citep{legoues2019} a ``validated'' patch is one
+that passes a test suite, an empirical check with no statistical content. Our sense is the
+conformal one: a finite-sample, distribution-free, high-probability bound on the risk of the
+emitted mixture under exchangeability. We claim no per-item guarantee, and
 \S\ref{sec:discussion} is explicit about what the guarantee does not say.
 
 \subsection{Distribution shift caused by the predictor}
