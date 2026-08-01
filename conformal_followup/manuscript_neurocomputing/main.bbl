@@ -1,0 +1,481 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{vovk2005}
+V.~Vovk, A.~Gammerman, G.~Shafer, Algorithmic Learning in a Random World,
+  Springer, New York, 2005.
+
+\bibitem{bates2021rcps}
+S.~Bates, A.~N. Angelopoulos, L.~Lei, J.~Malik, M.~I. Jordan,
+  Distribution-free, risk-controlling prediction sets, Journal of the ACM
+  68~(6) (2021) 43:1--43:34.
+
+\bibitem{angelopoulos2021ltt}
+A.~N. Angelopoulos, S.~Bates, E.~J. Cand{\`e}s, M.~I. Jordan, L.~Lei, Learn
+  then test: Calibrating predictive algorithms to achieve risk control, arXiv
+  preprint arXiv:2110.01052 (2021).
+
+\bibitem{conflvlm}
+Z.~Li, C.~Yan, N.~J. Jackson, W.~Cui, B.~Li, J.~Zhang, B.~A. Malin,
+  \href{https://aclanthology.org/2025.emnlp-main.576/}{Towards statistical
+  factuality guarantee for large vision--language models}, in: Proceedings of
+  the 2025 Conference on Empirical Methods in Natural Language Processing
+  (EMNLP), Association for Computational Linguistics, Suzhou, China, 2025.
+\newline\urlprefix\url{https://aclanthology.org/2025.emnlp-main.576/}
+
+\bibitem{conformalfactuality}
+C.~Mohri, T.~Hashimoto, Language models with conformal factuality guarantees,
+  in: International Conference on Machine Learning (ICML), 2024,
+  arXiv:2402.10978.
+
+\bibitem{opera}
+Q.~Huang, X.~Dong, P.~Zhang, B.~Wang, C.~He, J.~Wang, D.~Lin, W.~Zhang, N.~Yu,
+  {OPERA}: Alleviating hallucination in multi-modal large language models via
+  over-trust penalty and retrospection-allocation, in: IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 2024.
+
+\bibitem{vcd}
+S.~Leng, H.~Zhang, G.~Chen, X.~Li, S.~Lu, C.~Miao, L.~Bing, Mitigating object
+  hallucinations in large vision-language models through visual contrastive
+  decoding, in: IEEE/CVF Conference on Computer Vision and Pattern Recognition
+  (CVPR), Seattle, WA, USA, 2024.
+
+\bibitem{degf}
+C.~Zhang, Z.~Wan, Z.~Kan, M.~Q. Ma, S.~Stepputtis, D.~Ramanan,
+  R.~Salakhutdinov, L.-P. Morency, K.~Sycara, Y.~Xie,
+  \href{https://arxiv.org/abs/2502.06130}{Self-correcting decoding with
+  generative feedback for mitigating hallucinations in large vision-language
+  models}, in: International Conference on Learning Representations (ICLR),
+  2025.
+\newline\urlprefix\url{https://arxiv.org/abs/2502.06130}
+
+\bibitem{attnlens}
+Z.~Jiang, J.~Chen, B.~Zhu, T.~Luo, Y.~Shen, X.~Yang,
+  \href{https://arxiv.org/abs/2411.16724}{Devils in middle layers of large
+  vision-language models: Interpreting, detecting and mitigating object
+  hallucinations via attention lens}, in: IEEE/CVF Conference on Computer
+  Vision and Pattern Recognition (CVPR), 2025.
+\newline\urlprefix\url{https://arxiv.org/abs/2411.16724}
+
+\bibitem{only}
+Z.~Wan, C.~Zhang, S.~Yong, M.~Q. Ma, S.~Stepputtis, L.-P. Morency, D.~Ramanan,
+  K.~Sycara, Y.~Xie, \href{https://arxiv.org/abs/2507.00898}{{ONLY}: One-layer
+  intervention sufficiently mitigates hallucinations in large vision-language
+  models}, in: IEEE/CVF International Conference on Computer Vision (ICCV),
+  2025, pp. 3225--3234.
+\newline\urlprefix\url{https://arxiv.org/abs/2507.00898}
+
+\bibitem{maskcd}
+J.~Deng, Y.~Yang, \href{https://arxiv.org/abs/2510.02790}{{MaskCD}: Mitigating
+  {LVLM} hallucinations by image head masked contrastive decoding}, in:
+  Findings of the Association for Computational Linguistics: EMNLP 2025,
+  Association for Computational Linguistics, 2025, pp. 18854--18866.
+\newline\urlprefix\url{https://arxiv.org/abs/2510.02790}
+
+\bibitem{causalgating}
+Z.~Cheng, W.~Chen, F.~Zhang, D.~Shen,
+  \href{https://arxiv.org/abs/2605.24024}{Mitigating hallucinations in large
+  vision-language models via causal route gating}, in: International Conference
+  on Machine Learning (ICML), 2026, spotlight.
+\newline\urlprefix\url{https://arxiv.org/abs/2605.24024}
+
+\bibitem{mcallava}
+Q.~Zhao, X.~Zhang, Y.~Li, Y.~Xing, X.~Yuan, F.~Tang, S.~Fan, X.~Chen, X.~Zhang,
+  D.~Wang, \href{https://arxiv.org/abs/2507.09184}{{MCA-LLaVA}: Manhattan
+  causal attention for reducing hallucination in large vision-language models},
+  in: Proceedings of the 33rd ACM International Conference on Multimedia (ACM
+  MM), Association for Computing Machinery, 2025.
+\newline\urlprefix\url{https://arxiv.org/abs/2507.09184}
+
+\bibitem{marine}
+L.~Zhao, Y.~Deng, W.~Zhang, Q.~Gu,
+  \href{https://proceedings.mlr.press/v267/zhao25j.html}{Mitigating object
+  hallucination in large vision-language models via image-grounded guidance},
+  in: Proceedings of the 42nd International Conference on Machine Learning
+  (ICML), Vol. 267 of Proceedings of Machine Learning Research, PMLR, 2025, pp.
+  77461--77486, spotlight.
+\newline\urlprefix\url{https://proceedings.mlr.press/v267/zhao25j.html}
+
+\bibitem{woodpecker}
+S.~Yin, C.~Fu, S.~Zhao, T.~Xu, H.~Wang, D.~Sui, Y.~Shen, K.~Li, X.~Sun,
+  E.~Chen, \href{https://doi.org/10.1007/s11432-024-4251-x}{Woodpecker:
+  Hallucination correction for multimodal large language models}, Science China
+  Information Sciences 67~(12) (2024) 220105:1--220105:13.
+\newline\urlprefix\url{https://doi.org/10.1007/s11432-024-4251-x}
+
+\bibitem{lure}
+Y.~Zhou, C.~Cui, J.~Yoon, L.~Zhang, Z.~Deng, C.~Finn, M.~Bansal, H.~Yao,
+  Analyzing and mitigating object hallucination in large vision-language
+  models, in: International Conference on Learning Representations (ICLR),
+  Vienna, Austria, 2024.
+
+\bibitem{reverse}
+T.-H. Wu, H.~Lee, J.~Ge, J.~E. Gonzalez, T.~Darrell, D.~M. Chan,
+  \href{https://reverse-vlm.github.io/}{Generate, but verify: Reducing
+  hallucination in vision-language models with retrospective resampling}, in:
+  Advances in Neural Information Processing Systems (NeurIPS), 2025.
+\newline\urlprefix\url{https://reverse-vlm.github.io/}
+
+\bibitem{mkgrag}
+J.~Lee, Y.~Wang, J.~Li, M.~Zhang,
+  \href{https://aclanthology.org/2024.acl-long.579/}{Multimodal reasoning with
+  multimodal knowledge graph}, in: Proceedings of the 62nd Annual Meeting of
+  the Association for Computational Linguistics (ACL), Bangkok, Thailand, 2024,
+  pp. 10767--10782.
+\newline\urlprefix\url{https://aclanthology.org/2024.acl-long.579/}
+
+\bibitem{rule}
+P.~Xia, K.~Zhu, H.~Li, H.~Zhu, Y.~Li, G.~Li, L.~Zhang, H.~Yao, {RULE}: Reliable
+  multimodal {RAG} for factuality in medical vision language models, in:
+  Proceedings of the 2024 Conference on Empirical Methods in Natural Language
+  Processing (EMNLP), Miami, Florida, USA, 2024, pp. 1081--1093.
+
+\bibitem{conformallm}
+V.~Quach, A.~Fisch, T.~Schuster, A.~Yala, J.~H. Sohn, T.~S. Jaakkola,
+  R.~Barzilay, \href{https://arxiv.org/abs/2306.10193}{Conformal language
+  modeling}, in: International Conference on Learning Representations (ICLR),
+  2024.
+\newline\urlprefix\url{https://arxiv.org/abs/2306.10193}
+
+\bibitem{onlineabstention}
+M.~Lee, Y.~Jung, S.~Park, Online conformal abstention for factuality control
+  under adversarial bandit feedback, arXiv preprint arXiv:2506.14067 (2025).
+
+\bibitem{cmvkgguard}
+Q.-V. Dang, N.-S.-A. Nguyen, T.-B.-D. Vo, M.~N. Dinh, A.~D. Le, H.~V. Vu, P.~L.
+  Nguyen, Real-time hallucination correction in vision-language models using
+  dynamic knowledge graph verification, Discover Artificial IntelligenceIn
+  press (2026).
+
+\bibitem{crcimposs}
+V.~Kotte, \href{https://arxiv.org/abs/2606.29054}{When can conformal risk
+  control certify {LLM} outputs? bounds, impossibility, and adaptation for
+  structured generation}, arXiv preprint arXiv:2606.29054 (2026).
+\newline\urlprefix\url{https://arxiv.org/abs/2606.29054}
+
+\bibitem{twoaxes}
+B.~J. Wagner, Two axes of {LLM} abstention: Answer correctness and question
+  answerability, arXiv preprint arXiv:2607.08456 (2026).
+
+\bibitem{bcea}
+J.~Xu, Y.~Wu, D.~Zeng, J.~Paisley, Q.~Zhao,
+  \href{https://arxiv.org/abs/2606.16667}{Look again before you abstain:
+  Budgeted conformal evidence acquisition for reliable vision--language
+  models}, arXiv preprint arXiv:2606.16667 (2026).
+\newline\urlprefix\url{https://arxiv.org/abs/2606.16667}
+
+\bibitem{amber}
+J.~Wang, Y.~Wang, G.~Xu, J.~Zhang, Y.~Gu, H.~Jia, J.~Wang, H.~Xu, M.~Yan,
+  J.~Zhang, J.~Sang, \href{https://arxiv.org/abs/2311.07397}{{AMBER}: An
+  {LLM}-free multi-dimensional benchmark for {MLLM}s hallucination evaluation},
+  arXiv preprint arXiv:2311.07397 (2023).
+\newline\urlprefix\url{https://arxiv.org/abs/2311.07397}
+
+\bibitem{bai2024survey}
+Z.~Bai, P.~Wang, T.~Xiao, T.~He, Z.~Han, Z.~Zhang, M.~Z. Shou, Hallucination of
+  multimodal large language models: A survey, arXiv preprint arXiv:2404.18930
+  (2024).
+
+\bibitem{liu2024survey}
+H.~Liu, W.~Xue, Y.~Chen, D.~Chen, X.~Zhao, K.~Wang, L.~Hou, R.~Li, W.~Peng, A
+  survey on hallucination in large vision--language models, arXiv preprint
+  arXiv:2402.00253 (2024).
+
+\bibitem{ji2023}
+Z.~Ji, N.~Lee, R.~Frieske, T.~Yu, D.~Su, Y.~Xu, E.~Ishii, Y.~Bang, A.~Madotto,
+  P.~Fung, Survey of hallucination in natural language generation, ACM
+  Computing Surveys 55~(12) (2023) 248:1--248:38.
+
+\bibitem{liu2023lrv}
+F.~Liu, K.~Lin, L.~Li, J.~Wang, Y.~Yacoob, L.~Wang, Mitigating hallucination in
+  large multi-modal models via robust instruction tuning, in: International
+  Conference on Learning Representations (ICLR), 2024.
+
+\bibitem{guo2017}
+C.~Guo, G.~Pleiss, Y.~Sun, K.~Q. Weinberger, On calibration of modern neural
+  networks, in: International Conference on Machine Learning (ICML), 2017.
+
+\bibitem{owlv2}
+M.~Minderer, A.~A. Gritsenko, N.~Houlsby, Scaling open-vocabulary object
+  detection, in: Advances in Neural Information Processing Systems (NeurIPS),
+  2023.
+
+\bibitem{liu2024groundingdino}
+S.~Liu, Z.~Zeng, T.~Ren, F.~Li, H.~Zhang, J.~Yang, Q.~Jiang, C.~Li, J.~Yang,
+  H.~Su, J.~Zhu, L.~Zhang, Grounding dino: Marrying dino with grounded
+  pre-training for open-set object detection, in: European Conference on
+  Computer Vision (ECCV), 2024.
+
+\bibitem{pope}
+Y.~Li, Y.~Du, K.~Zhou, J.~Wang, W.~X. Zhao, J.-R. Wen, Evaluating object
+  hallucination in large vision-language models, in: Proceedings of the 2023
+  Conference on Empirical Methods in Natural Language Processing (EMNLP),
+  Association for Computational Linguistics, Singapore, 2023, pp. 292--305.
+
+\bibitem{chair}
+A.~Rohrbach, L.~A. Hendricks, K.~Burns, T.~Darrell, K.~Saenko, Object
+  hallucination in image captioning, in: Proceedings of the 2018 Conference on
+  Empirical Methods in Natural Language Processing (EMNLP), Association for
+  Computational Linguistics, Brussels, Belgium, 2018, pp. 4035--4045.
+
+\bibitem{sun2024aligning}
+Z.~Sun, S.~Shen, S.~Cao, H.~Liu, C.~Li, Y.~Shen, C.~Gan, L.~Gui, Y.-X. Wang,
+  Y.~Yang, K.~Keutzer, T.~Darrell,
+  \href{https://aclanthology.org/2024.findings-acl.775/}{Aligning large
+  multimodal models with factually augmented {RLHF}}, in: Findings of the
+  Association for Computational Linguistics: ACL 2024, Association for
+  Computational Linguistics, Bangkok, Thailand, 2024, pp. 13088--13110.
+\newline\urlprefix\url{https://aclanthology.org/2024.findings-acl.775/}
+
+\bibitem{mme}
+C.~Fu, P.~Chen, Y.~Shen, Y.~Qin, M.~Zhang, X.~Lin, J.~Yang, X.~Zheng, K.~Li,
+  X.~Sun, Y.~Wu, R.~Ji, C.~Shan, R.~He,
+  \href{https://arxiv.org/abs/2306.13394}{{MME}: A comprehensive evaluation
+  benchmark for multimodal large language models}, arXiv preprint
+  arXiv:2306.13394 (2023).
+\newline\urlprefix\url{https://arxiv.org/abs/2306.13394}
+
+\bibitem{hallusionbench}
+T.~Guan, F.~Liu, X.~Wu, R.~Xian, Z.~Li, X.~Liu, X.~Wang, L.~Chen, F.~Huang,
+  Y.~Yacoob, D.~Manocha, T.~Zhou, {HallusionBench}: An advanced diagnostic
+  suite for entangled language hallucination and visual illusion in large
+  vision-language models, in: IEEE/CVF Conference on Computer Vision and
+  Pattern Recognition (CVPR), 2024.
+
+\bibitem{gqa}
+D.~A. Hudson, C.~D. Manning, {GQA}: A new dataset for real-world visual
+  reasoning and compositional question answering, in: IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition (CVPR), 2019.
+
+\bibitem{chen2024halc}
+Z.~Chen, Z.~Zhao, H.~Luo, H.~Yao, B.~Li, J.~Zhou, Halc: Object hallucination
+  reduction via adaptive focal-contrast decoding, in: International Conference
+  on Machine Learning (ICML), 2024.
+
+\bibitem{favero2024}
+A.~Favero, L.~Zancato, M.~Trager, S.~Choudhary, P.~Perera, A.~Achille,
+  A.~Swaminathan, S.~Soatto, Multi-modal hallucination control by visual
+  information grounding, in: IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR), 2024.
+
+\bibitem{yu2024rlhfv}
+T.~Yu, Y.~Yao, H.~Zhang, T.~He, Y.~Han, G.~Cui, J.~Hu, Z.~Liu, H.-T. Zheng,
+  M.~Sun, T.-S. Chua, Rlhf-v: Towards trustworthy mllms via behavior alignment
+  from fine-grained correctional human feedback, in: IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition (CVPR), 2024.
+
+\bibitem{papadopoulos2002}
+H.~Papadopoulos, K.~Proedrou, V.~Vovk, A.~Gammerman, Inductive confidence
+  machines for regression, in: European Conference on Machine Learning (ECML),
+  2002, pp. 345--356.
+
+\bibitem{lei2018}
+J.~Lei, M.~G'Sell, A.~Rinaldo, R.~J. Tibshirani, L.~Wasserman,
+  Distribution-free predictive inference for regression, Journal of the
+  American Statistical Association 113~(523) (2018) 1094--1111.
+
+\bibitem{angelopoulos2023gentle}
+A.~N. Angelopoulos, S.~Bates, Conformal prediction: A gentle introduction,
+  Foundations and Trends in Machine Learning 16~(4) (2023) 494--591.
+
+\bibitem{romano2019}
+Y.~Romano, E.~Patterson, E.~J. Cand{\`e}s, Conformalized quantile regression,
+  in: Advances in Neural Information Processing Systems (NeurIPS), 2019.
+
+\bibitem{barber2021}
+R.~F. Barber, E.~J. Cand{\`e}s, A.~Ramdas, R.~J. Tibshirani, Predictive
+  inference with the jackknife+, Annals of Statistics 49~(1) (2021) 486--507.
+
+\bibitem{sadinle2019}
+M.~Sadinle, J.~Lei, L.~Wasserman, Least ambiguous set-valued classifiers with
+  bounded error levels, Journal of the American Statistical Association
+  114~(525) (2019) 223--234.
+
+\bibitem{ding2023}
+T.~Ding, A.~N. Angelopoulos, S.~Bates, M.~I. Jordan, R.~J. Tibshirani,
+  Class-conditional conformal prediction with many classes, in: Advances in
+  Neural Information Processing Systems (NeurIPS), 2023.
+
+\bibitem{vovk2003mondrian}
+V.~Vovk, D.~Lindsay, I.~Nouretdinov, A.~Gammerman, Mondrian confidence machine,
+  On-line Compression Modelling project, Working Paper~4, Royal Holloway,
+  University of London (Mar. 2003).
+
+\bibitem{barber2023}
+R.~F. Barber, E.~J. Cand{\`e}s, A.~Ramdas, R.~J. Tibshirani, Conformal
+  prediction beyond exchangeability, Annals of Statistics 51~(2) (2023)
+  816--845.
+
+\bibitem{angelopoulos2024crc}
+A.~N. Angelopoulos, S.~Bates, A.~Fisch, L.~Lei, T.~Schuster, Conformal risk
+  control, in: International Conference on Learning Representations (ICLR),
+  2024.
+
+\bibitem{waudbysmith2024}
+I.~Waudby-Smith, A.~Ramdas, Estimating means of bounded random variables by
+  betting, Journal of the Royal Statistical Society Series B 86~(1) (2024)
+  1--27.
+
+\bibitem{clopper1934}
+C.~J. Clopper, E.~S. Pearson, The use of confidence or fiducial limits
+  illustrated in the case of the binomial, Biometrika 26~(4) (1934) 404--413.
+
+\bibitem{ramdas2023}
+A.~Ramdas, P.~Gr{\"u}nwald, V.~Vovk, G.~Shafer, Game-theoretic statistics and
+  safe anytime-valid inference, Statistical Science 38~(4) (2023) 576--601.
+
+\bibitem{chow1970}
+C.~K. Chow, On optimum recognition error and reject tradeoff, IEEE Transactions
+  on Information Theory 16~(1) (1970) 41--46.
+
+\bibitem{elyaniv2010}
+R.~El-Yaniv, Y.~Wiener, On the foundations of noise-free selective
+  classification, Journal of Machine Learning Research 11 (2010) 1605--1641.
+
+\bibitem{bartlett2008}
+P.~L. Bartlett, M.~H. Wegkamp, Classification with a reject option using a
+  hinge loss, Journal of Machine Learning Research 9 (2008) 1823--1840.
+
+\bibitem{cortes2016}
+C.~Cortes, G.~DeSalvo, M.~Mohri, Learning with rejection, in: International
+  Conference on Algorithmic Learning Theory (ALT), 2016, pp. 67--82.
+
+\bibitem{geifman2019}
+Y.~Geifman, R.~El-Yaniv, Selectivenet: A deep neural network with an integrated
+  reject option, in: International Conference on Machine Learning (ICML), 2019.
+
+\bibitem{gui2024conformal}
+Y.~Gui, Y.~Jin, Z.~Ren, Conformal alignment: Knowing when to trust foundation
+  models with guarantees, in: Advances in Neural Information Processing Systems
+  (NeurIPS), 2024.
+
+\bibitem{kumar2023}
+B.~Kumar, C.~Lu, G.~Gupta, A.~Palepu, D.~Bellamy, R.~Raskar, A.~Beam,
+  \href{https://arxiv.org/abs/2305.18404}{Conformal prediction with large
+  language models for multi-choice question answering}, in: ICML 2023 Workshop
+  on Neural Conversational AI: What's Left to {TEACH} (Trustworthy, Enhanced,
+  Adaptable, Capable and Human-centric) Chatbots?, 2023.
+\newline\urlprefix\url{https://arxiv.org/abs/2305.18404}
+
+\bibitem{ren2023knowno}
+A.~Z. Ren, A.~Dixit, A.~Bodrova, S.~Singh, S.~Tu, N.~Brown, P.~Xu, L.~Takayama,
+  F.~Xia, J.~Varley, Z.~Xu, D.~Sadigh, A.~Zeng, A.~Majumdar, Robots that ask
+  for help: Uncertainty alignment for large language model planners, in:
+  Conference on Robot Learning (CoRL), 2023.
+
+\bibitem{tecp}
+B.~Xu, Y.~Lu, \href{https://doi.org/10.3390/math13203351}{{TECP}: Token-entropy
+  conformal prediction for {LLM}s}, Mathematics 13~(20) (2025) 3351.
+\newline\urlprefix\url{https://doi.org/10.3390/math13203351}
+
+\bibitem{cover}
+Y.~Chen, Y.~Wang, S.~Liu, Y.~Jing, D.~Tao, {CoVeR}: Conformal calibration for
+  versatile and reliable autoregressive next-token prediction, arXiv preprint
+  arXiv:2509.04733 (2025).
+
+\bibitem{tamingvar}
+L.~Pang, L.~Huang, J.~Lin, T.~Wang, A.~Aue, C.~E. Priebe, Taming variability:
+  Randomized and bootstrapped conformal risk control for {LLM}s, arXiv preprint
+  arXiv:2509.23007 (2025).
+
+\bibitem{pasc}
+V.~Kotte, {PASC}: Pipeline-aware conformal prediction with joint coverage
+  guarantees for multi-stage {NLP} and {LLM} pipelines, arXiv preprint
+  arXiv:2605.18812 (2026).
+
+\bibitem{clip}
+A.~Radford, J.~W. Kim, C.~Hallacy, A.~Ramesh, G.~Goh, S.~Agarwal, G.~Sastry,
+  A.~Askell, P.~Mishkin, J.~Clark, G.~Krueger, I.~Sutskever, Learning
+  transferable visual models from natural language supervision, in:
+  International Conference on Machine Learning (ICML), 2021.
+
+\bibitem{kadavath2022}
+S.~Kadavath, T.~Conerly, A.~Askell, T.~Henighan, et~al., Language models
+  (mostly) know what they know, arXiv preprint arXiv:2207.05221 (2022).
+
+\bibitem{kuhn2023}
+L.~Kuhn, Y.~Gal, S.~Farquhar, Semantic uncertainty: Linguistic invariances for
+  uncertainty estimation in natural language generation, in: International
+  Conference on Learning Representations (ICLR), 2023.
+
+\bibitem{farquhar2024}
+S.~Farquhar, J.~Kossen, L.~Kuhn, Y.~Gal, Detecting hallucinations in large
+  language models using semantic entropy, Nature 630 (2024) 625--630.
+
+\bibitem{lin2022}
+S.~Lin, J.~Hilton, O.~Evans, Teaching models to express their uncertainty in
+  words, Transactions on Machine Learning Research (2022).
+
+\bibitem{manakul2023}
+P.~Manakul, A.~Liusie, M.~J.~F. Gales, Selfcheckgpt: Zero-resource black-box
+  hallucination detection for generative large language models, in: Conference
+  on Empirical Methods in Natural Language Processing (EMNLP), 2023.
+
+\bibitem{wang2023selfconsistency}
+X.~Wang, J.~Wei, D.~Schuurmans, Q.~Le, E.~Chi, S.~Narang, A.~Chowdhery,
+  D.~Zhou, Self-consistency improves chain of thought reasoning in language
+  models, in: International Conference on Learning Representations (ICLR),
+  2023.
+
+\bibitem{cohen2019}
+J.~M. Cohen, E.~Rosenfeld, J.~Z. Kolter, Certified adversarial robustness via
+  randomized smoothing, in: International Conference on Machine Learning
+  (ICML), 2019.
+
+\bibitem{legoues2019}
+C.~Le~Goues, M.~Pradel, A.~Roychoudhury, Automated program repair,
+  Communications of the ACM 62~(12) (2019) 56--65.
+
+\bibitem{tibshirani2019}
+R.~J. Tibshirani, R.~F. Barber, E.~J. Cand{\`e}s, A.~Ramdas, Conformal
+  prediction under covariate shift, in: Advances in Neural Information
+  Processing Systems (NeurIPS), 2019, pp. 2526--2536.
+
+\bibitem{fannjiang2022fcs}
+C.~Fannjiang, S.~Bates, A.~N. Angelopoulos, J.~Listgarten, M.~I. Jordan,
+  Conformal prediction under feedback covariate shift for biomolecular design,
+  Proceedings of the National Academy of Sciences 119~(43) (2022).
+
+\bibitem{anydist}
+D.~Prinster, S.~Stanton, A.~Liu, S.~Saria,
+  \href{https://arxiv.org/abs/2405.06627}{Conformal validity guarantees exist
+  for any data distribution (and how to find them)}, in: Proceedings of the
+  41st International Conference on Machine Learning (ICML), Vol. 235 of
+  Proceedings of Machine Learning Research, PMLR, 2024, pp. 41086--41118.
+\newline\urlprefix\url{https://arxiv.org/abs/2405.06627}
+
+\bibitem{gibbs2021}
+I.~Gibbs, E.~J. Cand{\`e}s, Adaptive conformal inference under distribution
+  shift, in: Advances in Neural Information Processing Systems (NeurIPS), 2021.
+
+\bibitem{chen2023frugalgpt}
+L.~Chen, M.~Zaharia, J.~Zou, \href{https://arxiv.org/abs/2305.05176}{Frugalgpt:
+  How to use large language models while reducing cost and improving
+  performance}, Transactions on Machine Learning Research (2024).
+\newline\urlprefix\url{https://arxiv.org/abs/2305.05176}
+
+\bibitem{gupta2024}
+N.~Gupta, H.~Narasimhan, W.~Jitkrittum, A.~S. Rawat, A.~K. Menon, S.~Kumar,
+  Language model cascades: Token-level uncertainty and beyond, in:
+  International Conference on Learning Representations (ICLR), 2024.
+
+\bibitem{hoeffding1956}
+W.~Hoeffding, On the distribution of the number of successes in independent
+  trials, Annals of Mathematical Statistics 27~(3) (1956) 713--721.
+
+\bibitem{llava}
+H.~Liu, C.~Li, Y.~Li, Y.~J. Lee, Improved baselines with visual instruction
+  tuning, in: IEEE/CVF Conference on Computer Vision and Pattern Recognition
+  (CVPR), Seattle, WA, USA, 2024.
+
+\bibitem{qwenvl}
+P.~Wang, S.~Bai, S.~Tan, S.~Wang, Z.~Fan, J.~Bai, K.~Chen, X.~Liu, J.~Wang,
+  W.~Ge, Y.~Fan, K.~Dang, M.~Du, X.~Ren, R.~Men, D.~Liu, C.~Zhou, J.~Zhou,
+  J.~Lin, Qwen2-{VL}: Enhancing vision-language model's perception of the world
+  at any resolution, arXiv preprint arXiv:2409.12191 (2024).
+
+\end{thebibliography}

@@ -1,0 +1,10 @@
+Highlights
+==========
+(Elsevier submission requirement: 3-5 bullet points, max 85 characters each,
+submitted as a separate file from the manuscript PDF.)
+
+- We introduce Certified-Correction Risk Control (CCRC) for VLM answers.
+- CCRC accepts, substitutes, or abstains, certifying the emitted error rate.
+- A detection-grounded score beats internal-uncertainty scores by 3.1-45.6 points.
+- We prove a mixture-level budget bounding how much self-certified repair can gain.
+- A generative extension fails: mid-caption repair raises downstream hallucination.
