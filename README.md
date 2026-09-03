@@ -53,6 +53,11 @@ CMVKG-Guard is a research project focused on developing a novel framework for de
 3.  **Research-Grade Quality**: This project demonstrates a systematic approach to addressing VLM hallucinations with comprehensive documentation.
 4.  **Implementation Gap**: While the core architecture is implemented, advanced algorithms (like complex reasoning verification) require further development.
 
+## Papers
+
+1. **Paper 1 — CMVKG-Guard.** Framework manuscript in `manuscript/`.
+2. **Paper 2 — "Certified Correction of Vision–Language Hallucinations: Gains, Preconditions, and a Sequential Failure Mode" (CCRC).** Follow-up study in `conformal_followup/`, manuscript in `conformal_followup/manuscript_neurocomputing/`. **Status: under review at Neurocomputing.**
+
 ## Usage
 
 To run the demonstration script:
