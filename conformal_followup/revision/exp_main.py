@@ -7,7 +7,7 @@ Also stores repair accounting (R1.8) and the cohort variant 'grounded only' (R1.
 import json, time, numpy as np, ccrc_rev as R
 S = R.load_settings(); M = R.Mode
 ALPHAS = (0.05, 0.10, 0.15, 0.20)
-DEV = {n: "AMBER(d) LLaVA" for n in R.MAIN[:4]}; DEV["AMBER(d) LLaVA"] = "POPE-1500 LLaVA"
+DEV = {n: "AMBER(d) LLaVA" for n in R.MAIN if not n.startswith("AMBER")}; DEV["AMBER(d) LLaVA"] = "POPE-1500 LLaVA"
 out = {}; t0 = time.time()
 for name in R.MAIN:
     for cohort, mode in (("all", M()), ("grounded", M(missing="drop"))):

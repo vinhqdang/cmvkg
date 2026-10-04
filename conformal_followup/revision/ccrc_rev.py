@@ -123,9 +123,15 @@ def load_settings():
     d = _J("exp9_vcd_pope.json")
     S["POPE-adv LLaVA+VCD"] = Setting("POPE-adv LLaVA+VCD", d["p_vcd"], d["answer"], d["gold"], d["owl"],
                                       ids["exp9_vcd_pope.json"], d["obj"])
-    d = _J("exp12_amber_all.json")
-    S["AMBER(d) LLaVA"] = Setting("AMBER(d) LLaVA", d["p_yes"], d["answer"], d["gold"], d["owl"],
-                                  ids["exp12_amber_all.json"], d["obj"])
+    d = _J("exp12_amber_all.json"); a_ids = ids["exp12_amber_all.json"]
+    p, ans, gold, owl, obj = list(d["p_yes"]), list(d["answer"]), list(d["gold"]), list(d["owl"]), list(d["obj"])
+    ext = os.path.join(ROOT, "exp17_amber_ext.json")
+    if os.path.exists(ext):                       # items 500.. of the same shuffled list (colab_exp17_amber_ext.py)
+        e = _J("exp17_amber_ext.json")
+        p += e["p_yes"]; ans += e["answer"]; gold += e["gold"]; owl += e["owl"]; obj += e["obj"]; a_ids = list(a_ids) + [str(x) for x in e["image"]]
+    S["AMBER(d) LLaVA"] = Setting("AMBER(d) LLaVA", p, ans, gold, owl, a_ids, obj)
+    big = load_pope_extended()
+    if big is not None: S["POPE-3000 LLaVA"] = big
     return S
 
 
@@ -141,6 +147,7 @@ def load_pope_extended():
 
 
 MAIN = ["POPE-1500 LLaVA", "POPE-adv LLaVA", "POPE-adv Qwen2-VL", "POPE-adv LLaVA+VCD", "AMBER(d) LLaVA"]
+if os.path.exists(os.path.join(ROOT, "exp16_pope_ext.json")): MAIN.insert(1, "POPE-3000 LLaVA")
 
 _ARR = ("p", "a", "y", "o", "img", "g", "b", "ok", "okr", "m")
 
