@@ -56,7 +56,7 @@ CMVKG-Guard is a research project focused on developing a novel framework for de
 ## Papers
 
 1. **Paper 1 — CMVKG-Guard.** Framework manuscript in `manuscript/`.
-2. **Paper 2 — "Certified Correction of Vision–Language Hallucinations: Gains, Preconditions, and a Sequential Failure Mode" (CCRC).** Follow-up study in `conformal_followup/`, manuscript in `conformal_followup/manuscript_neurocomputing/`. **Status: under review at Neurocomputing.**
+2. **Paper 2 — "Certified Correction of Vision–Language Hallucinations" (CCRC).** Follow-up study in `conformal_followup/`. Status: rejected at Neurocomputing; revised in `conformal_followup/manuscript_revised/` (journal-agnostic source, all reviewer comments addressed in `conformal_followup/revision/RESPONSE.md`) and being prepared for submission to another journal. The earlier Neurocomputing version is kept in `conformal_followup/manuscript_neurocomputing/`.
 
 ## Usage
 
