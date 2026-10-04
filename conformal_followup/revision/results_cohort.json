@@ -1,0 +1,130 @@
+{
+ "POPE-1500 LLaVA": {
+  "n_items": 1500,
+  "n_images": 250,
+  "items_per_image": 6.0,
+  "n_grounded": 1500,
+  "n_ungrounded": 0,
+  "n_unparsed_object": null,
+  "mu": 0.18066666666666664,
+  "mu_grounded": 0.18066666666666664,
+  "acc_detector_grounded": 0.8313333333333334,
+  "fold_images": [
+   83.0,
+   83.0,
+   84.0
+  ],
+  "fold_items": [
+   498.0,
+   498.0,
+   504.0
+  ],
+  "icc_model_error": -0.039800665252603194,
+  "icc_detector_error": -0.036866412213740485
+ },
+ "POPE-adv LLaVA": {
+  "n_items": 450,
+  "n_images": 75,
+  "items_per_image": 6.0,
+  "n_grounded": 444,
+  "n_ungrounded": 6,
+  "n_unparsed_object": 6,
+  "mu": 0.17333333333333334,
+  "mu_grounded": 0.17342342342342343,
+  "acc_detector_grounded": 0.8243243243243243,
+  "fold_images": [
+   25.0,
+   25.0,
+   25.0
+  ],
+  "fold_items": [
+   150.0,
+   150.0,
+   150.0
+  ],
+  "icc_model_error": -0.052866508578602325,
+  "icc_detector_error": -0.06947216465647428
+ },
+ "POPE-adv Qwen2-VL": {
+  "n_items": 600,
+  "n_images": 100,
+  "items_per_image": 6.0,
+  "n_grounded": 591,
+  "n_ungrounded": 9,
+  "n_unparsed_object": 9,
+  "mu": 0.1266666666666667,
+  "mu_grounded": 0.12859560067681897,
+  "acc_detector_grounded": 0.8291032148900169,
+  "fold_images": [
+   33.0,
+   33.0,
+   34.0
+  ],
+  "fold_items": [
+   198.0,
+   198.0,
+   204.0
+  ],
+  "icc_model_error": -0.03513677811550147,
+  "icc_detector_error": -0.048424459221117974
+ },
+ "POPE-adv LLaVA+VCD": {
+  "n_items": 600,
+  "n_images": 100,
+  "items_per_image": 6.0,
+  "n_grounded": 591,
+  "n_ungrounded": 9,
+  "n_unparsed_object": 9,
+  "mu": 0.19666666666666666,
+  "mu_grounded": 0.19627749576988152,
+  "acc_detector_grounded": 0.8291032148900169,
+  "fold_images": [
+   33.0,
+   33.0,
+   34.0
+  ],
+  "fold_items": [
+   198.0,
+   198.0,
+   204.0
+  ],
+  "icc_model_error": -0.036634506242905804,
+  "icc_detector_error": -0.048424459221117974
+ },
+ "AMBER(d) LLaVA": {
+  "n_items": 500,
+  "n_images": 392,
+  "items_per_image": 1.2755102040816326,
+  "n_grounded": 228,
+  "n_ungrounded": 272,
+  "n_unparsed_object": 272,
+  "mu": 0.21399999999999997,
+  "mu_grounded": 0.11403508771929827,
+  "acc_detector_grounded": 0.956140350877193,
+  "fold_images": [
+   130.0,
+   130.0,
+   132.0
+  ],
+  "fold_items": [
+   165.6,
+   166.91,
+   167.49
+  ],
+  "icc_model_error": -0.08511431400574725,
+  "icc_detector_error": 0.05039670878636514
+ },
+ "_image_overlap": {
+  "POPE-1500 LLaVA & POPE-adv LLaVA": 75,
+  "POPE-1500 LLaVA & POPE-adv Qwen2-VL": 100,
+  "POPE-1500 LLaVA & POPE-adv LLaVA+VCD": 100,
+  "POPE-1500 LLaVA & AMBER(d) LLaVA": 0,
+  "POPE-adv LLaVA & POPE-adv Qwen2-VL": 75,
+  "POPE-adv LLaVA & POPE-adv LLaVA+VCD": 75,
+  "POPE-adv LLaVA & AMBER(d) LLaVA": 0,
+  "POPE-adv Qwen2-VL & POPE-adv LLaVA+VCD": 100,
+  "POPE-adv Qwen2-VL & AMBER(d) LLaVA": 0,
+  "POPE-adv LLaVA+VCD & AMBER(d) LLaVA": 0
+ },
+ "_unique_images_total": 642
+}

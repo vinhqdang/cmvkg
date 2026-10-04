@@ -1,0 +1,91 @@
+\documentclass[11pt,a4paper]{article}
+% Journal-agnostic submission draft. Anonymous for review; the title page with author details is
+% title_page.tex. Reformat to the target journal's class by replacing this preamble and the
+% bibliography style only: all content lives in the \input files.
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,multirow,array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{setspace}
+\onehalfspacing
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\renewcommand{\topfraction}{0.95}\renewcommand{\textfraction}{0.05}\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{4}\setcounter{totalnumber}{6}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\Risk}{\mathcal{R}}
+\newcommand{\Cov}{\mathcal{C}}
+\newcommand{\emit}{\mathcal{E}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\Iota}{\mathcal{I}}
+\newcommand{\ind}[1]{\mathbf{1}\{#1\}}
+
+\title{Certified Correction of Vision--Language Hallucinations:\\
+Guarantees, Gains and Failure Modes under a Pre-specified Protocol}
+\author{Anonymous Author(s)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Selective prediction gives a vision--language model (VLM) a distribution-free guarantee on the
+answers it emits and pays for it by abstaining on the rest. When the base error rate $\mu$
+exceeds the target $\alpha$, any predictor that may only emit or abstain the model's own answer
+must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of inputs. We ask what changes when the
+predictor may emit a different answer. Certified-Correction Risk Control (CCRC) accepts the
+model's answer where a correctness score is high, substitutes the answer of a distinct evidence
+source (here an open-vocabulary detector) where that source is decisive, abstains otherwise, and
+certifies the error rate of everything emitted with a fixed-sequence Clopper--Pearson test.
+
+We prove validity for policy families indexed by pre-specified score values under i.i.d.
+sampling of calibration units, and we evaluate CCRC under a protocol built so that the proved
+procedure and the evaluated procedure coincide: folds are unions of whole images, thresholds and
+repair gate are values fixed before calibration, the start of the test sequence is derived
+analytically, and the repair gate is fixed on external data, chosen on the fit fold, or
+certified by a union bound. On five benchmark--backbone cells, certified coverage over
+filtering changes by $+0.8$ to $+7.9$ points with an externally fixed gate, positive in all ten
+(cell, $\alpha$) combinations; an outer image-level bootstrap excludes zero only on the largest
+cell (250 images). Most of the repaired mass re-emits the model's own answer with detector
+confirmation, and only $0.04$--$1.7\%$ of test items have their answer changed; no
+false-positive existence error is corrected. The correctness score, not the repair, supplies
+most of the coverage, and fixed-sequence testing started at the minimal certifiable emitted set
+is fragile with small calibration folds. A matched-prefix experiment shows that mid-caption repair
+increases downstream hallucination, which blocks a fixed-point route to a sequential guarantee.
+\end{abstract}
+
+\input{sec_intro}
+\input{sec_related}
+\input{sec_setup}
+\input{sec_method}
+\input{sec_protocol}
+\input{sec_results}
+\input{sec_concurrent}
+\input{sec_sequential}
+\input{sec_discussion}
+
+\bibliographystyle{abbrvnat}
+\bibliography{refs}
+
+\appendix
+\input{sec_appendix}
+\end{document}

@@ -1,0 +1,78 @@
+\section{Introduction}
+\label{sec:intro}
+
+A vision--language model that answers ``is there a mouse in the image?'' wrongly is more
+useful if it says so. Selective prediction does this: a score ranks the model's answers, a
+threshold is calibrated on held-out data, and the model answers only above it. Conformal and
+risk-controlling variants \citep{bates2021rcps,angelopoulos2021ltt,angelopoulos2024crc} certify,
+with a finite-sample guarantee that makes no assumption on the score or the model, that the
+error rate among the answers that are emitted stays below a target $\alpha$.
+
+The guarantee is paid for in coverage, and part of the bill cannot be reduced. Kotte
+\citep{crcimposs} shows that when the base error rate $\mu$ exceeds $\alpha$, any predictor that
+may only emit or abstain the model's own answer must abstain on at least
+$(\mu-\alpha)/(1-\alpha)$ of inputs, whatever the score, the concentration inequality or the
+calibration budget (Proposition~\ref{prop:floor} below). The proof uses one premise: an
+abstained item is an item whose model answer stays wrong. A predictor that may emit a
+\emph{different} answer is outside the premise.
+
+This paper studies that possibility in the simplest setting where it can be made exact: yes/no
+object-existence questions, with an open-vocabulary detector as a second, distinct source of
+evidence. \emph{Certified-Correction Risk Control} (CCRC) accepts the model's answer where a
+correctness score is high, replaces it with the detector's answer where the detector's evidence
+is decisive, abstains otherwise, and certifies the error rate of the whole emitted set, accepted
+and substituted answers together.
+
+\paragraph{What the paper contributes.}
+Our aim is a result that survives a strict reading of the protocol. Four design decisions follow
+from that aim, and each is a contribution in its own right.
+\begin{enumerate}
+\item \emph{The proved procedure is the evaluated procedure.} Theorem~\ref{thm:validity} covers
+  policy families indexed by threshold \emph{values} fixed before calibration under i.i.d.
+  sampling of calibration units. Every reported number uses such a family: thresholds and repair
+  gate are read off the fit fold, never off the calibration sample whose errors are counted.
+\item \emph{The sampling unit is stated and respected.} POPE contributes six questions per
+  image; folds here are unions of whole images, we measure the within-image dependence of
+  errors, and a known-population simulation shows how clustering would degrade the guarantee and
+  how a one-item-per-image calibration restores it.
+\item \emph{The repair gate is not tuned on the evaluation data.} We report three ways of
+  fixing it that keep the guarantee: a constant chosen on a different benchmark, a choice made
+  on the fit fold, and a union bound over a pre-specified set of gates.
+\item \emph{Uncertainty is stated at the level of the data.} Gains are accompanied by an outer
+  image-level bootstrap, because hundreds of random splits of one benchmark measure the
+  procedure's sensitivity to the split, not the benchmark's sampling error.
+\end{enumerate}
+
+\paragraph{What we find.}
+\begin{itemize}
+\item With the gate fixed on an external benchmark, CCRC certifies $+0.8$ to $+7.9$ points more
+  coverage than filtering in all ten (cell, $\alpha$) combinations, and the image-bootstrap
+  interval excludes zero only on the largest cell (250 images). On the others the sign is
+  right in $65$--$95\%$ of bootstrap replicates but cannot be called (\S\ref{sec:main}).
+\item Choosing the gate on the fit fold, or certifying three gates by a union bound, is valid
+  but costs more than it returns when the calibration fold holds $150$--$200$ items
+  ($-6.2$ to $+9.4$ and $-16.5$ to $+4.4$ points over all cells); with $500$ items both help.
+\item The repair is mostly confirmation. Between $41$ and $96\%$ of repaired items are items on
+  which the detector agrees with the model, and the answer is changed for only $0.04$--$1.7\%$
+  of test items. The one-directional gate never corrects a false-positive existence error, and
+  a polarity-symmetric gate does not either (\S\ref{sec:accounting}).
+\item The start of the fixed sequence matters more than the repair on small folds. Starting
+  where a single error can be tolerated ($k\ge38$ at $\alpha=\delta=0.10$) rather than where
+  none can ($k\ge22$) raises filtering coverage on the smallest cell (calibration folds of $150$ items) from $22\%$
+  to $41\%$ when the first hypothesis sits at the minimal count, and removes the apparent loss on
+  AMBER that the conventional start produces (\S\ref{sec:start}).
+\item Certified coverage comes mostly from the score: a detection-grounded score certifies
+  $68\%$ on POPE-1500 against $41\%$ for model confidence and $0.5\%$ for the image--text
+  similarity score of ConfLVLM, while certified repair adds $3$--$6$ points
+  (\S\ref{sec:score}).
+\item In free-form generation, repairing a claim mid-caption increases downstream
+  hallucination in a matched-prefix experiment (\S\ref{sec:sequential}), which blocks the
+  fixed-point argument we had hoped to use for a sequential guarantee.
+\end{itemize}
+
+\paragraph{Scope.}
+Everything here concerns binary existence questions, one detector, one family of backbones and
+benchmarks whose images overlap ($642$ distinct images across all cells, and the POPE-adversarial
+cells are subsets of the POPE-1500 cell's $250$ images). We do not claim that correction is
+generally useful, only that under a protocol whose guarantee we can state it is valid and its
+gain is measured.

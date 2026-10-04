@@ -1,0 +1,12 @@
+\begin{tabular}{lccccc}
+\toprule
+ & POPE-1500,\ LLaVA & POPE-adv,\ LLaVA & POPE-adv,\ Qwen2-VL & POPE-adv,\ LLaVA+VCD & AMBER(d),\ LLaVA\\
+\midrule
+conventional protocol (item folds, calibration quantiles, $e_0{=}0$, fixed $q{=}0.10$) & 68.6/71.8 & 44.0/47.1 & 77.9/79.7 & 48.8/51.0 & 91.8/81.6\\
++ image-grouped folds & 68.2/71.3 & 43.1/48.3 & 77.6/79.5 & 47.9/50.8 & 92.0/81.9\\
++ fixed value grid and gate (fit fold) & 67.5/70.9 & 35.0/42.3 & 75.5/77.7 & 39.9/45.3 & 90.9/85.1\\
++ analytic start $e_0{=}1$ & 68.2/71.1 & 43.6/47.4 & 75.6/78.0 & 45.5/47.6 & 90.2/90.0\\
++ gate chosen on the fit fold & 68.2/77.0 & 43.6/39.4 & 75.6/68.3 & 45.5/39.7 & 90.2/89.8\\
++ all-item cohort & 68.2/77.0 & 44.5/41.4 & 76.9/71.2 & 45.8/39.6 & 55.2/55.8\\
+\bottomrule
+\end{tabular}
