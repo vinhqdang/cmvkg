@@ -1,0 +1,114 @@
+\section{Problem setup}
+\label{sec:setup}
+
+\subsection{Units, risk and the guarantee}
+
+Let $Z=(X,A^\star)$ be a query--answer pair, where $X$ contains an image and a question and
+$A^\star\in\{0,1\}$ is the gold answer. A VLM returns $\hat a(X)$. A second predictor (channel 2)
+returns an answer $b(X)$ and an evidence margin $m(X)\ge0$. Write $Y=\ind{\hat a(X)=A^\star}$ and
+$Y^{(2)}=\ind{b(X)=A^\star}$ for the two correctness indicators and $\mu=\Pr[Y=0]$ for the base
+risk. $\alpha$ is always a risk target and $\delta$ the failure probability of the certificate.
+
+A \emph{policy} $\pi$ maps $X$ to one of three actions: emit $\hat a(X)$, emit $b(X)$, or abstain.
+Let $\emit_\pi(X)=\ind{\pi\text{ emits}}$ be the emission indicator and
+$W_\pi=\emit_\pi\cdot\ind{\text{emitted answer}\ne A^\star}$ the indicator of an emitted error. The
+\emph{risk} and \emph{coverage} of $\pi$ are
+\[
+\Risk(\pi)=\frac{\E[W_\pi]}{\Pr[\emit_\pi=1]},\qquad \Cov(\pi)=\Pr[\emit_\pi=1],
+\]
+with the convention $\Risk(\pi)=0$ when $\Pr[\emit_\pi=1]=0$. The same convention applies to a
+realised abort: a procedure that certifies nothing emits nothing, has risk $0$ and coverage $0$,
+and every coverage figure in this paper includes aborted splits as zero coverage.
+
+\begin{assumption}[Sampling unit]
+\label{ass:iid}
+The calibration units $Z_1,\dots,Z_n$ are i.i.d.\ draws from a distribution $P$, independent of the
+data used to build the policy family (the \emph{fit} data), and the unit is the item.
+\end{assumption}
+
+Exchangeability is not enough here. Under exchangeability alone, sampling without replacement from
+a finite pool makes the number of emitted errors hypergeometric rather than binomial, and the exact
+binomial bound used below is not valid. When several questions share an image the item is not an
+i.i.d.\ unit; \S\ref{sec:clusters} states what remains true and measures what does not.
+
+\begin{assumption}[Pre-specified policy family]
+\label{ass:family}
+The candidate policies form a finite, ordered family $\pi_1,\dots,\pi_M$ whose members and order
+are functions of the fit data and of constants only, never of calibration outcomes or calibration
+features.
+\end{assumption}
+
+Calibration is a statement about the \emph{population} risk $\Risk(\pi_{\hat\jmath})$ of the policy
+the calibration sample selects; it is not a statement about any finite test fold, whose realised
+error rate carries binomial noise of its own.
+
+\subsection{Filtering and the floor it cannot cross}
+
+A \emph{filtering} policy uses a score $s(X)\in[0,1]$, large when the model is likely right, and
+emits $\hat a(X)$ when $s(X)\ge t$.
+
+\begin{proposition}[Abstention floor; Kotte \citep{crcimposs}]
+\label{prop:floor}
+Let $\mu>\alpha$. Any selective predictor whose emitted answer is always $\hat a(X)$ and whose risk
+is at most $\alpha$ satisfies
+\[
+1-\Cov\ \ge\ \frac{\mu-\alpha}{1-\alpha}.
+\]
+\end{proposition}
+\begin{proof}
+Split the error mass by emission, $\mu=\Risk\,\Cov+\Pr[Y=0\mid\text{abstain}](1-\Cov)\le\alpha\Cov+(1-\Cov)$.
+The inequality uses that abstaining does not change $Y$. Solving for $\Cov$ gives
+$\Cov\le(1-\mu)/(1-\alpha)$.
+\end{proof}
+
+The proof uses one premise: an abstained item's model answer is still wrong. It is a statement about
+the action space. Because $\alpha$ is chosen by the user and $\mu$ is estimated from data, the
+floor can be evaluated before calibration only up to the uncertainty of $\hat\mu$; a feasibility
+check should use a confidence bound on $\mu$, not its plug-in value.
+
+\subsection{Two channels}
+
+\begin{definition}[Channels]
+\label{def:channels}
+\emph{Channel 1} is a correctness score $s(X)\approx\Pr[Y=1\mid\phi(X)]$ fitted on features of the
+model's own output together with grounding features. \emph{Channel 2} is a distinct predictor
+$b(X)$ that answers the same question without using the VLM's answer, together with a margin
+$m(X)$ measuring how decisively it does so.
+\end{definition}
+
+We call channel 2 a \emph{distinct evidence source}. Statistical independence between $Y$ and
+$Y^{(2)}$ is neither assumed nor needed for validity: Theorem~\ref{thm:validity} holds for any
+fixed policy and needs only the sampling model. What distinctness buys is usefulness. A repair
+region helps only if $\Pr[Y^{(2)}=1\mid\text{region}]$ is high, which requires channel 2's errors to
+differ from the model's inside that region (\S\ref{sec:selfrepair} shows what happens when channel 2
+is the negation of the model's answer). Our instantiation also violates independence in the
+other direction: the detector score is an input to channel 1.
+
+\paragraph{Instantiation.}
+Channel 2 is OWLv2 \citep{owlv2} queried with the object named in the question. With detection
+confidence $o(X)$ and a fixed operating point $\theta=0.15$, $b(X)=\ind{o(X)\ge\theta}$ and
+$m(X)=|o(X)-\theta|$. A confident negative reaches only $m\le\theta$ while positives reach
+$1-\theta$, so with a single gate on $m$ every repair says ``the object is present''. Section
+\ref{sec:accounting} evaluates a polarity-symmetric gate as well. When no detector value exists
+(the object phrase could not be parsed, or the question concerns an attribute or relation), the
+item keeps channel 1's decision, receives $m=-1$, and can never be repaired.
+
+\begin{table}[t]
+\centering
+\caption{Notation.}
+\label{tab:notation}
+\small
+\begin{tabular}{@{}lp{0.78\textwidth}@{}}
+\toprule
+$\alpha,\delta$ & risk target; failure probability of the certificate\\
+$\mu$ & base risk $\Pr[Y=0]$\\
+$Y,\ Y^{(2)}$ & correctness indicators of the model and of channel 2\\
+$s(X),\ m(X)$ & channel-1 score; channel-2 evidence margin\\
+$t_1>\dots>t_M$ & acceptance thresholds, score \emph{values} fixed from fit data\\
+$g$ & repair-gate value on $m$, fixed from fit or external data\\
+$\emit_j$, $K_j$, $V_j$ & emission indicator, emitted count and emitted-error count of policy $j$ on the calibration sample\\
+$U(e,k;\delta)$ & one-sided Clopper--Pearson upper bound\\
+$k_{\mathrm{start}}(e_0)$ & smallest $k$ with $U(e_0,k;\delta)\le\alpha$\\
+\bottomrule
+\end{tabular}
+\end{table}

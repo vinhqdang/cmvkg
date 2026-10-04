@@ -1,0 +1,310 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{Certified coverage}
+\label{sec:main}
+
+Table~\ref{tab:main} compares CCRC with filtering on identical folds at $\alpha\in\{0.10,0.15\}$,
+$\delta=0.10$, all items, and Figure~\ref{fig:forest} plots the gains with their bootstrap intervals. Two
+certified variants appear. In the \emph{external gate} variant $q$ is a constant chosen once on a different
+benchmark (AMBER for the POPE cells, POPE-1500 for AMBER; the choice is $q=0.10$ at $\alpha=0.10$ and $0.25$
+at $0.15$ for the POPE cells, and $0.50$ for AMBER). In the \emph{fit-fold gate} variant $q$ is chosen inside each
+split on the fit fold, with filtering as one candidate.
+
+\begin{table}[t]
+\centering
+\caption{Certified coverage (\%), with the abort rate (\%) in parentheses, $\delta=0.10$, $400$ paired
+splits, all-item cohort. Gain is the mean paired difference over splits against filtering; the interval is the
+$95\%$ percentile interval from the outer image-level bootstrap (\S\ref{sec:protocol}), and
+$P(\text{gain}>0)$ is the fraction of bootstrap datasets with a positive gain.}
+\label{tab:main}
+\small
+\resizebox{\textwidth}{!}{\input{tables/main}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_forest.png}
+\caption{Gain in certified coverage over filtering. Points are means over $400$ splits of the original
+benchmark; bars are $95\%$ image-bootstrap intervals.}
+\label{fig:forest}
+\end{figure}
+
+With the external gate the gain is positive in all ten cells, from $+0.8$ to $+7.9$ points, and
+the share of bootstrap datasets with a positive gain is $0.65$--$0.99$. The interval excludes zero on
+POPE-1500 at both targets ($+2.9$ at $\alpha=0.10$, $+5.8$ at $0.15$) and on no other cell. The other cells
+rest on $75$--$392$ images, folds of $25$--$130$ images, and filtering aborts on $25\%$ and $14\%$ of splits on the two smallest;
+the data support the sign more than the size. The same data do not support a larger
+claim than that, and the per-split standard deviations (Appendix~\ref{app:audit}) are $2$--$15$ points.
+
+The fit-fold gate is the more flexible variant and the more variable. On POPE-1500 it selects $q=0.5$ in
+$84$--$92\%$ of splits and gains $+8.8$ and $+7.1$ points, a larger gain than any fixed gate; on the four cells
+with $150$--$200$ calibration items its gain ranges from $-6.2$ to $+9.4$ points and is negative in three of
+the four small cells at $\alpha=0.10$, because a gate chosen on a fit fold of $150$ items is itself noisy and a
+wrong choice costs more than the right one returns. The union over three gates avoids selection noise and pays
+$\delta/3$ per gate: it gains $+4.4$ and $+3.6$ points on POPE-1500 and loses up to $16.5$ points on
+the cells with fewer than $200$ calibration items (Appendix~\ref{app:audit}). The continuity gate $q=0.10$, selected in
+exploratory runs on these benchmarks, gains $+0.6$ to $+3.9$ points in every cell. We report it
+as an uncertified reference and do not use it for any claim, since a gate chosen with knowledge of the
+benchmarks is exactly what Theorem~\ref{thm:validity} does not cover.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.55\textwidth]{fig_alpha.png}
+\caption{Certified coverage against the risk target on POPE-1500. Bars are one standard deviation over
+splits.}
+\label{fig:alpha}
+\end{figure}
+
+Coverage rises with $\alpha$ for every arm (Figure~\ref{fig:alpha}); the gap between CCRC and filtering is
+largest at moderate targets. The audit columns of Appendix Table~\ref{tab:audit} are discussed in
+\S\ref{sec:validity-audit}.
+
+\subsection{What each protocol change does}
+\label{sec:ladder}
+
+Table~\ref{tab:ladder} introduces the changes one at a time, from a conventional implementation (item-level folds,
+thresholds and gate as quantiles of the calibration fold, a start at $k_{\mathrm{start}}(0)$ and a fixed $q=0.10$) to the
+protocol of this paper; the $\alpha=0.15$ version is in Appendix~\ref{app:ladder}.
+
+\begin{table}[t]
+\centering
+\caption{Filtering / CCRC certified coverage (\%) at $\alpha=0.10$ as the protocol changes. Rungs L0--L3 use the
+fixed gate $q=0.10$, rung L4 chooses the gate on the fit fold, and rung L5 keeps items with no detector
+value. L0--L4 use the grounded cohort of each cell; L5 uses all items, so
+its absolute level for AMBER is lower: the attribute and relation queries are harder and cannot be repaired.}
+\label{tab:ladder}
+\small
+\resizebox{\textwidth}{!}{\input{tables/ladder_01}}
+\end{table}
+
+Image-grouped folds change coverage by at most $1.2$ points and lower the test-fold exceedance on the four POPE
+cells from $0.14, 0.11, 0.16, 0.12$ to $0.10, 0.09, 0.09, 0.12$. Replacing calibration quantiles by fit-fold values
+costs coverage when the fixed sequence starts at $e_0=0$, because the first hypothesis then lands at
+a threshold where a single error aborts the test, and the abort rate of filtering on POPE-adv LLaVA rises from
+$19\%$ to $34\%$; the analytic start at $e_0=1$ recovers most of it. The gain of repair over filtering
+is $+2.9$ to $+3.5$ points on POPE-1500 under L0--L3, stable under all of these changes. On AMBER the loss of
+$-10.2$ points under the conventional protocol is not a property of repair: it falls to $-5.8$ with value-indexed
+thresholds and to $-0.3$ with the analytic start, and is $+0.6$ on the all-item cohort.
+
+\subsection{What a repair is}
+\label{sec:accounting}
+
+The reviewer-style question for any correction method is how often it changes the model's answer, and whether
+the changes are right. Table~\ref{tab:acct} separates the repaired items (those emitted through channel 2) into
+those where channel 2's answer differs from the model's and those where the two agree, and counts wrong-to-right and
+right-to-wrong changes.
+
+\begin{table}[t]
+\centering
+\caption{Accounting of repaired items, external-gate variant, all items, pooled over test folds of $400$ splits.
+``Repaired'' and ``answer changed'' are percentages of test items; the next five columns are percentages of repaired
+items. ``FP corrected'' is the number of the model's false-positive errors (it said yes, gold is no) whose emitted answer was
+corrected, over the number of such errors; ``FN corrected'' is the share of the model's false-negative errors corrected.}
+\label{tab:acct}
+\small
+\resizebox{\textwidth}{!}{\input{tables/acct}}
+\end{table}
+
+The repaired mass is $0.7$--$3.6\%$ of test items at $\alpha=0.10$, and the answer is changed for $0.04$--$1.7\%$
+of test items. Among repaired items the detector agrees with the model on $41$--$96\%$: these items are
+\emph{re-emitted with detector confirmation}, which is not correction and is a different benefit, namely that an item
+the correctness score would have abstained on is emitted because an independent source confirms it. Where the answer is
+changed it is almost always right (for example $2230$ wrong-to-right against $13$ right-to-wrong changes on POPE-1500).
+No false-positive error is corrected on the POPE cells ($0$ of $2{,}724$--$11{,}482$) and $2.6\%$ on AMBER
+with the larger gate $q=0.5$; between $0.4$ and $9.8\%$ of the model's false-negative errors are corrected.
+
+Table~\ref{tab:sym} repeats the accounting for one-sided and polarity-symmetric gates, each gating a fixed
+fraction $q=0.10$ of its own polarity's margins. The symmetric gate admits negative-polarity repairs, which are
+highly precise, and these confirm the model's own ``no'' answers; none changes an answer. The reason is
+structural in this instantiation: the model's false positives are items where the detector also fires, so the
+detector's strongly negative evidence occurs on items the model already got right.
+
+\begin{table}[t]
+\centering
+\caption{Gate polarity at $\alpha=0.10$, $q=0.10$ per polarity. Gain over filtering in points, repaired items as a
+percentage of test items, and the number of false-positive errors corrected (pooled over $400$ test folds).
+Pooled margin is the gate used elsewhere in the paper.}
+\label{tab:sym}
+\small
+\resizebox{\textwidth}{!}{\input{tables/sym}}
+\end{table}
+
+\paragraph{Where the gain comes from.}
+Repaired items are themselves emitted, so whenever the certified threshold does not move the gain over filtering equals
+the repaired mass at filtering's own threshold. Table~\ref{tab:dilution} splits the gain into this term and a dilution
+term, the extra accepted mass admitted because high-precision repairs lower the emitted risk and let the threshold
+open further; the gate is the continuity gate $q=0.10$. The certified threshold differs between the two arms on
+$2.5$--$34\%$ of splits, and the dilution term is $0.05$ to $1.5$ points; most of the gain is automatic.
+
+\begin{table}[t]
+\centering
+\caption{Gain decomposition (points of test coverage), $q=0.10$, all items, conditional on both arms certifying.}
+\label{tab:dilution}
+\small
+\resizebox{\textwidth}{!}{\input{tables/dilution}}
+\end{table}
+
+\subsection{The start of the sequence}
+\label{sec:start}
+
+Table~\ref{tab:start} varies the number of errors the first hypothesis can tolerate, $e_0\in\{0,1,2,3\}$ (so
+$k_{\mathrm{start}}=22,38,52,65$), and the placement multiplier $c\in\{1.0,1.5\}$, for filtering and CCRC with the
+fit-fold gate. On POPE-1500 the choice is nearly irrelevant for CCRC ($76.5$--$77.5\%$) and moves
+filtering by $2.6$ points. On the smallest cell (150 calibration items) filtering ranges from $22\%$ to
+$45\%$ with abort rates from $24$ to $67\%$, and CCRC follows. Neither extreme is good: $e_0=0$ makes the first
+test fail on a single error; large $e_0$ together with $c=1.5$ places the first hypothesis at a permissive threshold at which
+the score does not separate. We use $e_0=1$, $c=1.5$ throughout, fixed before the final runs and following the
+analytic argument of Lemma~\ref{lem:kstart}; the table shows it is a reasonable region and that it was not selected
+on test outcomes. The practical consequence is that conclusions drawn on calibration folds of $150$--$200$ items
+depend on the start of the sequence more than on the repair.
+
+\begin{table}[t]
+\centering
+\caption{Certified coverage (\%) and abort rate (\%) at $\alpha=0.10$ as the start of the fixed sequence varies,
+filtering and CCRC with the fit-fold gate (Appendix~\ref{app:ladder} for $\alpha=0.05$ and $0.15$).}
+\label{tab:start}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{tables/start_01}}
+\end{table}
+
+\subsection{Where the coverage comes from}
+\label{sec:score}
+
+\paragraph{The score.}
+Table~\ref{tab:scores} compares scores under the same protocol, filtering only. The scorer of ConfLVLM \citep{conflvlm},
+image--text similarity, certifies $0.5\%$ here at $\alpha=0.10$;
+VLM confidence alone certifies $41.0\%$; a learned combination of the VLM's own signals $58.8\%$; adding
+standardised image--text similarity does not help ($56.8\%$); adding detection grounding gives $68.2\%$ and the
+lowest area under the risk--coverage curve ($0.0562$ against $0.0678$). Against the similarity scorer the full CCRC
+arm (external gate, $71.1\%$) gains $70.6$ points, of which $67.7$ come from the score and $2.9$ from certified
+repair. The correctness score is the dominant lever.
+
+\begin{table}[t]
+\centering
+\caption{POPE-1500, filtering only: certified coverage (\%) with abort rate in parentheses, and area under the
+risk--coverage curve at $\alpha=0.10$ (lower is better).}
+\label{tab:scores}
+\small
+\input{tables/scores}
+\end{table}
+
+\paragraph{The detector as a predictor.}
+If channel 2 is good, why not use it alone? Table~\ref{tab:detonly} reports selective prediction on the detector
+alone. Its raw accuracy matches the VLM's on POPE ($83.1\%$ against $81.9\%$), but its selective coverage is lower
+(at $\alpha=0.10$, $57.7$ against $68.2\%$ on POPE-1500 and $12$--$28\%$ on the other cells): accuracy does not imply a
+separable score.
+
+\begin{table}[t]
+\centering
+\caption{Certified coverage (\%) of VLM filtering, CCRC (external gate) and detector-only selective prediction,
+and the detector's accuracy on grounded items.}
+\label{tab:detonly}
+\small
+\resizebox{\textwidth}{!}{\input{tables/detonly}}
+\end{table}
+
+\paragraph{Composition with a mitigation decoder.}
+On POPE-adversarial with visual contrastive decoding \citep{vcd} (base risk $19.7\%$, the highest of our cells),
+CCRC with the external gate gains $+2.0$ and $+1.6$ points over filtering at $\alpha=0.10$ and $0.15$, with the
+sign supported by $91\%$ and $76\%$ of bootstrap datasets (Table~\ref{tab:main}). Lowering the base risk and
+adding certified repair are compatible; neither result is large.
+
+\subsection{Self-certified repair}
+\label{sec:selfrepair}
+
+A design that needs no second channel would flip the model's answer where the score says it is probably wrong.
+For binary answers the flipped answer is wrong exactly when the model was right, so the flip region's risk
+is the model's \emph{accuracy} there.
+
+\begin{proposition}[Self-repair is bounded by slack]
+\label{prop:selfrepair}
+Let the repair be the negation of the model's answer on a region $R$ of mass $c_r$ and let the accepted region have
+mass $c_a$ and risk $r_a$. The risk of the repaired region is $r_r=\Pr[Y=1\mid X\in R]$. If $r_r>\alpha$, the
+emitted mixture has risk at most $\alpha$ only if $c_r\le c_a(\alpha-r_a)/(r_r-\alpha)$.
+\end{proposition}
+\begin{proof}
+On $R$ the emitted answer is $1-\hat a$, correct iff $\hat a$ is wrong, so its error indicator is $Y$ and averaging gives
+$r_r$. The mixture risk $(c_ar_a+c_rr_r)/(c_a+c_r)\le\alpha$ rearranges to $c_r(r_r-\alpha)\le c_a(\alpha-r_a)$.
+\end{proof}
+
+Table~\ref{tab:selfrepair} flips the answer on the bottom $q\in\{0.02,0.05,0.10\}$ of the score, at both starts. The
+flip region's risk is $12$--$57\%$, far above $\alpha$, and certified coverage falls by $4$ to $76$ points at
+$\alpha=0.10$ with the analytic start, with abort rates up to $100\%$. The fixed-mass, high-error block is largest relative
+to the emitted set at the beginning of the sequence, fails the first hypothesis, and the sequence cannot continue to the
+later thresholds where Proposition~\ref{prop:selfrepair} would allow it. The start does not change the
+conclusion: at $e_0=0$ the losses are $7$--$76$ points. Self-repair is not impossible in principle (the
+proposition admits it when the accepted region has slack and the flip region is clean), but on these cells no such region exists.
+
+\begin{table}[t]
+\centering
+\caption{Self-certified repair against filtering at $\alpha=0.10$: gain in points (abort rate, \%) and the risk of the
+flip region $r_{\text{flip}}$ (\%), at both starts; the last column is CCRC with the $q=0.10$ detector gate.}
+\label{tab:selfrepair}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{tables/selfrepair}}
+\end{table}
+
+\subsection{Items without usable evidence}
+\label{sec:noevidence}
+
+Table~\ref{tab:cohort} shows that $0$ of $1500$ POPE-1500 items but $272$ of $500$ AMBER items have no detector value.
+Where the detector never applies, CCRC reduces to filtering. Table~\ref{tab:sweep} gives filtering on three
+benchmarks where the detector returns nothing (MME, GQA, HallusionBench): at $\alpha=0.10$ coverage is $0.9\%$, $8.5\%$
+and $0\%$ with abort rates of $97\%$, $72\%$ and $100\%$. On HallusionBench the base risk is $48.8\%$ and nothing is
+certifiable at $\alpha\le0.20$; the floor alone is $(0.488-0.20)/0.80=36\%$ and the abstention is far larger.
+Applicability of the evidence channel is a property of the benchmark's question types, not of its difficulty.
+
+\begin{table}[t]
+\centering
+\caption{Filtering (confidence score, image-grouped folds, $400$ splits) where the detector does not apply.
+Certified coverage (\%) with abort rate in parentheses.}
+\label{tab:sweep}
+\small
+\resizebox{\textwidth}{!}{\input{tables/sweep}}
+\end{table}
+
+\subsection{Auditing validity}
+\label{sec:validity-audit}
+
+\paragraph{Real data.}
+Across all arms and cells in Appendix Table~\ref{tab:audit} the test-fold exceedance of $\alpha$ is $0.04$--$0.21$ and the
+confident-violation rate is at most $0.03$, against the bound of $0.10$ per split. We treat this as consistent with
+validity and do not treat it as proof: with test folds of $150$--$500$ items and risks near $\alpha$, exceedance of the
+realised fold risk is expected, and a real-data audit cannot exceed the resolution of its test fold.
+
+\paragraph{Known population.}
+The exact audit uses a generative population in which the risk of the selected policy is computed on $400{,}000$
+reference items. Items come in image clusters of six with a shared random effect that sets the intra-image
+correlation of errors (ICC); the score is the best item-level predictor; channel 2 is right with probability
+$1-\frac12e^{-4v}$ at margin $v$. We audit the exceedance $\Pr[\Risk(\pi_{\hat\jmath})>\alpha]$, counting aborts as compliant, over
+$3000$ trials per cell, $\mu\in\{0.15,0.25\}$, $\alpha\in\{0.10,0.15\}$, $n_{\mathrm{cal}}\in\{150,450\}$.
+
+\begin{table}[t]
+\centering
+\caption{Known-population exceedance $\Pr[\Risk>\alpha]$ (aborts counted as compliant), $\alpha=0.10$; target $\delta=0.10$. ``Value'' fixes thresholds and gate from an
+independent fit sample (the object of Theorem~\ref{thm:validity}); ``rank'' takes them as quantiles of the
+calibration sample; the last column calibrates on one random item per image.}
+\label{tab:validity}
+\small
+\resizebox{\textwidth}{!}{\input{tables/validity}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_validity.png}
+\caption{Worst-case known-population exceedance over the $\mu$ and $\alpha$ cells, against the intra-image
+correlation of errors, with repair. Horizontal line: $\delta=0.10$.}
+\label{fig:validity}
+\end{figure}
+
+With i.i.d.\ items (ICC $=0$) the exceedance is at most $0.064$ in every cell for both the value-indexed family, which
+Theorem~\ref{thm:validity} covers, and the rank-indexed family, which it does not, so the rank-indexed variant is also
+conservative here, so the missing proof for it is a gap in the argument rather than an observed failure. With positive
+within-image correlation the guarantee degrades: at ICC $0.08$ the worst cell is $0.091$, and at ICC $0.26$ the
+exceedance of the value-indexed family rises to $0.125$ (filtering) and $0.132$ (repair), above $\delta$, and the rank-indexed
+variant to $0.14$. Calibrating on one random item per image restores validity in every cell ($\le0.062$) at the price of a
+smaller calibration sample. In the benchmarks used here the measured ICC is slightly negative
+(Table~\ref{tab:cohort}), so the clustered regime is not the one these data are in; it is the regime a benchmark with
+several correlated questions per image would be in, and the audit shows that the item-level bound should not be used there
+without the one-item-per-image calibration or a design-effect correction.

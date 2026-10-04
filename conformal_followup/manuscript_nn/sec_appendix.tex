@@ -1,0 +1,51 @@
+\section{Additional results}
+
+\subsection{Audit of all arms}
+\label{app:audit}
+\begin{table}[h]
+\centering
+\caption{Certified coverage (\%) with abort rate (ab) and validity statistics for every arm, all items. exc is the
+fraction of non-aborted splits whose test-fold risk exceeds $\alpha$; cv is the fraction whose one-sided $90\%$
+Clopper--Pearson lower bound on test risk exceeds $\alpha$. The fixed $q{=}0.10$ gate was chosen with knowledge of
+these benchmarks and is not certified.}
+\label{tab:audit}
+\tiny
+\resizebox{\textwidth}{!}{\input{tables/audit}}
+\end{table}
+
+\subsection{Protocol ladder and start of the sequence at other targets}
+\label{app:ladder}
+\begin{table}[h]
+\centering
+\caption{As Table~\ref{tab:ladder} at $\alpha=0.15$.}
+\small
+\resizebox{\textwidth}{!}{\input{tables/ladder_015}}
+\end{table}
+\begin{table}[h]
+\centering
+\caption{As Table~\ref{tab:start} at $\alpha=0.05$.}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{tables/start_005}}
+\end{table}
+\begin{table}[h]
+\centering
+\caption{As Table~\ref{tab:start} at $\alpha=0.15$.}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{tables/start_015}}
+\end{table}
+
+\subsection{Grounded-only cohort}
+\label{app:grounded}
+\begin{table}[h]
+\centering
+\caption{As Table~\ref{tab:main} restricted to items with a detector value; no bootstrap.}
+\small
+\resizebox{\textwidth}{!}{\input{tables/grounded}}
+\end{table}
+
+\subsection{Reproducibility}
+All numbers in the paper are generated from per-item signals by the scripts in the released repository
+(\texttt{conformal\_followup/revision}): \texttt{attach\_image\_ids.py} recovers and verifies image identifiers;
+\texttt{ccrc\_rev.py} implements the protocol; \texttt{regress\_legacy.py} checks that the conventional-protocol mode reproduces the
+numbers of the baseline implementation; \texttt{exp\_*.py} produce the results files and \texttt{make\_tables.py},
+\texttt{make\_figures.py} the tables and figures. Splits are deterministic in the seed.

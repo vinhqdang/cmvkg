@@ -1,0 +1,53 @@
+\section{Comparison with concurrent methods}
+\label{sec:concurrent}
+
+Two methods published in 2026 are close enough to CCRC that a reader will ask what separates them.
+Table~\ref{tab:concurrent} compares the three on the dimensions the reviewing literature cares about. The comparison
+is conceptual: the benchmarks, backbones and sample sizes differ, so we do not compare numbers across papers and we
+did not rerun either method.
+
+\begin{table}[t]
+\centering
+\caption{CCRC, BCEA \citep{bcea} (version 4, 21 July 2026) and CEBC \citep{mishra2026cebc}.}
+\label{tab:concurrent}
+\footnotesize
+\begin{tabular}{@{}p{0.17\textwidth}p{0.25\textwidth}p{0.25\textwidth}p{0.27\textwidth}@{}}
+\toprule
+ & CCRC & BCEA & CEBC\\
+\midrule
+Action on a flagged claim & emit a detector answer, accept, or abstain & acquire more visual evidence, then answer or abstain; the answer is the model's own & rewrite with a VLM, possibly substituting or inserting objects, then delete what remains below threshold\\
+Quantity controlled & error rate of the emitted set, accepted and substituted answers together & error rate of emitted claims & per-mention false-accept rate of a detector threshold on hallucinated mentions in base captions\\
+Guarantee & finite-sample, probability $1-\delta$ over calibration, i.i.d.\ units & finite-sample, Bonferroni-corrected Clopper--Pearson over a fixed grid; a full-level scan is labelled uncertified & none stated; no theorem, no sampling model\\
+Revised output inside the guarantee & yes & not applicable (no revision) & no; the rewrite may use objects at $\tau-0.05$ and is outside the calibration\\
+Calibration procedure & fixed-sequence test over values from the fit fold & fixed grid, Bonferroni & one clipped quantile\\
+Role of the detector & channel 2: supplies the substituted answer and its margin & optional guide for acquisition & sole arbiter of support\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{BCEA.}
+BCEA reduces the abstention floor's practical bite by spending a visual budget to re-read the image and
+recalibrating on post-acquisition scores. It stays inside the premise of Proposition~\ref{prop:floor}: acquisition changes how confident the
+method is about the model's claim, not which claim is emitted. Its current version certifies a
+Bonferroni-corrected Clopper--Pearson test over a threshold grid fixed independently of the calibration sample and
+reports certified coverage of $0.23$ without acquisition and $0.32$ with gated acquisition at $\alpha=0.10$; the
+coverage figures of $0.28$ and $0.37$ correspond to its uncertified practical variant, which scans the calibration
+scores at full confidence. The mechanisms are different (re-scoring a claim versus replacing it) and in principle
+composable, since a re-scored claim can still be repaired when the detector is decisive. We have not tested
+the composition in this version, and nothing here shows that it helps.
+
+\paragraph{CEBC.}
+CEBC is the nearest published method that edits unsupported object mentions in VLM output with an external detector.
+Its calibration is a one-sided quantile of detector scores on hallucinated mentions from base captions; its rewrite stage
+is not calibrated; and it reports no violation check. Whatever its empirical merit, it is a detector-gated rewriter rather than a certified
+selective predictor, and its headline numbers (for example CHAIR$_S$ from $10.0$ to $2.0$) measure a different object
+than a certified error rate over emitted claims. CEBC applies to free-form captions and CCRC as evaluated to
+yes/no questions; the guarantee of Theorem~\ref{thm:validity} has no free-form counterpart in this paper, and
+\S\ref{sec:sequential} gives the reason.
+
+\paragraph{What remains of the novelty claim.}
+Among the work we surveyed up to 4 October 2026, CCRC is the one whose certificate covers an emitted answer
+that differs from the model's, with the repair gate fixed from fit or external data. CEBC edits without certifying;
+BCEA certifies without editing; conformal linguistic calibration \citep{jiang2025clc} certifies a rewritten output
+for text-only question answering by generalising claims. The claim is about the combination, in the setting of
+object-existence questions, and not about the idea of correcting hallucinations.

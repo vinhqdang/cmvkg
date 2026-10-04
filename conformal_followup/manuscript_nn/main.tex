@@ -1,25 +1,14 @@
-\documentclass[11pt,a4paper]{article}
-% Journal-agnostic submission draft. Anonymous for review; the title page with author details is
-% title_page.tex. Reformat to the target journal's class by replacing this preamble and the
-% bibliography style only: all content lives in the \input files.
-\usepackage[margin=2.5cm]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{microtype}
-\usepackage{amsmath,amssymb,amsthm}
+\documentclass[review,number]{elsarticle}
+% Neural Networks (Elsevier): single-anonymised review, elsarticle class, numeric references.
+\usepackage{url}
 \usepackage{booktabs,multirow,array}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage[numbers,sort&compress]{natbib}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{hyperref}
-\usepackage{setspace}
-\onehalfspacing
-\hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
 \renewcommand{\topfraction}{0.95}\renewcommand{\textfraction}{0.05}\renewcommand{\floatpagefraction}{0.8}
 \setcounter{topnumber}{4}\setcounter{totalnumber}{6}
-
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}{Proposition}
@@ -30,7 +19,6 @@
 \newtheorem{assumption}{Assumption}
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
-
 \newcommand{\Risk}{\mathcal{R}}
 \newcommand{\Cov}{\mathcal{C}}
 \newcommand{\emit}{\mathcal{E}}
@@ -38,14 +26,17 @@
 \renewcommand{\Pr}{\mathbb{P}}
 \newcommand{\Iota}{\mathcal{I}}
 \newcommand{\ind}[1]{\mathbf{1}\{#1\}}
-
-\title{Certified Correction of Vision--Language Hallucinations:\\
-Guarantees, Gains and Failure Modes under a Pre-specified Protocol}
-\author{Anonymous Author(s)}
-\date{}
+\journal{Neural Networks}
 
 \begin{document}
-\maketitle
+\begin{frontmatter}
+\title{Certified Correction of Vision--Language Hallucinations:\\
+Guarantees, Gains and Failure Modes under a Pre-specified Protocol}
+
+\author[bu]{Quang-Vinh Dang\corref{cor1}}
+\ead{vinh.dq4@buv.edu.vn}
+\cortext[cor1]{Corresponding author. ORCID: 0000-0002-3877-8024}
+\address[bu]{British University Vietnam, Hung Yen, Vietnam}
 
 \begin{abstract}
 Selective prediction gives a vision--language model (VLM) a distribution-free guarantee on its emitted answers
@@ -66,6 +57,19 @@ fixed-sequence testing is fragile with small calibration folds. Repairing a clai
 hallucination, which blocks a fixed-point route to a sequential guarantee.
 \end{abstract}
 
+\begin{highlights}
+\item A repair-and-certify selective predictor with a valid finite-sample risk guarantee
+\item Proved and evaluated procedures coincide: fixed value grid, image-grouped folds
+\item Certified gain over filtering is small; bootstrap excludes zero on one cell
+\item Most repairs confirm the model's answer; false positives are never corrected
+\item Mid-caption repair raises downstream hallucination, blocking a sequential guarantee
+\end{highlights}
+
+\begin{keyword}
+conformal prediction \sep selective prediction \sep risk control \sep vision--language models \sep hallucination \sep uncertainty quantification
+\end{keyword}
+\end{frontmatter}
+
 \input{sec_intro}
 \input{sec_related}
 \input{sec_setup}
@@ -76,7 +80,20 @@ hallucination, which blocks a fixed-point route to a sequential guarantee.
 \input{sec_sequential}
 \input{sec_discussion}
 
-\bibliographystyle{abbrvnat}
+\section*{Data and code availability}
+Per-item model and detector signals, image identifiers and every script that produces the tables and figures are
+released at \url{https://github.com/vinhqdang/cmvkg} (directory \texttt{conformal\_followup/revision}).
+
+\section*{CRediT authorship contribution statement}
+\textbf{Quang-Vinh Dang}: Conceptualization, Methodology, Software, Formal analysis, Investigation, Writing.
+
+\section*{Declaration of competing interest}
+[TO CONFIRM BY THE AUTHOR BEFORE SUBMISSION]
+
+\section*{Funding}
+[TO CONFIRM BY THE AUTHOR BEFORE SUBMISSION]
+
+\bibliographystyle{elsarticle-num}
 \bibliography{refs}
 
 \appendix

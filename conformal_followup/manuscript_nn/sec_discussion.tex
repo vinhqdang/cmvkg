@@ -1,0 +1,46 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{What the guarantee says.}
+With probability $1-\delta$ over the calibration sample, the population risk of the deployed policy, accepted and
+substituted answers together, is at most $\alpha$. It says nothing about a single item, about a finite test fold, about
+a distribution other than the one the units were drawn from, or about the coverage that results. A sampling model is
+part of it: units are i.i.d., and when a benchmark is split at random the iid assumption is a modelling choice about the population
+the benchmark represents.
+
+\paragraph{What the evidence supports.}
+Under a protocol in which the proved procedure is the evaluated procedure, certified repair gains between $0.8$ and $7.9$ points
+of coverage over certified filtering when the gate is fixed on external data; the sign is supported by $65$--$99\%$ of
+image-bootstrap datasets and the interval excludes zero on one cell. The statement a reader can rely on is therefore
+that the gain is positive in expectation on these benchmarks and small, and that more images would be needed to
+size it. Repair does add a few points of coverage; it
+does so mostly by confirming answers the model already gave, and corrects almost none of the model's false positives.
+The correctness score dominates the coverage, and the start of the fixed sequence dominates the repair on small folds.
+
+\paragraph{Limitations.}
+(i) The task is binary object existence, with one detector, three backbones and two benchmark families whose
+images overlap; $642$ distinct images are involved in total. (ii) The channel-2 operating point $\theta=0.15$ was fixed
+in the extraction scripts and is not varied here; we do not claim it was chosen independently of the benchmarks.
+(iii) The external gate for the POPE cells was chosen on AMBER, whose image sources we could not verify to be disjoint from
+POPE's COCO images; the guarantee requires the gate to be independent of the calibration sample, and any image overlap
+would weaken that independence slightly. (iv) The i.i.d.\ assumption is violated within images when errors are correlated; here the
+measured correlation is slightly negative, and \S\ref{sec:validity-audit} shows the guarantee degrades with positive
+correlation unless calibration uses one item per image. (v) The bootstrap interval reflects sampling of images from the benchmark, not
+of benchmarks from the world. (vi) Free-form generation is not covered and mid-sequence repair worsens the continuation.
+(vii) We did not rerun the VLMs, extract signals on additional images, or run BCEA or CEBC.
+
+\paragraph{Next steps.}
+The measurement that would most improve the paper is more images: processing the remaining POPE images and a
+second detector would narrow the intervals the bootstrap now shows to be wide. A repair rule that
+respects the generation context, tested on the free-form setting with the matched-prefix design, is the natural
+extension.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Certified correction replaces an answer the model would have abstained on with a detector's answer and
+certifies the emitted set as a whole; the procedure is valid under i.i.d.\ sampling when thresholds and gate are
+fixed before calibration. Under a protocol built on that requirement the coverage gain over filtering is small and positive, with an
+uncertainty that the available images do not resolve. Most repaired items re-emit the model's answer with detector
+confirmation, the model's false positives are not corrected, and the coverage comes mainly from the correctness score.
+In generation, mid-sequence repair worsens the continuation. The reproducible pipeline and all negative results are released.
