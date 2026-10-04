@@ -129,6 +129,17 @@ def load_settings():
     return S
 
 
+def load_pope_extended():
+    """POPE adversarial rows 0..2999 (500 images): the cached 1500 rows plus the rows extracted by
+    colab_exp16_pope_ext.py. Returns None when the extension file is absent."""
+    f = os.path.join(ROOT, "exp16_pope_ext.json")
+    if not os.path.exists(f): return None
+    r, o, e = _J("raw_scores.json"), _J("owlv2_scores.json"), _J("exp16_pope_ext.json")
+    ids = _J("revision/image_ids.json")["raw_scores.json"] + [str(x) for x in e["image_source"]]
+    return Setting("POPE-3000 LLaVA", r["p_yes"] + e["p_yes"], r["answer"] + e["answer"], r["gold"] + e["gold"],
+                   o["ground_det"] + e["ground_det"], ids)
+
+
 MAIN = ["POPE-1500 LLaVA", "POPE-adv LLaVA", "POPE-adv Qwen2-VL", "POPE-adv LLaVA+VCD", "AMBER(d) LLaVA"]
 
 _ARR = ("p", "a", "y", "o", "img", "g", "b", "ok", "okr", "m")
