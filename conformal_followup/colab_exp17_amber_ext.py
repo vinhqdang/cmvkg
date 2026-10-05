@@ -91,6 +91,7 @@ def extract_object(q):
 STAGE=os.environ.get('STAGE','llava')   # 'llava' then 'owl' as SEPARATE processes: the 4-bit LLaVA load leaves ~11GB of host RAM
                                          # that is not returned, and loading OWLv2 afterwards is OOM-killed on a 12GB Colab VM.
 n=len(picks);p_yes=np.zeros(n);ans=np.zeros(n,int);owl=np.full(n,-1.0)
+import faulthandler; faulthandler.enable()
 gold=np.array([p[3] for p in picks]);objs=[extract_object(p[2]) for p in picks]
 if STAGE=='llava':
     # ---- 3. LLaVA ----
@@ -135,10 +136,13 @@ od=Owlv2ForObjectDetection.from_pretrained("google/owlv2-base-patch16-ensemble")
 for i,(qid,fn,q,g,typ) in enumerate(picks):
     if not objs[i]: continue
     with torch.no_grad():
-        oi=op(text=[[f"a photo of a {objs[i]}"]],images=Image.open(index[fn]).convert("RGB"),
-              return_tensors="pt").to(device)
+        _im=Image.open(index[fn]); _im.draft("RGB",(2000,2000)); _im=_im.convert("RGB"); _im.thumbnail((2000,2000))
+        # some AMBER photos are up to 54 MP; the OWLv2 processor's float resize of those exhausts host RAM, so images
+        # are shrunk to at most 2000 px on the long side first (the detector input is 960x960 either way)
+        oi=op(text=[[f"a photo of a {objs[i]}"]],images=_im,return_tensors="pt").to(device)
         owl[i]=float(od(**oi).logits.sigmoid().max().item())
-    if (i+1)%100==0: log(f"  owl {i+1}/{n} (+{time.time()-t0:.0f}s)")
+    if (i+1)%25==0:
+        import resource; log(f"  owl {i+1}/{n} rss={resource.getrusage(resource.RUSAGE_SELF).ru_maxrss//1024}MB (+{time.time()-t0:.0f}s)")
 correct=(ans==gold).astype(int)
 out=dict(dataset=f"AMBER-{SUBSET}",p_yes=p_yes.tolist(),answer=ans.tolist(),gold=gold.tolist(),
          correct=correct.tolist(),owl=owl.tolist(),obj=objs,category=[p[4] for p in picks],image=[p[1] for p in picks],qid=[p[0] for p in picks])
