@@ -3,8 +3,8 @@ in a table is typed by hand. Writes ../manuscript_revised/tables/*.tex."""
 import json, os, numpy as np
 H = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(H, "..", "manuscript_revised", "tables"); os.makedirs(OUT, exist_ok=True)
 L = lambda f: json.load(open(os.path.join(H, f)))
-NAMES = ["POPE-1500 LLaVA", "POPE-adv LLaVA", "POPE-adv Qwen2-VL", "POPE-adv LLaVA+VCD", "AMBER(d) LLaVA"]
-SHORT = {"POPE-1500 LLaVA": "POPE-1500, LLaVA", "POPE-adv LLaVA": "POPE-adv, LLaVA", "POPE-adv Qwen2-VL": "POPE-adv, Qwen2-VL",
+NAMES = ["POPE-1500 LLaVA", "POPE-3000 LLaVA", "POPE-adv LLaVA", "POPE-adv Qwen2-VL", "POPE-adv LLaVA+VCD", "AMBER(d) LLaVA"]
+SHORT = {"POPE-1500 LLaVA": "POPE-1500, LLaVA", "POPE-3000 LLaVA": "POPE-3000, LLaVA", "POPE-adv LLaVA": "POPE-adv, LLaVA", "POPE-adv Qwen2-VL": "POPE-adv, Qwen2-VL",
          "POPE-adv LLaVA+VCD": "POPE-adv, LLaVA+VCD", "AMBER(d) LLaVA": "AMBER(d), LLaVA"}
 def w(name, body): open(os.path.join(OUT, name + ".tex"), "w").write(body)
 p1 = lambda x: f"{x*100:.1f}"
@@ -58,7 +58,7 @@ for a in ("0.1", "0.15"):
         for n in NAMES:
             x = ladder[f"{n}|{rn}|{a}"]; r += f" & {p1(x['filter']['cov'])}/{p1(x['ccrc']['cov'])}"
         rows.append(r + "\\\\")
-    w(f"ladder_{a.replace('.','')}", "\\begin{tabular}{lccccc}\n\\toprule\n & " + " & ".join(SHORT[n].replace(", ", ",\\ ") for n in NAMES) + "\\\\\n\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n")
+    w(f"ladder_{a.replace('.','')}", "\\begin{tabular}{l" + "c" * len(NAMES) + "}\n\\toprule\n & " + " & ".join(SHORT[n].replace(", ", ",\\ ") for n in NAMES) + "\\\\\n\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n")
 
 # ---------------------------------------------------------------- start ablation
 for a in ("0.05", "0.1", "0.15"):
@@ -70,7 +70,7 @@ for a in ("0.05", "0.1", "0.15"):
                 x = start[f"{n}|c={c}|e0={e0}|{a}"]; r += f" & {p1(x['filter']['cov'])} ({ab(x['filter']['abort'])}) & {p1(x['ccrc']['cov'])} ({ab(x['ccrc']['abort'])})"
             rows.append(r + "\\\\")
         rows.append("\\addlinespace")
-    w(f"start_{a.replace('.','')}", "\\begin{tabular}{ccc" + "rr" * 5 + "}\n\\toprule\n & & & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{{SHORT[n].replace(', ', ',~')}}}" for n in NAMES) + "\\\\\n" + "".join(f"\\cmidrule(lr){{{4+2*i}-{5+2*i}}}" for i in range(5)) + "\n$c$ & $e_0$ & $k_{\\mathrm{start}}$ & " + " & ".join("filter & CCRC" for _ in NAMES) + "\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
+    w(f"start_{a.replace('.','')}", "\\begin{tabular}{ccc" + "rr" * len(NAMES) + "}\n\\toprule\n & & & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{{SHORT[n].replace(', ', ',~')}}}" for n in NAMES) + "\\\\\n" + "".join(f"\\cmidrule(lr){{{4+2*i}-{5+2*i}}}" for i in range(len(NAMES))) + "\n$c$ & $e_0$ & $k_{\\mathrm{start}}$ & " + " & ".join("filter & CCRC" for _ in NAMES) + "\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
 
 # --------------------------------------------------- repair accounting (external gate, all items)
 rows = []
