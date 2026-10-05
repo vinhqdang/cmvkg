@@ -18,6 +18,6 @@ The review PDF was received after the first revision round. Numbers are generate
 | W10 | Academic writing: abstraction, anecdotal opening, failures dominate | The introduction opens with the problem statement and refers to the schematic (Figure 1), states the main result early, and presents the failure modes as boundaries; the revision-history framing is removed. | Introduction |
 | W11 | Contrastive constructions and rhetorical asides | A pass removed most "A rather than B"/"A, not B" constructions and asides; ten remaining technical uses are kept where the contrast is the content (for example hypergeometric versus binomial). | Throughout |
 | W12 | Internal inconsistencies (four of five settings, 8 of 10 cells, 9.0% vs 8.1-point floor, 44% coverage) | Every number in the text was checked against the generated tables; abstract, introduction and results use one set of cells (six cells, twelve combinations). The unsupported "competitive with published results" claim is removed. | Whole paper |
-| O1 | Too many contributions/findings | Four design decisions, five findings. | Introduction |
+| O1 | Too many contributions/findings | Four design decisions (the former six contributions), six findings, each tied to one section. | Introduction |
 | O2 | Doubled periods in run-in headings | Removed (the Elsevier class appends its own period). | Source |
 | O3 | Highlights missing | Added (five bullets). | `manuscript_nn/main.tex` |
