@@ -5,7 +5,7 @@ Hallucinated object claims limit the use of vision--language models (VLMs) where
 addresses this by letting the model abstain: a score ranks the model's answers, a threshold is calibrated on held-out data, and the model
 answers only above it. Conformal and risk-controlling variants \citep{bates2021rcps,angelopoulos2021ltt,angelopoulos2024crc} certify, with
 a finite-sample guarantee that assumes nothing about the score or the model, that the error rate among emitted answers stays below a
-target $\alpha$ (Figure~\ref{fig:method} shows the setting). Existing conformal methods for VLMs filter, back off or abstain
+target $\alpha$. Existing conformal methods for VLMs filter, back off or abstain
 \citep{conflvlm,bcea,atabuzzaman2026introconformal}; mitigation methods repair outputs but give no guarantee
 \citep{woodpecker,lure,reverse,cmvkgguard}.
 
@@ -17,8 +17,17 @@ emit a \emph{different} answer lies outside it.
 We study that possibility for yes/no object-existence questions, with an open-vocabulary detector as a second, distinct source of evidence.
 \emph{Certified-Correction Risk Control} (CCRC) accepts the model's answer where a correctness score is high, replaces it with the
 detector's answer where the detector's evidence is decisive, abstains otherwise, and certifies the error rate of the whole emitted set,
-accepted and substituted answers together. The scope is deliberate: existence claims are the hallucinations a detector can refute, and
+accepted and substituted answers together (Figure~\ref{fig:qualitative}). The scope is deliberate: existence claims are the hallucinations a detector can refute, and
 \S\ref{sec:discussion} discusses what other evidence channels would be needed for attributes, counts and relations.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_qualitative.png}
+\caption{The three actions of CCRC on real POPE images (LLaVA-1.5, OWLv2). \emph{Accept}: the correctness score is high and the model is right.
+\emph{Repair}: the model misses an object that is present and scores low, the detector finds it with high confidence, and its answer is emitted instead.
+\emph{Abstain}: neither source is reliable (here both are wrong with weak evidence), so no answer is emitted.}
+\label{fig:qualitative}
+\end{figure}
 
 \paragraph{What is and is not new}
 Theorem~\ref{thm:validity} is an application of fixed-sequence testing \citep{angelopoulos2021ltt} with exact binomial bounds, and we claim no new

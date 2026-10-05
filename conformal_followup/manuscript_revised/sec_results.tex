@@ -261,6 +261,23 @@ Applicability of the evidence channel depends on the benchmark's question types.
 
 
 
+\subsection{Examples and failures}
+\label{sec:examples}
+
+Figure~\ref{fig:qualitative} shows accepted, repaired and abstained items. The cases that matter for the guarantee are the accepted answers that are wrong, which the
+certificate allows at rate $\alpha$ among emitted items (Figure~\ref{fig:failures}). Two kinds recur. A confident false positive (the model says the object is present with
+high probability and the score is high) is accepted whether the detector disagrees (conf $0.14$ for the car) or is fooled as well (conf $0.30$ for a bus that is absent), because an absent object's margin stays below the repair gate. A
+confident miss on which the detector is also weak is accepted too: the model answers ``no'' with high confidence about an object that is present and the detector's confidence is low (here
+$0.03$--$0.10$), so neither the score nor the evidence margin flags it. Both are the items that remain after any filtering rule; repair addresses only the low-score items on which
+the detector is decisive.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_failures.png}
+\caption{Accepted answers that are wrong under the policy of Figure~\ref{fig:qualitative}: two confident false positives and two confident misses (LLaVA-1.5 on POPE, held-out images).}
+\label{fig:failures}
+\end{figure}
+
 \subsection{Channel overlap and a held-out benchmark}
 \label{sec:overlap}
 
