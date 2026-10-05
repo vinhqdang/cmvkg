@@ -4,7 +4,7 @@
 The survey covers work available up to 4 October 2026; claims of the form ``no method does X'' refer
 to the literature we surveyed up to that date and are not claims about the field.
 
-\paragraph{Hallucination in vision--language models.}
+\paragraph{Hallucination in vision--language models}
 Multimodal hallucination is usually split into existence, attribute and relation errors
 \citep{amber}; surveys \citep{bai2024survey,liu2024survey,ji2023} attribute it to language-prior
 dominance, weak visual attention, instruction-tuning artefacts \citep{liu2023lrv} and
@@ -25,7 +25,7 @@ three steps as CCRC (flag, consult external evidence, substitute) and none of th
 certifies the substitution. Lowering the base risk $\mu$ lowers the abstention floor, so these
 methods compose with ours; \S\ref{sec:score} runs CCRC on top of visual contrastive decoding.
 
-\paragraph{Conformal prediction and distribution-free risk control.}
+\paragraph{Conformal prediction and distribution-free risk control}
 Conformal prediction \citep{vovk2005,papadopoulos2002,lei2018,angelopoulos2023gentle} gives
 finite-sample coverage under exchangeability. Risk-controlling prediction sets \citep{bates2021rcps}
 and conformal risk control \citep{angelopoulos2024crc} control the expectation of a monotone
@@ -37,7 +37,7 @@ Selective prediction with abstention predates the conformal treatment
 \citep{chow1970,elyaniv2010,bartlett2008,cortes2016,geifman2019}; the floor of
 Proposition~\ref{prop:floor} concerns the action space and applies to these formulations too.
 
-\paragraph{Conformal methods for language and vision--language models.}
+\paragraph{Conformal methods for language and vision--language models}
 Conformal language modelling \citep{conformallm} calibrates sampling, stopping and rejection;
 conformal factuality \citep{conformalfactuality} backs off to a subset of claims;
 coherent factuality \citep{rubintoles2025coherent} filters whole reasoning steps; adaptive
@@ -56,14 +56,14 @@ conformal linguistic calibration \citep{jiang2025clc} replaces claims by less sp
 guarantee on the rewritten text; it is text-only and the rewrite generalises a claim rather than
 substituting externally verified evidence.
 
-\paragraph{Uncertainty estimation without a guarantee.}
+\paragraph{Uncertainty estimation without a guarantee}
 Our correctness score belongs to the literature on generative uncertainty: self-evaluation
 \citep{kadavath2022}, semantic entropy \citep{kuhn2023,farquhar2024}, verbalised confidence
 \citep{lin2022}, sampling consistency \citep{manakul2023,wang2023selfconsistency}, and token-level
 conformal variants \citep{tecp,cover}. These scores interrogate the model about its own output;
 detector and similarity scores are perceptual evidence from a distinct predictor.
 
-\paragraph{The closest works.}
+\paragraph{The closest works}
 Kotte \citep{crcimposs} proves the abstention floor for text-only structured generation and
 recommends relaxing $\alpha$; the floor admits three responses: relax the target, lower $\mu$ or
 sharpen the score, or change the action space. We take the third. BCEA \citep{bcea} sharpens the
@@ -78,14 +78,14 @@ mentions, and a final filter deletes what remains. It states no theorem, assumes
 model and does not place the revised text under a calibrated guarantee. \S\ref{sec:concurrent}
 compares the three in detail.
 
-\paragraph{Shift caused by the predictor.}
+\paragraph{Shift caused by the predictor}
 Editing a generation changes what follows. This is feedback covariate shift
 \citep{fannjiang2022fcs}, to which weighted conformal prediction \citep{tibshirani2019} does not
 apply; online adaptation \citep{gibbs2021,onlineabstention} and reweighting \citep{anydist}
 address parts of it. \S\ref{sec:sequential} shows that in generative correction the obstacle is
 stronger than loss of exchangeability.
 
-\paragraph{What is new here.}
+\paragraph{What is new here}
 A selective predictor whose action space includes substitution and whose certificate covers the
 emitted mixture; a protocol in which the proved procedure and the evaluated procedure coincide;
 and measurements that bound what the mechanism contributes: attribution against score quality, accounting

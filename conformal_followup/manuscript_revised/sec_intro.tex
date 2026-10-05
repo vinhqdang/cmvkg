@@ -45,34 +45,29 @@ from that aim, and each is a contribution in its own right.
 
 \paragraph{What we find.}
 \begin{itemize}
-\item With the gate fixed on an external benchmark, CCRC certifies $+0.8$ to $+7.9$ points more
-  coverage than filtering in all ten (cell, $\alpha$) combinations, and the image-bootstrap
-  interval excludes zero only on the largest cell (250 images). On the others the sign is
-  right in $65$--$95\%$ of bootstrap replicates but cannot be called (\S\ref{sec:main}).
-\item Choosing the gate on the fit fold, or certifying three gates by a union bound, is valid
-  but costs more than it returns when the calibration fold holds $150$--$200$ items
-  ($-6.2$ to $+9.4$ and $-16.5$ to $+4.4$ points over all cells); with $500$ items both help.
-\item The repair is mostly confirmation. Between $41$ and $96\%$ of repaired items are items on
-  which the detector agrees with the model, and the answer is changed for only $0.04$--$1.7\%$
-  of test items. The one-directional gate never corrects a false-positive existence error, and
-  a polarity-symmetric gate does not either (\S\ref{sec:accounting}).
-\item The start of the fixed sequence matters more than the repair on small folds. Starting
-  where a single error can be tolerated ($k\ge38$ at $\alpha=\delta=0.10$) rather than where
-  none can ($k\ge22$) raises filtering coverage on the smallest cell (calibration folds of $150$ items) from $22\%$
-  to $41\%$ when the first hypothesis sits at the minimal count, and removes the apparent loss on
-  AMBER that the conventional start produces (\S\ref{sec:start}).
-\item Certified coverage comes mostly from the score: a detection-grounded score certifies
-  $68\%$ on POPE-1500 against $41\%$ for model confidence and $0.5\%$ for the image--text
-  similarity score of ConfLVLM, while certified repair adds $3$--$6$ points
+\item With the gate fixed on an external benchmark at the target's calibration size, CCRC certifies $+0.8$ to $+7.3$ points
+  more coverage than filtering in all twelve (cell, $\alpha$) combinations, and the image-bootstrap interval excludes zero in
+  seven. The gain is about one point on cells with $150$--$200$ calibration items and up to $+7.3$ points with $500$ or more
+  (\S\ref{sec:main}).
+\item Choosing the gate on the fit fold, or certifying three gates by a union bound, is valid and helps with $500$ or more calibration
+  items ($+2.4$ to $+8.8$ and $+2.0$ to $+4.4$ points) but costs more than it returns with $150$--$200$
+  ($-6.2$ to $+9.4$ and $-16.5$ to $+4.4$ points).
+\item Much of the repair is confirmation: $22$--$100\%$ of repaired items are items on which the detector agrees with the model.
+  With a small gate the answer is changed for under $0.5\%$ of test items; with a large gate for $2.4$--$5.7\%$, of which $81$--$93\%$
+  are right, and $4$--$5\%$ of the model's false-positive errors are corrected (\S\ref{sec:accounting}).
+\item The start of the fixed sequence matters more than the repair on small folds. Starting where a single error can be
+  tolerated ($k\ge38$ at $\alpha=\delta=0.10$) rather than where none can ($k\ge22$) raises filtering coverage on the smallest cell
+  from $22\%$ to $41\%$ and removes an apparent loss of repair on AMBER, where the conventional start makes CCRC abort on $72\%$
+  of splits (\S\ref{sec:start}).
+\item Certified coverage comes mostly from the score: a detection-grounded score certifies $68\%$ on POPE-1500 against $41\%$ for
+  model confidence and $0.5\%$ for the image--text similarity score of ConfLVLM, while certified repair adds $1.4$ to $8.8$ points
   (\S\ref{sec:score}).
-\item In free-form generation, repairing a claim mid-caption increases downstream
-  hallucination in a matched-prefix experiment (\S\ref{sec:sequential}), which blocks the
-  fixed-point argument for a sequential guarantee.
+\item In free-form generation, repairing a claim mid-caption increases downstream hallucination in a matched-prefix experiment
+  (\S\ref{sec:sequential}), which blocks a fixed-point argument for a sequential guarantee.
 \end{itemize}
 
 \paragraph{Scope.}
 Everything here concerns binary existence questions, one detector, one family of backbones and
-benchmarks whose images overlap ($642$ distinct images across all cells, and the POPE-adversarial
-cells are subsets of the POPE-1500 cell's $250$ images). We do not claim that correction is
+benchmarks whose images overlap ($1{,}457$ distinct images across all cells: the $500$ POPE images, nested across the POPE cells, and $957$ AMBER images). We do not claim that correction is
 generally useful, only that under a protocol whose guarantee we can state it is valid and its
 gain is measured.

@@ -25,7 +25,7 @@ Role of the detector & channel 2: supplies the substituted answer and its margin
 \end{tabular}
 \end{table}
 
-\paragraph{BCEA.}
+\paragraph{BCEA}
 BCEA reduces the abstention floor's practical bite by spending a visual budget to re-read the image and
 recalibrating on post-acquisition scores. It stays inside the premise of Proposition~\ref{prop:floor}: acquisition changes how confident the
 method is about the model's claim, not which claim is emitted. Its current version certifies a
@@ -36,7 +36,7 @@ scores at full confidence. The mechanisms are different (re-scoring a claim vers
 composable, since a re-scored claim can still be repaired when the detector is decisive. We have not tested
 the composition in this version, and nothing here shows that it helps.
 
-\paragraph{CEBC.}
+\paragraph{CEBC}
 CEBC is the nearest published method that edits unsupported object mentions in VLM output with an external detector.
 Its calibration is a one-sided quantile of detector scores on hallucinated mentions from base captions; its rewrite stage
 is not calibrated; and it reports no violation check. Whatever its empirical merit, it is a detector-gated rewriter rather than a certified
@@ -45,7 +45,7 @@ than a certified error rate over emitted claims. CEBC applies to free-form capti
 yes/no questions; the guarantee of Theorem~\ref{thm:validity} has no free-form counterpart in this paper, and
 \S\ref{sec:sequential} gives the reason.
 
-\paragraph{What remains of the novelty claim.}
+\paragraph{What remains of the novelty claim}
 Among the work we surveyed up to 4 October 2026, CCRC is the one whose certificate covers an emitted answer
 that differs from the model's, with the repair gate fixed from fit or external data. CEBC edits without certifying;
 BCEA certifies without editing; conformal linguistic calibration \citep{jiang2025clc} certifies a rewritten output

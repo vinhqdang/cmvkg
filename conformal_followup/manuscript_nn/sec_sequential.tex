@@ -9,14 +9,14 @@ data-dependent. Prefix-conditional (Mondrian) $p$-values and e-processes \citep{
 handle both in principle, leaving the drift of the calibration pool, which on-policy calibration by fixed-point
 iteration would address if the correction map were monotone. We measured whether it is before attempting a proof.
 
-\paragraph{Design.}
+\paragraph{Design}
 For each image we generate a caption greedily, locate the first hallucinated object mention at position $t$ using AMBER's
 per-image present and absent object lists, and build two prefixes identical up to $t$: one that keeps the hallucinated
 word and one that substitutes the best-detected object the image contains. We continue decoding the same number of
 tokens from each and count hallucinated mentions in the continuations only. The only difference between the two
 continuations is the intervention. The unit is the matched pair ($n=121$ images); there is one repair per pair.
 
-\paragraph{Result.}
+\paragraph{Result}
 Repair makes the continuation worse (Table~\ref{tab:monotone}, Figure~\ref{fig:monotonicity}). Hallucinated mentions
 in the continuation rise from $1.207$ to $1.413$, a paired difference of $+0.207\pm0.091$ ($t(120)=2.27$, two-sided
 $p=0.025$), with $45$ pairs worsening, $25$ improving and $51$ tied. A Wilcoxon signed-rank test ($p=0.035$) and an exact sign test
@@ -48,7 +48,7 @@ Hallucinated share of mentions    & 0.433 & 0.447 & $-0.004$ ($0.884$)\\
 \label{fig:monotonicity}
 \end{figure}
 
-\paragraph{What the experiment can support.}
+\paragraph{What the experiment can support}
 The result is significant under three tests and under-powered. At the observed paired standard deviation ($0.999$) the
 minimum detectable effect at $80\%$ power is $+0.257$, larger than the observed $+0.207$, and about $186$ pairs would be
 needed at this effect size. Equivalence testing against a margin of $\pm0.25$ does not establish equivalence
@@ -59,7 +59,7 @@ claims is not helped by this, since each additional hallucinated mention counts.
 context-blind, and the finding concerns that rule rather than all correction. What the data withdraw is support
 for a monotone correction map and hence for a fixed-point route to a sequential guarantee, at the sample size we have.
 
-\paragraph{A coupling bound.}
+\paragraph{A coupling bound}
 For a sequence of claims let $F(O)$ be the number of false claims and $\Risk(O)=\E[F(O)]$ the expected count per
 sequence. Let a repair rule replace claims at a random set $P$ of positions, producing $O'$.
 Write $W$ for the number of wrong repaired claims, $F_P(O)$ for the number of false \emph{original} claims at the

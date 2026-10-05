@@ -33,20 +33,20 @@ for n in NAMES:
         qe = b["q_ext"]
         rows.append(f"{SHORT[n] if a=='0.1' else ''} & {float(a):.2f} & {p1(F['cov'])} ({ab(F['abort'])}) & "
                     f"{cell(n,a,'ext')} & {sg(main[f'{n}|all|{a}']['ext']['gain'])} [{sg(e['gain'][1])}, {sg(e['gain'][2])}] & {e['frac_pos']:.2f} & "
-                    f"{cell(n,a,'fitsel')} & {sg(main[f'{n}|all|{a}']['fitsel']['gain'])} [{sg(f_['gain'][1])}, {sg(f_['gain'][2])}]\\\\")
+                    f"{cell(n,a,'fitsel')} & {sg(main[f'{n}|all|{a}']['fitsel']['gain'])} [{sg(f_['gain'][1])}, {sg(f_['gain'][2])}] & {sg(main[f'{n}|all|{a}']['extfull']['gain'])}\\\\")
     rows.append("\\addlinespace")
-w("main", "\\begin{tabular}{lcccccccc}\n\\toprule\n & & Filter & \\multicolumn{3}{c}{CCRC, external gate} & & \\multicolumn{2}{c}{CCRC, fit-fold gate}\\\\\n\\cmidrule(lr){4-6}\\cmidrule(lr){8-9}\nSetting & $\\alpha$ & cov.\\ (abort) & cov.\\ (abort) & gain [95\\% CI] & $P(\\text{gain}>0)$ & & cov.\\ (abort) & gain [95\\% CI]\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
+w("main", "\\begin{tabular}{lccccccccc}\n\\toprule\n & & Filter & \\multicolumn{3}{c}{CCRC, external gate} & & \\multicolumn{2}{c}{CCRC, fit-fold gate} & CCRC, full-size\\\\\n\\cmidrule(lr){4-6}\\cmidrule(lr){8-9}\nSetting & $\\alpha$ & cov.\\ (abort) & cov.\\ (abort) & gain [95\\% CI] & $P(\\text{gain}>0)$ & & cov.\\ (abort) & gain [95\\% CI] & ext.\\ gate gain\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
 
 # --------------------------------------------------- audit + alternatives (all-item cohort)
 rows = []
 for n in NAMES:
     for a in ("0.1", "0.15"):
         c = main[f"{n}|all|{a}"]; r = f"{SHORT[n] if a=='0.1' else ''} & {float(a):.2f}"
-        for arm in ("filter", "ext", "fitsel", "union", "fixed10"):
+        for arm in ("filter", "ext", "extfull", "fitsel", "union", "fixed10"):
             x = c[arm]; r += f" & {p1(x['cov'])} ({ab(x['abort'])}) & {x['exc_te']:.2f} / {x['conf_viol']:.2f}"
         rows.append(r + "\\\\")
     rows.append("\\addlinespace")
-w("audit", "\\begin{tabular}{lcrrrrrrrrrr}\n\\toprule\n & & \\multicolumn{2}{c}{Filter} & \\multicolumn{2}{c}{External gate} & \\multicolumn{2}{c}{Fit-fold gate} & \\multicolumn{2}{c}{Union ($\\delta/3$)} & \\multicolumn{2}{c}{Fixed $q{=}0.10$}\\\\\n\\cmidrule(lr){3-4}\\cmidrule(lr){5-6}\\cmidrule(lr){7-8}\\cmidrule(lr){9-10}\\cmidrule(lr){11-12}\nSetting & $\\alpha$ & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
+w("audit", "\\begin{tabular}{lc" + "rr" * 6 + "}\n\\toprule\n & & \\multicolumn{2}{c}{Filter} & \\multicolumn{2}{c}{External, size-matched} & \\multicolumn{2}{c}{External, full-size} & \\multicolumn{2}{c}{Fit-fold gate} & \\multicolumn{2}{c}{Union ($\\delta/3$)} & \\multicolumn{2}{c}{Fixed $q{=}0.10$}\\\\\n\\cmidrule(lr){3-4}\\cmidrule(lr){5-6}\\cmidrule(lr){7-8}\\cmidrule(lr){9-10}\\cmidrule(lr){11-12}\\cmidrule(lr){13-14}\nSetting & $\\alpha$ & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv & cov.\\ (ab) & exc/cv\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
 
 # ---------------------------------------------------------------- ladder
 RUNGS = ["L0 conventional protocol", "L1 + image-grouped folds", "L2 + fixed value grid and gate", "L3 + analytic start e0=1", "L4 + gate chosen on fit fold", "L5 + all items (missing policy)"]

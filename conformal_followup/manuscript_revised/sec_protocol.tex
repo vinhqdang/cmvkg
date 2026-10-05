@@ -6,17 +6,21 @@ Backbones are LLaVA-1.5-7B \citep{llava} in 4-bit, Qwen2-VL-2B-Instruct \citep{q
 visual contrastive decoding \citep{vcd}. Channel 2 is OWLv2-base \citep{owlv2} with $\theta=0.15$. Benchmarks are
 the POPE adversarial split \citep{pope} and the AMBER discriminative benchmark \citep{amber}; MME, GQA and
 HallusionBench appear only where the detector does not apply (\S\ref{sec:noevidence}). Per-item signals were
-extracted once and are released, so every analysis below runs on a CPU. We did not rerun the VLMs.
+extracted once and are released, so every analysis below runs on a CPU. The extended POPE and AMBER cells (items $1500$--$2999$ of the
+POPE adversarial split and items $500$--$2999$ of the shuffled AMBER list) were extracted with the same prompts and detector query as the
+earlier cells; in the AMBER extension, photographs larger than $2000$ pixels on the long side were shrunk before detection because the
+detector's preprocessing of the largest ones ($54$ megapixels) exhausted host memory.
 
 \paragraph{Cohorts and the unit of splitting.}
 The extraction streamed the first $N$ rows of each public benchmark. We recovered the image identifier of every
 item from the benchmark metadata and verified the reconstruction against the cached gold labels, object phrases
 and categories (all agree). Table~\ref{tab:cohort} reports what enters each cell. The POPE items are
-six questions per image (three present, three absent objects), so there are $75$, $100$ and $250$ distinct
-images in the three POPE cell sizes, and the smaller POPE cells are subsets of the largest one's images. AMBER
-contributes $1.3$ items per image. Folds are unions of whole images, drawn at random with a third of the images per
-fold. The intra-image correlation of the model's errors is slightly \emph{negative} ($-0.04$ to $-0.09$): the
-balanced yes/no design makes an error on one question of an image mildly predictive of a correct answer on another.
+six questions per image (three present, three absent objects), so there are $75$, $100$, $250$ and $500$ distinct
+images in the four POPE cell sizes; the smaller POPE cells are subsets of the largest one's images, and POPE-3000 is the whole
+adversarial split. AMBER contributes $3.1$ items per image over $957$ images. Folds are unions of whole images, drawn at
+random with a third of the images per fold. The intra-image correlation of the model's errors is slightly \emph{negative}
+($-0.01$ to $-0.09$): in POPE the balanced yes/no design makes an error on one question of an image mildly predictive of a
+correct answer on another.
 
 \begin{table}[t]
 \centering
