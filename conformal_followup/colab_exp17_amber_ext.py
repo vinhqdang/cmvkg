@@ -88,36 +88,46 @@ def extract_object(q):
         s=s.replace(k,"")
     s=s.strip(); return s if 1<=len(s.split())<=3 and s else None
 
-# ---- 3. LLaVA ----
-M="llava-hf/llava-1.5-7b-hf"
-log("[model] fetching LLaVA weights (may take ~5min, silent) ...")
-proc=AutoProcessor.from_pretrained(M)
-bnb=BitsAndBytesConfig(load_in_4bit=True,bnb_4bit_compute_dtype=torch.float16)
-llava=LlavaForConditionalGeneration.from_pretrained(M,quantization_config=bnb,
-      torch_dtype=torch.float16,low_cpu_mem_usage=True,device_map="auto").eval()
-tok=proc.tokenizer
-def ids_for(ws):
-    o=set()
-    for w in ws:
-        for v in (w," "+w):
-            t=tok(v,add_special_tokens=False).input_ids
-            if len(t)==1: o.add(t[0])
-    return list(o)
-YES,NO=ids_for(["yes","Yes","YES"]),ids_for(["no","No","NO"])
-log(f"[model] LLaVA ready (+{time.time()-t0:.0f}s)")
+STAGE=os.environ.get('STAGE','llava')   # 'llava' then 'owl' as SEPARATE processes: the 4-bit LLaVA load leaves ~11GB of host RAM
+                                         # that is not returned, and loading OWLv2 afterwards is OOM-killed on a 12GB Colab VM.
 n=len(picks);p_yes=np.zeros(n);ans=np.zeros(n,int);owl=np.full(n,-1.0)
 gold=np.array([p[3] for p in picks]);objs=[extract_object(p[2]) for p in picks]
-for i,(qid,fn,q,g,typ) in enumerate(picks):
-    im=Image.open(index[fn]).convert("RGB")
-    inp=proc(images=im,text=f"USER: <image>\n{q} Please answer yes or no. ASSISTANT:",
-             return_tensors="pt").to(device)
-    inp["pixel_values"]=inp["pixel_values"].to(torch.float16)
-    with torch.no_grad():
-        lg=llava(**inp).logits[0,-1].float()
-        p_yes[i]=torch.sigmoid(torch.logsumexp(lg[YES],0)-torch.logsumexp(lg[NO],0)).item()
-        ans[i]=int(p_yes[i]>=.5)
-    if (i+1)%50==0: log(f"  amber-{SUBSET} {i+1}/{n} (+{time.time()-t0:.0f}s)")
-del llava; torch.cuda.empty_cache()
+if STAGE=='llava':
+    # ---- 3. LLaVA ----
+    M="llava-hf/llava-1.5-7b-hf"
+    log("[model] fetching LLaVA weights (may take ~5min, silent) ...")
+    proc=AutoProcessor.from_pretrained(M)
+    bnb=BitsAndBytesConfig(load_in_4bit=True,bnb_4bit_compute_dtype=torch.float16)
+    llava=LlavaForConditionalGeneration.from_pretrained(M,quantization_config=bnb,
+          torch_dtype=torch.float16,low_cpu_mem_usage=True,device_map="auto").eval()
+    tok=proc.tokenizer
+    def ids_for(ws):
+        o=set()
+        for w in ws:
+            for v in (w," "+w):
+                t=tok(v,add_special_tokens=False).input_ids
+                if len(t)==1: o.add(t[0])
+        return list(o)
+    YES,NO=ids_for(["yes","Yes","YES"]),ids_for(["no","No","NO"])
+    log(f"[model] LLaVA ready (+{time.time()-t0:.0f}s)")
+    n=len(picks);p_yes=np.zeros(n);ans=np.zeros(n,int);owl=np.full(n,-1.0)
+    gold=np.array([p[3] for p in picks]);objs=[extract_object(p[2]) for p in picks]
+    for i,(qid,fn,q,g,typ) in enumerate(picks):
+        im=Image.open(index[fn]).convert("RGB")
+        inp=proc(images=im,text=f"USER: <image>\n{q} Please answer yes or no. ASSISTANT:",
+                 return_tensors="pt").to(device)
+        inp["pixel_values"]=inp["pixel_values"].to(torch.float16)
+        with torch.no_grad():
+            lg=llava(**inp).logits[0,-1].float()
+            p_yes[i]=torch.sigmoid(torch.logsumexp(lg[YES],0)-torch.logsumexp(lg[NO],0)).item()
+            ans[i]=int(p_yes[i]>=.5)
+        if (i+1)%50==0: log(f"  amber-{SUBSET} {i+1}/{n} (+{time.time()-t0:.0f}s)")
+    del llava; torch.cuda.empty_cache()
+    json.dump(dict(p_yes=p_yes.tolist(),answer=ans.tolist()),open('/content/exp17_llava.json','w'))
+    log('[stage llava done]'); os._exit(0)
+else:
+    _d=json.load(open('/content/exp17_llava.json')); p_yes=np.array(_d['p_yes']); ans=np.array(_d['answer'])
+
 
 # ---- 4. OWLv2 grounding ----
 op=Owlv2Processor.from_pretrained("google/owlv2-base-patch16-ensemble")
