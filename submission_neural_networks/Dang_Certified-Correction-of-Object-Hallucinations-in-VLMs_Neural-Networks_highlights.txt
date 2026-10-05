@@ -1,0 +1,5 @@
+A repair-and-certify selective predictor with a valid finite-sample risk guarantee
+Proved and evaluated procedures coincide: fixed value grid, image-grouped folds
+Certified gain over filtering is small; bootstrap excludes zero on one cell
+Most repairs confirm the model's answer; false positives are never corrected
+Mid-caption repair raises downstream hallucination, blocking a sequential guarantee

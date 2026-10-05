@@ -1,0 +1,57 @@
+\documentclass[10.5pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{hyperref}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.55em}
+\pagestyle{empty}
+\begin{document}
+
+Quang-Vinh Dang\\
+British University Vietnam, Hung Yen, Vietnam\\
+vinh.dq4@buv.edu.vn \quad ORCID 0000-0002-3877-8024
+
+\today
+
+The Editors\\
+\emph{Neural Networks}
+
+\textbf{Submission: ``Certified Correction of Object Hallucinations in Vision--Language Models: Guarantees, Gains and Failure Modes under a Pre-specified Protocol''}
+
+Dear Editors,
+
+I submit the above manuscript as an original research article for \emph{Neural Networks}.
+
+\textbf{Problem.} Vision--language models (VLMs) assert objects that are not in the image, and a wrong answer is costly in the settings where they are
+deployed. Selective prediction lets a model abstain, and conformal and risk-controlling methods certify the error rate of the answers it does emit.
+That certificate has a known price: when the model's error rate exceeds the target, any predictor that only emits or abstains the model's own answer must abstain on a fixed fraction of
+inputs, whatever its score. The manuscript asks what changes when the predictor may emit a different answer.
+
+\textbf{Contribution.} I propose Certified-Correction Risk Control (CCRC) for object-existence questions. It accepts the VLM's answer where a correctness score is high,
+substitutes the answer of an open-vocabulary detector where the detector's evidence is decisive, abstains otherwise, and certifies the error rate of the emitted
+set as a whole with a fixed-sequence Clopper--Pearson test. The validity theorem is an application of fixed-sequence testing and I claim no new statistical technique. The
+contribution is the formulation, a protocol in which the proved procedure is exactly the evaluated procedure (folds are unions of whole images, thresholds and repair gate are fixed before calibration, the start of the test sequence is derived analytically, and the repair gate is fixed on external data, chosen on the fit fold or certified by a union bound), and a measured account of what the mechanism does and does not contribute.
+
+\textbf{Findings.} On six benchmark--backbone cells (POPE, AMBER; LLaVA-1.5, Qwen2-VL, visual contrastive decoding) the gain in certified coverage over filtering is
+$+0.8$ to $+7.3$ points with a gate fixed on external data, positive in all twelve (cell, risk target) combinations; an outer image-level bootstrap excludes zero in seven. Most
+of the coverage comes from the correctness score, not from the repair; much of the repaired mass re-emits the model's own answer with detector confirmation; false-positive errors are corrected only
+with a large gate; fixed-sequence testing is fragile with small calibration folds; and a matched-prefix experiment suggests that mid-caption repair increases downstream hallucination.
+The manuscript reports the negative and inconclusive results with the same prominence as the positive ones.
+
+\textbf{Fit with the journal.} The work concerns the trustworthy use of deep vision--language networks: calibrated uncertainty, risk-controlled prediction and the limits of what a
+finite-sample guarantee can buy. It combines a theorem, a protocol that makes the evaluation faithful to the theorem, and a reproducible empirical study, which I believe suits the journal's readership in
+machine-learning theory and applications.
+
+\textbf{Originality and ethics.} The manuscript has not been published and is not under consideration elsewhere. A previous version was submitted to another journal and was not
+accepted; the present version is substantially revised, with new experiments (extended POPE and AMBER data, an image-grouped protocol, additional analyses) and a restructured text. I have no competing interests to declare and
+received no specific funding. Per-item model and detector signals, image identifiers and all scripts that generate the tables and figures are publicly available at
+\url{https://github.com/vinhqdang/cmvkg} (directory \texttt{conformal\_followup/revision}).
+
+Thank you for considering the manuscript.
+
+Sincerely,
+
+Quang-Vinh Dang
+
+\end{document}
