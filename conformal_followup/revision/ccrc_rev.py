@@ -457,7 +457,7 @@ def external_gate(dev, alpha, mode=None, delta=DELTA):
 
 
 def external_gate_matched(dev, alpha, n_cal, reps=20, subsamples=20, seed=11, mode=None, delta=DELTA,
-                          qs=(0.05, 0.10, 0.25, 0.50)):
+                          qs=(0.05, 0.10, 0.25, 0.50), X_of=None):
     """External gate at the TARGET calibration size. The full-size version of `external_gate` treats the
     whole development set as one huge calibration sample and so favours gates that only pay off with many
     items. Here the development benchmark is subsampled (by image) to 3 * n_cal items, the full protocol is
@@ -474,7 +474,7 @@ def external_gate_matched(dev, alpha, n_cal, reps=20, subsamples=20, seed=11, mo
             idx = np.flatnonzero(inv == u); keep.append(idx); tot += len(idx)
             if tot >= 3 * n_cal: break
         sub = take(dev, np.concatenate(keep))
-        run = Runner(sub, mode, reps=reps, seed=int(rng.integers(1e9)))
+        run = Runner(sub, mode, reps=reps, seed=int(rng.integers(1e9)), X=None if X_of is None else X_of(sub))
         for q in cov:
             res = run.run(alpha, delta, gate=None if q is None else "fixed", q=q)
             cov[q].append(np.mean([r["cov"] for r in res]) if res else 0.0)

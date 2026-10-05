@@ -1,46 +1,42 @@
 \section{Introduction}
 \label{sec:intro}
 
-A vision--language model that answers ``is there a mouse in the image?'' wrongly is more
-useful if it says so. Selective prediction does this: a score ranks the model's answers, a
-threshold is calibrated on held-out data, and the model answers only above it. Conformal and
-risk-controlling variants \citep{bates2021rcps,angelopoulos2021ltt,angelopoulos2024crc} certify,
-with a finite-sample guarantee that makes no assumption on the score or the model, that the
-error rate among the answers that are emitted stays below a target $\alpha$.
+Hallucinated object claims limit the use of vision--language models (VLMs) wherever a wrong answer is costly. Selective prediction
+addresses this by letting the model abstain: a score ranks the model's answers, a threshold is calibrated on held-out data, and the model
+answers only above it. Conformal and risk-controlling variants \citep{bates2021rcps,angelopoulos2021ltt,angelopoulos2024crc} certify, with
+a finite-sample guarantee that assumes nothing about the score or the model, that the error rate among emitted answers stays below a
+target $\alpha$ (Figure~\ref{fig:method} shows the setting). Existing conformal methods for VLMs filter, back off or abstain
+\citep{conflvlm,bcea,atabuzzaman2026introconformal}; mitigation methods repair outputs but give no guarantee
+\citep{woodpecker,lure,reverse,cmvkgguard}.
 
-The guarantee is paid for in coverage, and part of the bill cannot be reduced. Kotte
-\citep{crcimposs} shows that when the base error rate $\mu$ exceeds $\alpha$, any predictor that
-may only emit or abstain the model's own answer must abstain on at least
-$(\mu-\alpha)/(1-\alpha)$ of inputs, whatever the score, the concentration inequality or the
-calibration budget (Proposition~\ref{prop:floor} below). The proof uses one premise: an
-abstained item is an item whose model answer stays wrong. A predictor that may emit a
-\emph{different} answer is outside the premise.
+The guarantee has a price that no score can remove. Kotte \citep{crcimposs} shows that when the base error rate $\mu$ exceeds $\alpha$, any
+predictor that only emits or abstains the model's own answer must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of inputs
+(Proposition~\ref{prop:floor}). The proof uses one premise, that an abstained item's model answer stays wrong, so a predictor that may
+emit a \emph{different} answer lies outside it.
 
-This paper studies that possibility in the simplest setting where it can be made exact: yes/no
-object-existence questions, with an open-vocabulary detector as a second, distinct source of
-evidence. \emph{Certified-Correction Risk Control} (CCRC) accepts the model's answer where a
-correctness score is high, replaces it with the detector's answer where the detector's evidence
-is decisive, abstains otherwise, and certifies the error rate of the whole emitted set, accepted
-and substituted answers together.
+We study that possibility for yes/no object-existence questions, with an open-vocabulary detector as a second, distinct source of evidence.
+\emph{Certified-Correction Risk Control} (CCRC) accepts the model's answer where a correctness score is high, replaces it with the
+detector's answer where the detector's evidence is decisive, abstains otherwise, and certifies the error rate of the whole emitted set,
+accepted and substituted answers together. The scope is deliberate: existence claims are the hallucinations a detector can refute, and
+\S\ref{sec:discussion} discusses what other evidence channels would be needed for attributes, counts and relations.
 
-\paragraph{What the paper contributes}
-Our aim is a result that survives a strict reading of the protocol. Four design decisions follow
-from that aim, and each is a contribution in its own right.
+\paragraph{What is and is not new}
+Theorem~\ref{thm:validity} is an application of fixed-sequence testing \citep{angelopoulos2021ltt} with exact binomial bounds, and we claim no new
+statistical technique. The contributions are the formulation (a risk certificate over a mixture of the model's and a second predictor's
+answers, which escapes the abstention floor), a protocol under which the proved procedure is the evaluated procedure, and measurements of what the
+mechanism does and does not contribute. Four design decisions make up the protocol.
+
 \begin{enumerate}
-\item \emph{The proved procedure is the evaluated procedure.} Theorem~\ref{thm:validity} covers
-  policy families indexed by threshold \emph{values} fixed before calibration under i.i.d.
-  sampling of calibration units. Every reported number uses such a family: thresholds and repair
-  gate are read off the fit fold, never off the calibration sample whose errors are counted.
-\item \emph{The sampling unit is stated and respected.} POPE contributes six questions per
-  image; folds here are unions of whole images, we measure the within-image dependence of
-  errors, and a known-population simulation shows how clustering would degrade the guarantee and
-  how a one-item-per-image calibration restores it.
-\item \emph{The repair gate is not tuned on the evaluation data.} We report three ways of
-  fixing it that keep the guarantee: a constant chosen on a different benchmark, a choice made
-  on the fit fold, and a union bound over a pre-specified set of gates.
-\item \emph{Uncertainty is stated at the level of the data.} Gains are accompanied by an outer
-  image-level bootstrap, because hundreds of random splits of one benchmark measure the
-  procedure's sensitivity to the split, not the benchmark's sampling error.
+\item \emph{The proved procedure is the evaluated procedure.} Theorem~\ref{thm:validity} covers policy families indexed by threshold
+  \emph{values} fixed before calibration, under i.i.d.\ sampling of calibration units. Thresholds and repair gate are read off the fit fold,
+  never off the calibration sample whose errors are counted.
+\item \emph{The sampling unit is respected.} POPE contributes six questions per image. Folds are unions of whole images, the within-image
+  dependence of errors is measured, and a known-population simulation shows how clustering would degrade the guarantee and how
+  one-item-per-image calibration restores it.
+\item \emph{The repair gate is fixed without looking at the evaluation data.} Three ways keep the guarantee: a constant chosen on a
+  different benchmark at the target's calibration size, a choice made on the fit fold, and a union bound over a pre-specified set of gates.
+\item \emph{Uncertainty refers to the data.} Gains carry an outer image-level bootstrap interval, since repeated random splits of one
+  benchmark measure sensitivity to the split and say nothing about the benchmark's sampling error.
 \end{enumerate}
 
 \paragraph{What we find}
@@ -62,8 +58,8 @@ from that aim, and each is a contribution in its own right.
 \item Certified coverage comes mostly from the score: a detection-grounded score certifies $68\%$ on POPE-1500 against $41\%$ for
   model confidence and $0.5\%$ for the image--text similarity score of ConfLVLM, while certified repair adds $1.4$ to $8.8$ points
   (\S\ref{sec:score}).
-\item In free-form generation, repairing a claim mid-caption increases downstream hallucination in a matched-prefix experiment
-  (\S\ref{sec:sequential}), which blocks a fixed-point argument for a sequential guarantee.
+\item In free-form generation, a small matched-prefix experiment ($n=121$, under-powered for the size of the effect) finds more downstream
+  hallucination after repair (\S\ref{sec:sequential}); it withdraws support for a fixed-point argument for a sequential guarantee.
 \end{itemize}
 
 \paragraph{Scope}

@@ -164,3 +164,30 @@ for n in NAMES:
     rows.append("\\addlinespace")
 w("grounded", "\\begin{tabular}{lcccccccc}\n\\toprule\n & & Filter & \\multicolumn{2}{c}{External gate} & \\multicolumn{2}{c}{Fit-fold gate} & \\multicolumn{2}{c}{Fixed $q{=}0.10$}\\\\\n\\cmidrule(lr){4-5}\\cmidrule(lr){6-7}\\cmidrule(lr){8-9}\nSetting & $\\alpha$ & cov.\\ (ab) & cov.\\ (ab) & gain & cov.\\ (ab) & gain & cov.\\ (ab) & gain\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
 print("extra tables written")
+
+# ------------------------------------------------ review round 2: detector-free score, multi-start, transfer
+r2 = L("results_review2.json"); rows = []
+for n in NAMES:
+    for a in ("0.1", "0.15"):
+        x = r2[f"A|{n}|{a}"]; m = main[f"{n}|all|{a}"]
+        rows.append(f"{SHORT[n] if a=='0.1' else ''} & {float(a):.2f} & {p1(x['filter']['cov'])} ({ab(x['filter']['abort'])}) & {p1(x['ext']['cov'])} ({ab(x['ext']['abort'])}) & {sg(x['ext']['gain'])} & "
+                    f"{p1(m['filter']['cov'])} ({ab(m['filter']['abort'])}) & {p1(m['ext']['cov'])} ({ab(m['ext']['abort'])}) & {sg(m['ext']['gain'])}\\\\")
+    rows.append("\\addlinespace")
+w("detfree", "\\begin{tabular}{lcccccccc}\n\\toprule\n & & \\multicolumn{3}{c}{channel 1 without detector features} & \\multicolumn{3}{c}{channel 1 with detector features}\\\\\n\\cmidrule(lr){3-5}\\cmidrule(lr){6-8}\nSetting & $\\alpha$ & filter & CCRC & gain & filter & CCRC & gain\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
+
+rows = []
+for n in NAMES:
+    for a in ("0.1", "0.15"):
+        x = r2[f"B|{n}|{a}"]; f = lambda k: f"{p1(x[k]['cov'])} ({ab(x[k]['abort'])})"
+        rows.append(f"{SHORT[n] if a=='0.1' else ''} & {float(a):.2f} & {f('filter e0=0')} & {f('filter e0=1')} & {f('filter multi')} & {f('ccrc e0=0')} & {f('ccrc e0=1')} & {f('ccrc multi')}\\\\")
+    rows.append("\\addlinespace")
+w("multistart", "\\begin{tabular}{lcccccccc}\n\\toprule\n & & \\multicolumn{3}{c}{filtering} & \\multicolumn{3}{c}{CCRC, external gate}\\\\\n\\cmidrule(lr){3-5}\\cmidrule(lr){6-8}\nSetting & $\\alpha$ & $e_0{=}0$ & $e_0{=}1$ & multi-start ($\\delta/3$) & $e_0{=}0$ & $e_0{=}1$ & multi-start ($\\delta/3$)\\\\\n\\midrule\n" + "\n".join(rows[:-1]) + "\n\\bottomrule\n\\end{tabular}\n")
+
+rows = []
+for k, v in r2.items():
+    if not k.startswith("C|"): continue
+    _, tgt, dev, a = k.split("|"); a = a.replace("0.1", "0.10") if a == "0.1" else a
+    ind = main[f"{tgt}|all|{ '0.1' if a=='0.10' else a}"]["ext"]
+    rows.append(f"{SHORT[tgt]} $\\leftarrow$ {SHORT[dev].split(',')[0]} & {a} & {p1(ind['cov'])} & {p1(v['filter']['cov'])} ({ab(v['filter']['abort'])}) & {p1(v['ccrc']['cov'])} ({ab(v['ccrc']['abort'])}) & {v['ccrc']['exc_te']:.2f} / {v['ccrc']['conf_viol']:.2f} & {v['q']}\\\\")
+w("transfer", "\\begin{tabular}{llccccc}\n\\toprule\nTarget $\\leftarrow$ source & $\\alpha$ & in-domain CCRC & filter (abort) & CCRC (abort) & exc / cv & $q$\\\\\n\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n")
+print("review2 tables written")

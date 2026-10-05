@@ -18,6 +18,14 @@ comes from confirming answers the model already gave, and false positives are co
 $4$--$5\%$ of them.
 The correctness score dominates the coverage, and the start of the fixed sequence dominates the repair on small folds.
 
+\paragraph{Scope, and other hallucination types.}
+The method as evaluated repairs object-existence answers, and in practice it repairs missed objects; the title says so. Extending it needs a
+distinct evidence source for each claim type, with a margin that can gate repair. For attributes this could be a region-level attribute classifier or a
+second VLM queried on a crop; for counts, a detector's instance count compared against the model's; for relations, a scene-graph model. The certificate
+does not change, since it only needs a fixed policy and i.i.d.\ units, but Section~\ref{sec:noevidence} shows what happens without such a source:
+on attribute and relation questions CCRC reduces to filtering. Whether a source with a decisive margin exists for those claim types is an empirical question this
+paper does not answer.
+
 \paragraph{Limitations.}
 (i) The task is binary object existence, with one detector, three backbones and two benchmark families whose
 images overlap; $1{,}457$ distinct images are involved in total. (ii) The channel-2 operating point $\theta=0.15$ was fixed
@@ -28,7 +36,7 @@ would weaken that independence slightly. (iv) The i.i.d.\ assumption is violated
 measured correlation is slightly negative, and \S\ref{sec:validity-audit} shows the guarantee degrades with positive
 correlation unless calibration uses one item per image. (v) The bootstrap interval reflects sampling of images from the benchmark, not
 of benchmarks from the world. (vi) Free-form generation is not covered and mid-sequence repair worsens the continuation.
-(vii) We did not run BCEA or CEBC, and the signals of the two extended cells were extracted once, with images above $2000$ pixels on the long side shrunk before detection in the AMBER extension.
+(vii) We did not run BCEA or CEBC, we tested a detector-free channel 1 (Table~\ref{tab:detfree}) but not a second detector, and the signals of the two extended cells were extracted once, with images above $2000$ pixels on the long side shrunk before detection in the AMBER extension.
 
 \paragraph{Next steps.}
 The measurement that would most improve the paper is a second detector and more benchmarks with several questions per image, which would narrow the
@@ -45,4 +53,4 @@ fixed before calibration. Under a protocol built on that requirement the coverag
 an uncertainty that the available images do not resolve on the smaller cells. Many repaired items re-emit the model's answer with detector
 confirmation, false positives are corrected only with a large gate and then for a small share of them, and the coverage comes mainly from
 the correctness score.
-In generation, mid-sequence repair worsens the continuation. The reproducible pipeline and all negative results are released.
+In a small matched-prefix experiment, mid-sequence repair worsened the continuation. The reproducible pipeline and all negative results are released.

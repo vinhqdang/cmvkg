@@ -30,7 +30,7 @@
 
 \begin{document}
 \begin{frontmatter}
-\title{Certified Correction of Vision--Language Hallucinations:\\
+\title{Certified Correction of Object Hallucinations in Vision--Language Models:\\
 Guarantees, Gains and Failure Modes under a Pre-specified Protocol}
 
 \author[bu]{Quang-Vinh Dang\corref{cor1}}
@@ -42,15 +42,15 @@ Guarantees, Gains and Failure Modes under a Pre-specified Protocol}
 Selective prediction gives a vision--language model (VLM) a distribution-free guarantee on its emitted answers
 at the price of abstaining on the rest. When the base error rate $\mu$ exceeds the target $\alpha$, any
 predictor that only emits or abstains the model's own answer must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of
-inputs. We study a predictor that may emit a different answer: Certified-Correction Risk Control (CCRC) accepts the
+inputs. For object-existence questions we study a predictor that may emit a different answer: Certified-Correction Risk Control (CCRC) accepts the
 model's answer where a correctness score is high, substitutes the answer of a distinct evidence source where that source is decisive, abstains otherwise, and certifies the error rate of
 everything emitted with a fixed-sequence Clopper--Pearson test. We prove validity for policy families indexed by
 pre-specified score values under i.i.d.\ sampling of calibration units, and evaluate under a protocol in which the
 proved and evaluated procedures coincide: folds are unions of images, and thresholds, repair gate and sequence start
 are fixed before calibration. On six benchmark--backbone cells, certified coverage over filtering rises by $0.8$ to $7.3$
 points with a gate fixed on external data at the target's calibration size, positive in all twelve combinations; an image-level bootstrap excludes zero in seven. Most repaired items re-emit the model's own answer with
-detector confirmation; the answer changes for under $0.5\%$ of test items with a small gate and up to $5.7\%$ with a large one. The correctness score supplies most of the coverage; fixed-sequence testing is fragile with small calibration folds. Repairing a claim mid-caption increases downstream
-hallucination, which blocks a fixed-point route to a sequential guarantee.
+detector confirmation. The correctness score supplies most of the coverage; fixed-sequence testing is fragile with small calibration folds. A small matched-prefix experiment suggests that repairing a claim mid-caption increases downstream
+hallucination.
 \end{abstract}
 
 \begin{highlights}

@@ -37,8 +37,8 @@ model's errors.}
 \paragraph{Primary analysis and missing evidence}
 The primary cohort contains all items. Items with no detector value receive zeroed grounding features and a
 missing-evidence flag in the score, and a margin $m=-1$ so they are never repaired. A secondary analysis restricted to
-items with a detector value appears in Appendix~\ref{app:grounded}. Excluding the items would be an analysis of the
-detector's coverage, not of deployment: a system must decide what to do with a question the detector cannot parse.
+items with a detector value appears in Appendix~\ref{app:grounded}. Excluding the items would analyse the
+detector's coverage; a deployed system must decide what to do with a question the detector cannot parse.
 
 \paragraph{Procedure}
 Each split draws three image-disjoint folds (fit, calibration, test); the score is a logistic regression with five

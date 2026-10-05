@@ -1,4 +1,4 @@
-\section{Free-form generation: mid-sequence repair increases downstream hallucination}
+\section{Free-form generation: a matched-prefix test of mid-sequence repair}
 \label{sec:sequential}
 
 Correction looks more attractive in captions than in yes/no answers: replacing a hallucinated word keeps a
@@ -17,7 +17,7 @@ tokens from each and count hallucinated mentions in the continuations only. The 
 continuations is the intervention. The unit is the matched pair ($n=121$ images); there is one repair per pair.
 
 \paragraph{Result}
-Repair makes the continuation worse (Table~\ref{tab:monotone}, Figure~\ref{fig:monotonicity}). Hallucinated mentions
+In this sample repair makes the continuation worse (Table~\ref{tab:monotone}, Figure~\ref{fig:monotonicity}). Hallucinated mentions
 in the continuation rise from $1.207$ to $1.413$, a paired difference of $+0.207\pm0.091$ ($t(120)=2.27$, two-sided
 $p=0.025$), with $45$ pairs worsening, $25$ improving and $51$ tied. A Wilcoxon signed-rank test ($p=0.035$) and an exact sign test
 ($p=0.023$) agree. The Hodges--Lehmann estimate is $0.000$ because $42\%$ of pairs are tied.

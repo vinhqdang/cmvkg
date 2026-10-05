@@ -34,6 +34,35 @@ these benchmarks and is not certified.}
 \resizebox{\textwidth}{!}{\input{tables/start_015}}
 \end{table}
 
+\subsection{Gain decomposition}
+\begin{table}[t]
+\centering
+\caption{Gain decomposition (points of test coverage), $q=0.10$, all items, conditional on both arms certifying.}
+\label{tab:dilution}
+\small
+\resizebox{\textwidth}{!}{\input{tables/dilution}}
+\end{table}
+
+\subsection{Multi-start search}
+\label{app:multistart}
+\begin{table}[h]
+\centering
+\caption{Certified coverage (\%, abort rate in parentheses) for the single starts $e_0=0$ and $e_0=1$ and for the union over $e_0\in\{0,1,2\}$ at $\delta/3$ each.}
+\label{tab:multistart}
+\small
+\resizebox{\textwidth}{!}{\input{tables/multistart}}
+\end{table}
+
+\subsection{Benchmarks where the detector does not apply}
+\begin{table}[h]
+\centering
+\caption{Filtering (confidence score, image-grouped folds, $400$ splits) where the detector does not apply.
+Certified coverage (\%) with abort rate in parentheses.}
+\label{tab:sweep}
+\small
+\resizebox{\textwidth}{!}{\input{tables/sweep}}
+\end{table}
+
 \subsection{Grounded-only cohort}
 \label{app:grounded}
 \begin{table}[h]

@@ -56,6 +56,19 @@ conformal linguistic calibration \citep{jiang2025clc} replaces claims by less sp
 guarantee on the rewritten text; it is text-only and the rewrite generalises a claim rather than
 substituting externally verified evidence.
 
+\paragraph{Learning to defer, cascades and routing}
+Emitting the answer of a second predictor is the action of learning to defer, where a policy decides when a decision-maker or expert answers instead of
+the model \citep{madras2018defer,mozannar2020defer}; classical rejection learning \citep{cortes2016} abstains at a constant cost. Cascades and
+routing send an input to a cheaper or stronger model by confidence \citep{chen2024frugalgpt}, and several recent methods add statistical guarantees:
+cascaded selective evaluation certifies agreement with human judgments by fixed-sequence testing over LLM judges \citep{jung2025trust}, conformal cascades
+and edge--cloud alignment control coverage or false discoveries across model tiers \citep{dou2026conformalcascade,huang2025edgecloud}, conformal arbitrage
+calibrates when a guardian model is consulted \citep{overman2025arbitrage}, and conformal deferral routes to human experts without training
+\citep{bary2025noneed}. Cascaded selective evaluation is the closest precedent for a finite-sample certificate over an emitted mixture, and it shares the fixed-sequence
+machinery. The settings differ in what the second predictor is. In those works it is a stronger model of the same kind, a human, or an expert whose answer is
+requested by the system's own confidence; here it is a detector of a different modality whose evidence margin, not the VLM's confidence, gates the substitution, and
+there is no learned deferral policy. Our reading is that a stronger model of the same kind tends to share the weaker model's failure modes, whereas a detector
+may err on different items, which is the property that makes substitution useful and that Section~\ref{sec:overlap} probes by removing the detector from the score.
+
 \paragraph{Uncertainty estimation without a guarantee}
 Our correctness score belongs to the literature on generative uncertainty: self-evaluation
 \citep{kadavath2022}, semantic entropy \citep{kuhn2023,farquhar2024}, verbalised confidence

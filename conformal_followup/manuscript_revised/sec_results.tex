@@ -121,7 +121,7 @@ $\alpha=0.10$) the repaired mass is $0.2$--$0.9\%$ of test items and the answer 
 the detector agrees with the model on all repaired items and no answer changes. With the large gate ($q=0.5$) the repaired mass
 is $4.4\%$ (AMBER) to $10.1\%$ (POPE-3000) of test items at $\alpha=0.10$ and the answer changes for $2.4$--$5.7\%$. Among repaired items the
 detector agrees with the model on $22$--$100\%$ at $\alpha=0.10$: those items are \emph{re-emitted with detector confirmation},
-which is not correction and is a different benefit, namely that an item the correctness score would have abstained on is emitted
+which is a different benefit from correction: an item the correctness score would have abstained on is emitted
 because a distinct source confirms it. Where the answer is changed it is mostly right: $18{,}583$ wrong-to-right against
 $4{,}486$ right-to-wrong changes on POPE-3000 ($81\%$) and $8{,}830$ against $634$ on AMBER ($93\%$), while with $q=0.05$ the
 right-to-wrong count is zero in every cell. A larger gate corrects more and makes more mistakes, and the certificate prices the mixture.
@@ -145,19 +145,7 @@ Pooled margin is the gate used elsewhere in the paper.}
 \end{table}
 
 \paragraph{Where the gain comes from.}
-Repaired items are themselves emitted, so whenever the certified threshold does not move the gain over filtering equals
-the repaired mass at filtering's own threshold. Table~\ref{tab:dilution} splits the gain into this term and a dilution
-term, the extra accepted mass admitted because high-precision repairs lower the emitted risk and let the threshold
-open further; the gate is the continuity gate $q=0.10$. The certified threshold differs between the two arms on
-$3$--$34\%$ of splits, and the dilution term is $0.06$ to $1.5$ points; the automatic term is the larger one in ten of the twelve combinations.
-
-\begin{table}[t]
-\centering
-\caption{Gain decomposition (points of test coverage), $q=0.10$, all items, conditional on both arms certifying.}
-\label{tab:dilution}
-\small
-\resizebox{\textwidth}{!}{\input{tables/dilution}}
-\end{table}
+Repaired items are themselves emitted, so whenever the certified threshold does not move the gain equals the repaired mass at filtering's own threshold; a dilution term appears when repairs lower the emitted risk and let the threshold open further. The threshold differs between the two arms on $3$--$34\%$ of splits and the dilution term is $0.06$ to $1.5$ points; the automatic term is the larger one in ten of the twelve combinations (Appendix Table~\ref{tab:dilution}).
 
 \subsection{The start of the sequence}
 \label{sec:start}
@@ -172,6 +160,8 @@ a single error; large $e_0$ together with $c=1.5$ places the first hypothesis at
 separate. We use $e_0=1$, $c=1.5$ throughout, fixed before the final runs and following the analytic argument of Lemma~\ref{lem:kstart};
 the table shows it lies in a reasonable region and it was not selected on test outcomes. The practical consequence is that conclusions drawn on
 calibration folds of $150$--$200$ items depend on the start of the sequence more than on the repair.
+
+A search that spends part of $\delta$ on several starts, instead of committing to one, is also valid (Corollary~\ref{cor:union}). We tested the union over $e_0\in\{0,1,2\}$, each at $\delta/3$, choosing the certified policy with the largest calibration coverage (Appendix Table~\ref{tab:multistart}). It is below the single analytic start $e_0=1$ in all twelve combinations, by $0.7$ to $13$ points ($1$--$4$ points on the cells with $500$ or more calibration items, up to $13$ on the small ones), because the $\delta/3$ penalty exceeds what the extra starts recover.
 
 \begin{table}[t]
 \centering
@@ -263,19 +253,53 @@ flip region $r_{\text{flip}}$ (\%), at both starts; the last column is CCRC with
 \label{sec:noevidence}
 
 Table~\ref{tab:cohort} shows that $0$ of $3000$ POPE-3000 items but $1689$ of $3000$ AMBER items have no detector value.
-Where the detector never applies, CCRC reduces to filtering. Table~\ref{tab:sweep} gives filtering on three
+Where the detector never applies, CCRC reduces to filtering. Appendix Table~\ref{tab:sweep} gives filtering on three
 benchmarks where the detector returns nothing (MME, GQA, HallusionBench): at $\alpha=0.10$ coverage is $0.9\%$, $8.5\%$
 and $0\%$ with abort rates of $97\%$, $72\%$ and $100\%$. On HallusionBench the base risk is $48.8\%$ and nothing is
 certifiable at $\alpha\le0.20$; the floor alone is $(0.488-0.20)/0.80=36\%$ and the abstention is far larger.
-Applicability of the evidence channel is a property of the benchmark's question types, not of its difficulty.
+Applicability of the evidence channel depends on the benchmark's question types.
+
+
+
+\subsection{Channel overlap and a held-out benchmark}
+\label{sec:overlap}
+
+\paragraph{Channel 1 without detector features.}
+In our instantiation the detector score is also an input to the correctness score, so the two channels are not independent. To see whether the repair
+gain depends on this overlap, Table~\ref{tab:detfree} removes every detector feature from channel 1 (the score uses only the VLM's probability and confidence)
+and keeps the detector as channel 2. Filtering then certifies less (for example $58.8\%$ against $68.2\%$ on POPE-1500 at $\alpha=0.10$), and CCRC with
+a size-matched external gate (chosen with the same detector-free score) gains $+0.3$ to $+46$ points over that filter, positive in all twelve combinations;
+the gain is larger than in the main table because the baseline is weaker. In absolute terms the detector-free CCRC certifies $72.0\%$ against $69.6\%$ for the
+full external-gate pipeline on POPE-1500 at $0.10$ and $77.4\%$ against $83.2\%$ on POPE-3000, and is below the full pipeline in $10$ of the $12$
+combinations by $0.1$ to $35$ points: using the detector for repair alone recovers much but not all of what using it in the score as well gives. The
+validity statistics stay in range (exceedance $0.05$--$0.20$, except $0.39$ for VCD at $0.10$, where $88\%$ of splits abort and the statistic rests on few
+splits; confident violations $\le0.03$ except $0.10$ there).
 
 \begin{table}[t]
 \centering
-\caption{Filtering (confidence score, image-grouped folds, $400$ splits) where the detector does not apply.
-Certified coverage (\%) with abort rate in parentheses.}
-\label{tab:sweep}
+\caption{Certified coverage (\%, abort rate in parentheses) with channel 1 restricted to the VLM's own signals and with the full score. CCRC uses the
+size-matched external gate in both cases (selected with the matching score); gain is against filtering with the same score.}
+\label{tab:detfree}
 \small
-\resizebox{\textwidth}{!}{\input{tables/sweep}}
+\resizebox{\textwidth}{!}{\input{tables/detfree}}
+\end{table}
+
+\paragraph{Score, grid and gate from another benchmark.}
+Intervals over resampled images do not speak to new data. Table~\ref{tab:transfer} therefore fits the correctness model, the score grid and the gate on one benchmark and uses
+the target only for calibration and test: AMBER as source for the POPE cells and POPE-3000 as source for AMBER. The guarantee covers this setting, since
+the policy family is fixed from independent data. Test-fold exceedance is $0.03$--$0.13$ in eight of the ten combinations and the confident-violation rate is at most $0.03$ in nine; the exceptions are the two smallest POPE cells at $\alpha=0.10$, where $75$--$98\%$ of splits abort and the statistics rest on a handful
+of splits (for POPE-adv LLaVA the $2\%$ of splits that do not abort are too few to audit, and the confident-violation rate there is $0.40$). Filtering with the
+transferred score fails more often than in-domain, because the source benchmark's score is miscalibrated on the target, and the repair region (a gate set on
+detector margins, which transfer better) restores certifiability: CCRC certifies $48.5\%$ and $59.8\%$ on AMBER where transferred filtering certifies nothing. These coverage differences measure how badly a transferred score calibrates and
+should not be read as the gain of repair; the result of interest is that the certificate holds when the source of the score and gate is a different benchmark.
+
+\begin{table}[t]
+\centering
+\caption{Held-out benchmark. Score model, score grid and gate are fitted on the source benchmark; calibration and test folds come from the target. In-domain CCRC
+is the size-matched external-gate result of Table~\ref{tab:main}. exc: test-fold exceedance of $\alpha$; cv: confident-violation rate.}
+\label{tab:transfer}
+\small
+\resizebox{\textwidth}{!}{\input{tables/transfer}}
 \end{table}
 
 \subsection{Auditing validity}
@@ -319,6 +343,5 @@ within-image correlation the guarantee degrades: at ICC $0.08$ the worst cell is
 exceedance of the value-indexed family rises to $0.125$ (filtering) and $0.132$ (repair), above $\delta$, and the rank-indexed
 variant to $0.14$. Calibrating on one random item per image restores validity in every cell ($\le0.062$) at the price of a
 smaller calibration sample. In the benchmarks used here the measured ICC is slightly negative
-(Table~\ref{tab:cohort}), so the clustered regime is not the one these data are in; it is the regime a benchmark with
-several correlated questions per image would be in, and the audit shows that the item-level bound should not be used there
-without the one-item-per-image calibration or a design-effect correction.
+(Table~\ref{tab:cohort}), so these data are not in the clustered regime. A benchmark with several correlated questions per image would be, and there the item-level bound
+should not be used without the one-item-per-image calibration or a design-effect correction.
