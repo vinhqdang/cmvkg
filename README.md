@@ -56,7 +56,7 @@ CMVKG-Guard is a research project focused on developing a novel framework for de
 ## Papers
 
 1. **Paper 1 — CMVKG-Guard.** Framework manuscript in `manuscript/`.
-2. **Paper 2 — "Certified Correction of Vision–Language Hallucinations" (CCRC).** Follow-up study in `conformal_followup/`. Status: rejected at Neurocomputing; revised in `conformal_followup/manuscript_revised/` (journal-agnostic source, all reviewer comments addressed in `conformal_followup/revision/RESPONSE.md`) and being prepared for submission to another journal. The earlier Neurocomputing version is kept in `conformal_followup/manuscript_neurocomputing/`.
+2. **Paper 2 — "Certified Correction of Object Hallucinations in Vision–Language Models" (CCRC).** Follow-up study in `conformal_followup/`. Status: submitted to *Neural Networks* (Elsevier, section Learning Systems) in October 2026 as a new submission, after a rejection at Neurocomputing; under review. Submission files are in `submission_neural_networks/`, the Elsevier-class source in `conformal_followup/manuscript_nn/`, the journal-agnostic source in `conformal_followup/manuscript_revised/`, and the point-by-point responses to both earlier reviews in `conformal_followup/revision/RESPONSE.md` and `RESPONSE_R2.md`. The earlier Neurocomputing version is kept in `conformal_followup/manuscript_neurocomputing/`.
 
 ## Usage
 
