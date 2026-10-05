@@ -454,3 +454,29 @@ def external_gate(dev, alpha, mode=None, delta=DELTA):
         kf = evaluate(dev, ref, idx, thr[j], rg)["k"]
         if kf > best_k: best_q, best_k = qq, kf
     return best_q
+
+
+def external_gate_matched(dev, alpha, n_cal, reps=20, subsamples=20, seed=11, mode=None, delta=DELTA,
+                          qs=(0.05, 0.10, 0.25, 0.50)):
+    """External gate at the TARGET calibration size. The full-size version of `external_gate` treats the
+    whole development set as one huge calibration sample and so favours gates that only pay off with many
+    items. Here the development benchmark is subsampled (by image) to 3 * n_cal items, the full protocol is
+    run on image-grouped splits of each subsample, and the candidate (filtering or q) with the highest mean
+    certified test coverage is kept. The target's size is known in advance and none of its data are used,
+    so the result is a constant that is independent of the target calibration sample."""
+    mode = mode or Mode()
+    rng = np.random.default_rng(seed)
+    uniq, inv = np.unique(dev.img, return_inverse=True)
+    cov = {q: [] for q in [None] + list(qs)}
+    for _ in range(subsamples):
+        perm = rng.permutation(len(uniq)); keep = []; tot = 0
+        for u in perm:
+            idx = np.flatnonzero(inv == u); keep.append(idx); tot += len(idx)
+            if tot >= 3 * n_cal: break
+        sub = take(dev, np.concatenate(keep))
+        run = Runner(sub, mode, reps=reps, seed=int(rng.integers(1e9)))
+        for q in cov:
+            res = run.run(alpha, delta, gate=None if q is None else "fixed", q=q)
+            cov[q].append(np.mean([r["cov"] for r in res]) if res else 0.0)
+    best = max(cov, key=lambda q: (np.mean(cov[q]), q is None))
+    return best
