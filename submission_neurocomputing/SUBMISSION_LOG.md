@@ -1,0 +1,7 @@
+# Submission log
+
+- Target: Neurocomputing (Elsevier), resubmission after rejection of NEUCOM-D-26-16868. The cover letter discloses the earlier submission, asks the Editors to consider the rebuilt manuscript as a new submission, and attaches a point-by-point response to both reviewers (`..._response-to-reviewers.pdf`).
+- Package: manuscript PDF (57 pp, elsarticle, `\journal{Neurocomputing}`), cover letter (PDF, tex), highlights, response to reviewers, LaTeX source; source in `conformal_followup/manuscript_neucom_resub/`.
+- Declarations in the manuscript: generative-AI use, no competing interests, no specific funding.
+- Alternative already prepared: Computer Vision and Image Understanding (`submission_cviu/`).
+- Earlier venues: Neurocomputing (rejected after review); Neural Networks (desk-rejected 2026-10-14 for scope).
