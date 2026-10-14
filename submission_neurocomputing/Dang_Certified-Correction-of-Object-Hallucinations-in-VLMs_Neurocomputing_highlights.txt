@@ -1,5 +1,0 @@
-A repair-and-certify selective predictor with a valid finite-sample risk guarantee
-Proved and evaluated procedures coincide: fixed value grid, image-grouped folds
-Certified gain over filtering: +0.8 to +7.3 points; CI excludes zero in 7 of 12
-Much repair is detector confirmation; false positives are rarely corrected
-A small matched-prefix test suggests mid-caption repair raises hallucination
