@@ -1,0 +1,12 @@
+\begin{tabular}{lcccc}
+\toprule
+Score & $\alpha{=}0.05$ & $\alpha{=}0.10$ & $\alpha{=}0.15$ & AURC\\
+\midrule
+image--text similarity only (ConfLVLM scorer) & 0.0 (100) & 0.5 (94) & 3.4 (72) & 0.1621\\
+VLM confidence only & 2.4 (93) & 41.0 (18) & 75.1 (5) & 0.0768\\
+learned, VLM signals & 10.6 (61) & 58.8 (1) & 80.7 (0) & 0.0678\\
++ image--text similarity & 9.0 (67) & 56.8 (2) & 80.5 (0) & 0.0691\\
++ detection grounding & 21.8 (44) & 68.2 (0) & 85.5 (0) & 0.0562\\
++ both & 18.8 (46) & 67.6 (0) & 85.5 (0) & 0.0577\\
+\bottomrule
+\end{tabular}

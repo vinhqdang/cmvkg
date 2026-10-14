@@ -56,7 +56,7 @@ CMVKG-Guard is a research project focused on developing a novel framework for de
 ## Papers
 
 1. **Paper 1 — CMVKG-Guard.** Framework manuscript in `manuscript/`.
-2. **Paper 2 — "Certified Correction of Object Hallucinations in Vision–Language Models" (CCRC).** Follow-up study in `conformal_followup/`. Status: submitted to *Neural Networks* (Elsevier, section Learning Systems) in October 2026 as a new submission, after a rejection at Neurocomputing; under review. Submission files are in `submission_neural_networks/`, the Elsevier-class source in `conformal_followup/manuscript_nn/`, the journal-agnostic source in `conformal_followup/manuscript_revised/`, and the point-by-point responses to both earlier reviews in `conformal_followup/revision/RESPONSE.md` and `RESPONSE_R2.md`. The earlier Neurocomputing version is kept in `conformal_followup/manuscript_neurocomputing/`.
+2. **Paper 2 — "Certified Correction of Object Hallucinations in Vision–Language Models" (CCRC).** Follow-up study in `conformal_followup/`. Status: preparing submission to *Computer Vision and Image Understanding* (Elsevier). History: rejected at Neurocomputing; desk-rejected at Neural Networks on 2026-10-14 for scope. Submission files are in `submission_cviu/` (earlier package in `submission_neural_networks/`), the Elsevier-class source in `conformal_followup/manuscript_cviu/` (and `manuscript_nn/`), the journal-agnostic source in `conformal_followup/manuscript_revised/`, and the point-by-point responses to both earlier reviews in `conformal_followup/revision/RESPONSE.md` and `RESPONSE_R2.md`. The earlier Neurocomputing version is kept in `conformal_followup/manuscript_neurocomputing/`.
 
 ## Usage
 
