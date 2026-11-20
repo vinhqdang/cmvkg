@@ -7,3 +7,4 @@
 - To check in the submission system: whether CVIU requires an anonymised manuscript; optional author biography (at most 100 words).
 - Earlier venues: Neurocomputing (NEUCOM-D-26-16868, rejected after review); Neural Networks (NEUNET-D-26-09109, desk-rejected 2026-10-14 for scope).
 - If revision is requested, reuse `conformal_followup/revision` (scripts, results, tables) and `manuscript_cviu`.
+- Outcome (recorded 2026-11-20): CVIU-26-3366 rejected after initial evaluation, with no reviewer reports. Editor's comment: substantiate the novelty with thorough experimental validation on well-established benchmarks widely adopted in the field, including comparisons with recent state-of-the-art methods.
