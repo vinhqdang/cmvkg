@@ -8,9 +8,9 @@
 \pagestyle{empty}
 \begin{document}
 
-Quang-Vinh Dang\\
-British University Vietnam, Hung Yen, Vietnam\\
-vinh.dq4@buv.edu.vn \quad ORCID 0000-0002-3877-8024
+Minh Ngoc Dinh (corresponding author)\\
+Millennia Education, Ho Chi Minh City, Vietnam\\
+minh.dinh@maeducation.com \quad ORCID 0000-0003-4026-6068
 
 \today
 
@@ -21,15 +21,15 @@ The Editors\\
 
 Dear Editors,
 
-I submit the above manuscript as an original research article for \emph{Machine Learning with Applications}.
+On behalf of all authors, I submit the above manuscript as an original research article for \emph{Machine Learning with Applications}.
 
 \textbf{Problem.} Vision--language models (VLMs) assert objects that are not in the image, and a wrong answer is costly where they are deployed. Selective prediction lets a model abstain,
 and conformal and risk-controlling methods certify the error rate of the answers it does emit. That certificate has a known price: when the model's error rate exceeds the target, any predictor that only emits
 or abstains the model's own answer must abstain on a fixed fraction of inputs, whatever its score. The manuscript asks what changes when the predictor may emit a different answer, here the answer of an object detector.
 
-\textbf{Contribution.} I propose Certified-Correction Risk Control (CCRC) for object-existence questions. It accepts the VLM's answer where a correctness score is high, substitutes the answer of an
+\textbf{Contribution.} We propose Certified-Correction Risk Control (CCRC) for object-existence questions. It accepts the VLM's answer where a correctness score is high, substitutes the answer of an
 open-vocabulary detector where the detector's evidence is decisive, abstains otherwise, and certifies the error rate of the emitted set as a whole with a fixed-sequence Clopper--Pearson test. The validity theorem
-applies fixed-sequence testing and I claim no new statistical technique. The contribution is the formulation, a protocol in which the proved procedure is the evaluated procedure (folds are unions of whole images, thresholds and repair gate are fixed
+applies fixed-sequence testing and we claim no new statistical technique. The contribution is the formulation, a protocol in which the proved procedure is the evaluated procedure (folds are unions of whole images, thresholds and repair gate are fixed
 before calibration, the start of the test sequence is derived analytically, and the repair gate is fixed on external data, chosen on the fit fold or certified by a union bound), and a measured account of what the mechanism contributes.
 The manuscript includes real-image examples of accepted, repaired, abstained and wrongly accepted items.
 
@@ -40,14 +40,14 @@ Negative and inconclusive results are reported with the same prominence as posit
 
 \textbf{Fit with the journal.} The work is a machine-learning contribution with a concrete application: a risk-controlled predictor for deployed vision--language models, with a finite-sample guarantee, a protocol in which the proved and evaluated procedures coincide, and measured results on public benchmarks (including the fact that POPE contributes six questions per image, so splits must be made by image). It combines distribution-free uncertainty quantification, computer vision and language grounding, and I believe it suits the journal's readership in applied machine learning.
 
-\textbf{Originality and ethics.} The manuscript has not been published and is not under consideration elsewhere. I have no competing interests to declare and received no specific funding. Generative AI tools were used to support writing and coding, as declared in the manuscript;
-all ideas, algorithms and research directions are my own, and I reviewed and edited all content. Per-item model and detector signals, image identifiers and all scripts that generate the tables and figures are publicly available at
+\textbf{Originality and ethics.} The manuscript has not been published and is not under consideration elsewhere. The authors have no competing interests to declare and received no specific funding. Generative AI tools were used to support writing and coding, as declared in the manuscript;
+all ideas, algorithms and research directions are the authors' own, and the authors reviewed and edited all content. Per-item model and detector signals, image identifiers and all scripts that generate the tables and figures are publicly available at
 \url{https://github.com/vinhqdang/cmvkg} (directory \texttt{conformal\_followup/revision}).
 
 Thank you for considering the manuscript.
 
 Sincerely,
 
-Quang-Vinh Dang
+Minh Ngoc Dinh, on behalf of Quang-Vinh Dang, Dat Le, Phuong-Lan Nguyen, Hoang-Viet Vu and Ngoc-Son-An Nguyen
 
 \end{document}
