@@ -1,0 +1,78 @@
+\section{Introduction}
+\label{sec:intro}
+
+Hallucinated object claims limit the use of vision--language models (VLMs) wherever a wrong answer is costly. Selective prediction
+addresses this by letting the model abstain: a score ranks the model's answers, a threshold is calibrated on held-out data, and the model
+answers only above it. Conformal and risk-controlling variants \citep{bates2021rcps,angelopoulos2021ltt,angelopoulos2024crc} certify, with
+a finite-sample guarantee that assumes nothing about the score or the model, that the error rate among emitted answers stays below a
+target $\alpha$. Existing conformal methods for VLMs filter, back off or abstain
+\citep{conflvlm,bcea,atabuzzaman2026introconformal}; mitigation methods repair outputs but give no guarantee
+\citep{woodpecker,lure,reverse,cmvkgguard}.
+
+The guarantee has a price that no score can remove. Kotte \citep{crcimposs} shows that when the base error rate $\mu$ exceeds $\alpha$, any
+predictor that only emits or abstains the model's own answer must abstain on at least $(\mu-\alpha)/(1-\alpha)$ of inputs
+(Proposition~\ref{prop:floor}). The proof uses one premise, that an abstained item's model answer stays wrong, so a predictor that may
+emit a \emph{different} answer lies outside it.
+
+We study that possibility for yes/no object-existence questions, with an open-vocabulary detector as a second, distinct source of evidence.
+\emph{Certified-Correction Risk Control} (CCRC) accepts the model's answer where a correctness score is high, replaces it with the
+detector's answer where the detector's evidence is decisive, abstains otherwise, and certifies the error rate of the whole emitted set,
+accepted and substituted answers together (Figure~\ref{fig:qualitative}). The scope is deliberate: existence claims are the hallucinations a detector can refute, and
+\S\ref{sec:discussion} discusses what other evidence channels would be needed for attributes, counts and relations.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_qualitative.png}
+\caption{The three actions of CCRC on real POPE images (LLaVA-1.5, OWLv2). \emph{Accept}: the correctness score is high and the model is right.
+\emph{Repair}: the model misses an object that is present and scores low, the detector finds it with high confidence, and its answer is emitted instead.
+\emph{Abstain}: neither source is reliable (here both are wrong with weak evidence), so no answer is emitted.}
+\label{fig:qualitative}
+\end{figure}
+
+\paragraph{What is and is not new}
+Theorem~\ref{thm:validity} is an application of fixed-sequence testing \citep{angelopoulos2021ltt} with exact binomial bounds, and we claim no new
+statistical technique. The contributions are the formulation (a risk certificate over a mixture of the model's and a second predictor's
+answers, which escapes the abstention floor), a protocol under which the proved procedure is the evaluated procedure, and measurements of what the
+mechanism does and does not contribute. Four design decisions make up the protocol.
+
+\begin{enumerate}
+\item \emph{The proved procedure is the evaluated procedure.} Theorem~\ref{thm:validity} covers policy families indexed by threshold
+  \emph{values} fixed before calibration, under i.i.d.\ sampling of calibration units. Thresholds and repair gate are read off the fit fold,
+  never off the calibration sample whose errors are counted.
+\item \emph{The sampling unit is respected.} POPE contributes six questions per image. Folds are unions of whole images, the within-image
+  dependence of errors is measured, and a known-population simulation shows how clustering would degrade the guarantee and how
+  one-item-per-image calibration restores it.
+\item \emph{The repair gate is fixed without looking at the evaluation data.} Three ways keep the guarantee: a constant chosen on a
+  different benchmark at the target's calibration size, a choice made on the fit fold, and a union bound over a pre-specified set of gates.
+\item \emph{Uncertainty refers to the data.} Gains carry an outer image-level bootstrap interval, since repeated random splits of one
+  benchmark measure sensitivity to the split and say nothing about the benchmark's sampling error.
+\end{enumerate}
+
+\paragraph{What we find}
+\begin{itemize}
+\item With the gate fixed on an external benchmark at the target's calibration size, CCRC certifies $+0.8$ to $+7.3$ points
+  more coverage than filtering in all twelve (cell, $\alpha$) combinations, and the image-bootstrap interval excludes zero in
+  seven. The gain is about one point on cells with $150$--$200$ calibration items and up to $+7.3$ points with $500$ or more
+  (\S\ref{sec:main}).
+\item Choosing the gate on the fit fold, or certifying three gates by a union bound, is valid and helps with $500$ or more calibration
+  items ($+2.4$ to $+8.8$ and $+2.0$ to $+4.4$ points) but costs more than it returns with $150$--$200$
+  ($-6.2$ to $+9.4$ and $-16.5$ to $+4.4$ points).
+\item Much of the repair is confirmation: $22$--$100\%$ of repaired items are items on which the detector agrees with the model.
+  With a small gate the answer is changed for under $0.5\%$ of test items; with a large gate for $2.4$--$5.7\%$, of which $81$--$93\%$
+  are right, and $4$--$5\%$ of the model's false-positive errors are corrected (\S\ref{sec:accounting}).
+\item The start of the fixed sequence matters more than the repair on small folds. Starting where a single error can be
+  tolerated ($k\ge38$ at $\alpha=\delta=0.10$) rather than where none can ($k\ge22$) raises filtering coverage on the smallest cell
+  from $22\%$ to $41\%$ and removes an apparent loss of repair on AMBER, where the conventional start makes CCRC abort on $72\%$
+  of splits (\S\ref{sec:start}).
+\item Certified coverage comes mostly from the score: a detection-grounded score certifies $68\%$ on POPE-1500 against $41\%$ for
+  model confidence and $0.5\%$ for the image--text similarity score of ConfLVLM, while certified repair adds $1.4$ to $8.8$ points
+  (\S\ref{sec:score}).
+\item In free-form generation, a small matched-prefix experiment ($n=121$, under-powered for the size of the effect) finds more downstream
+  hallucination after repair (\S\ref{sec:sequential}); it withdraws support for a fixed-point argument for a sequential guarantee.
+\end{itemize}
+
+\paragraph{Scope}
+Everything here concerns binary existence questions, one detector, one family of backbones and
+benchmarks whose images overlap ($1{,}457$ distinct images across all cells: the $500$ POPE images, nested across the POPE cells, and $957$ AMBER images). We do not claim that correction is
+generally useful, only that under a protocol whose guarantee we can state it is valid and its
+gain is measured.
